@@ -11,12 +11,12 @@ export default async function AdminLayout({
   const { userId } = await auth();
   const user = await currentUser();
 
-  // Перевірка аутентифікації (додатковий захист, основна перевірка у middleware)
+  // Authentication check (additional protection, main check in middleware)
   if (!userId || !user) {
     return redirect("/sign-in");
   }
 
-  // Перевірка ролі (додатковий захист, основна перевірка у middleware)
+  // Role check (additional protection, main check in middleware)
   if (user.privateMetadata.role !== "admin") {
     return redirect("/");
   }

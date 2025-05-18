@@ -28,7 +28,7 @@ export class PrismaService
       return;
     }
 
-    // Використовуйте з обережністю, тільки для тестування!
+    // Use with caution, for testing only!
     const models = Reflect.ownKeys(this).filter(
       (key) =>
         typeof key === 'string' && key[0] !== '_' && key !== 'constructor',

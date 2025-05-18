@@ -1,37 +1,39 @@
+import { Category } from '@lounge/types';
 import {
   BadRequestException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import slugify from 'slugify';
+
 import {
   CreateCategoryDto,
   UpdateCategoryDto,
   UpdateCategoriesOrderDto,
 } from './dto';
-import { Category } from '@lounge/types';
-import slugify from 'slugify';
+import { PrismaService } from '../prisma/prisma.service';
+
 
 @Injectable()
 export class CategoriesService {
   constructor(private readonly prisma: PrismaService) {}
 
   /**
-   * Створення нової категорії
+   * Create a new category
    */
   async create(createCategoryDto: CreateCategoryDto): Promise<Category> {
-    // Створення slug з назви, якщо не було надано
+    // Generate slug from name if not provided
     const slug =
       createCategoryDto.slug || this.generateSlug(createCategoryDto.name);
 
-    // Перевірка унікальності slug
+    // Check slug uniqueness
     await this.checkSlugUniqueness(slug);
 
-    // Знаходимо максимальний порядок відображення, щоб додати нову категорію в кінець
+    // Find the maximum display order to add the new category at the end
     const displayOrder =
       createCategoryDto.displayOrder ?? (await this.getNextDisplayOrder());
 
-    // Створюємо категорію
+    // Create the category
     return this.prisma.category.create({
       data: {
         name: createCategoryDto.name,
@@ -42,7 +44,7 @@ export class CategoriesService {
   }
 
   /**
-   * Отримання всіх категорій, відсортованих за порядком відображення
+   * Get all categories, sorted by display order
    */
   async findAll(): Promise<Category[]> {
     return this.prisma.category.findMany({
@@ -53,7 +55,7 @@ export class CategoriesService {
   }
 
   /**
-   * Отримання категорії за ID
+   * Get category by ID
    */
   async findOne(id: string): Promise<Category> {
     const category = await this.prisma.category.findUnique({
@@ -61,14 +63,14 @@ export class CategoriesService {
     });
 
     if (!category) {
-      throw new NotFoundException(`Категорію з ID ${id} не знайдено`);
+      throw new NotFoundException(`Category with ID ${id} not found`);
     }
 
     return category;
   }
 
   /**
-   * Отримання категорії за slug
+   * Get category by slug
    */
   async findBySlug(slug: string): Promise<Category> {
     const category = await this.prisma.category.findUnique({
@@ -76,30 +78,30 @@ export class CategoriesService {
     });
 
     if (!category) {
-      throw new NotFoundException(`Категорію зі slug ${slug} не знайдено`);
+      throw new NotFoundException(`Category with slug ${slug} not found`);
     }
 
     return category;
   }
 
   /**
-   * Оновлення категорії
+   * Update category
    */
   async update(
     id: string,
     updateCategoryDto: UpdateCategoryDto,
   ): Promise<Category> {
-    // Перевіряємо чи існує категорія
+    // Check if category exists
     await this.findOne(id);
 
-    // Якщо змінюється slug, перевіряємо його унікальність
+    // If slug is changed, check its uniqueness
     if (updateCategoryDto.slug) {
       await this.checkSlugUniqueness(updateCategoryDto.slug, id);
     } else if (updateCategoryDto.name) {
-      // Якщо змінюється тільки назва, не оновлюємо slug автоматично
+      // If only name is changed, do not automatically update slug
     }
 
-    // Оновлюємо категорію
+    // Update the category
     return this.prisma.category.update({
       where: { id },
       data: updateCategoryDto,
@@ -107,25 +109,25 @@ export class CategoriesService {
   }
 
   /**
-   * Видалення категорії
+   * Delete the category
    */
   async remove(id: string): Promise<Category> {
-    // Перевіряємо чи існує категорія
+    // Check if category exists
     await this.findOne(id);
 
-    // Видаляємо категорію (зауважте, що альбоми будуть видалені каскадно через onDelete: Cascade у відношенні)
+    // Delete the category (note that albums will be deleted cascadingly via onDelete: Cascade relationship)
     return this.prisma.category.delete({
       where: { id },
     });
   }
 
   /**
-   * Оновлення порядку відображення категорій
+   * Update display order of categories
    */
   async updateOrder(
     updateCategoriesOrderDto: UpdateCategoriesOrderDto,
   ): Promise<Category[]> {
-    // Масив операцій оновлення
+    // Array of update operations
     const updateOperations = updateCategoriesOrderDto.categories.map((item) => {
       return this.prisma.category.update({
         where: { id: item.id },
@@ -133,17 +135,17 @@ export class CategoriesService {
       });
     });
 
-    // Виконуємо всі операції оновлення в транзакції
+    // Execute all update operations in a transaction
     await this.prisma.$transaction(updateOperations);
 
-    // Повертаємо оновлений список категорій
+    // Return the updated list of categories
     return this.findAll();
   }
 
-  // Допоміжні методи
+  // Helper methods
 
   /**
-   * Перевірка унікальності slug
+   * Check slug uniqueness
    */
   private async checkSlugUniqueness(
     slug: string,
@@ -154,12 +156,14 @@ export class CategoriesService {
     });
 
     if (existingCategory && existingCategory.id !== excludeId) {
-      throw new BadRequestException(`Категорія зі slug "${slug}" вже існує`);
+      throw new BadRequestException(
+        `Category with slug "${slug}" already exists`,
+      );
     }
   }
 
   /**
-   * Генерація slug з назви
+   * Generate slug from name
    */
   private generateSlug(name: string): string {
     return slugify(name, {
@@ -169,7 +173,7 @@ export class CategoriesService {
   }
 
   /**
-   * Отримання наступного порядкового номера для відображення
+   * Get the next display order number
    */
   private async getNextDisplayOrder(): Promise<number> {
     const maxOrderCategory = await this.prisma.category.findFirst({

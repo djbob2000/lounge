@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Photo } from "@lounge/types";
 import DraggableList from "../../../components/admin/DraggableList";
 
-// Функція для отримання фотографій з API
+// Function to fetch photos from the API
 async function getPhotos(): Promise<Photo[]> {
   try {
     const response = await fetch(
@@ -23,7 +23,7 @@ async function getPhotos(): Promise<Photo[]> {
   }
 }
 
-// Функція для отримання фотографій за альбомом
+// Function to fetch photos by album from the API
 async function getPhotosByAlbum(albumId: string): Promise<Photo[]> {
   try {
     const response = await fetch(
@@ -44,7 +44,7 @@ async function getPhotosByAlbum(albumId: string): Promise<Photo[]> {
   }
 }
 
-// Функція для отримання слайдерних фотографій
+// Function to fetch slider photos from the API
 async function getSliderPhotos(): Promise<Photo[]> {
   try {
     const response = await fetch(

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Album } from "@lounge/types";
 import DraggableList from "../../../components/admin/DraggableList";
 
-// Функція для отримання альбомів з API
+// Function to fetch albums from the API
 async function getAlbums(): Promise<Album[]> {
   try {
     const response = await fetch(
@@ -23,7 +23,7 @@ async function getAlbums(): Promise<Album[]> {
   }
 }
 
-// Функція для отримання альбомів за категорією
+// Function to fetch albums by category from the API
 async function getAlbumsByCategory(categoryId: string): Promise<Album[]> {
   try {
     const response = await fetch(

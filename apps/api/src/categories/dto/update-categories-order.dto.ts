@@ -1,3 +1,4 @@
+import { UpdateCategoriesOrderRequest } from '@lounge/types';
 import { Type } from 'class-transformer';
 import {
   ArrayMinSize,
@@ -7,7 +8,6 @@ import {
   IsString,
   ValidateNested,
 } from 'class-validator';
-import { UpdateCategoriesOrderRequest } from '@lounge/types';
 
 class CategoryOrderItem {
   @IsNotEmpty({ message: 'ID категорії не може бути порожнім' })

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Category } from "@lounge/types";
 import DraggableList from "../../../components/admin/DraggableList";
 
-// Функція для отримання категорій з API
+// Function to fetch categories from the API
 async function getCategories(): Promise<Category[]> {
   try {
     const response = await fetch(

@@ -1,6 +1,7 @@
 {
   "name": "@lounge/types",
   "version": "0.0.0",
+  "type": "module",
   "private": true,
   "main": "./src/index.ts",
   "types": "./src/index.ts",
@@ -11,6 +12,7 @@
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
+    "eslint-plugin-unicorn": "^59.0.1",
     "typescript": "^5.4.5"
   }
 }

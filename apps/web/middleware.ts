@@ -3,11 +3,11 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 /**
- * Middleware для захисту адмін-маршрутів та інтеграції з Clerk
+ * Middleware for protecting admin routes and integrating with Clerk
  */
 export default authMiddleware({
   /**
-   * Список маршрутів, які не потребують аутентифікації
+   * List of routes that do not require authentication
    */
   publicRoutes: [
     "/",
@@ -17,10 +17,10 @@ export default authMiddleware({
   ],
 
   /**
-   * Функція для визначення, чи має користувач доступ до адмін-маршрутів
+   * Function to determine if a user has access to admin routes
    */
   async afterAuth(auth, req, evt) {
-    // Доступ до API дозволений лише для аутентифікованих запитів
+    // API access is allowed only for authenticated requests
     if (
       req.nextUrl.pathname.startsWith("/api/") &&
       !req.nextUrl.pathname.startsWith("/api/webhook/") &&
@@ -30,7 +30,7 @@ export default authMiddleware({
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Маршрути адміністратора потребують аутентифікації
+    // Admin routes require authentication
     if (req.nextUrl.pathname.startsWith("/admin")) {
       if (!auth.userId) {
         const loginUrl = new URL("/sign-in", req.url);
@@ -38,7 +38,7 @@ export default authMiddleware({
         return NextResponse.redirect(loginUrl);
       }
 
-      // Опціонально: перевірка ролі користувача
+      // Optional: checking user role
       try {
         const user = await clerkClient.users.getUser(auth.userId);
         const isAdmin = user.privateMetadata.role === "admin";
@@ -57,7 +57,7 @@ export default authMiddleware({
 });
 
 /**
- * Конфігурація для middleware
+ * Configuration for middleware
  */
 export const config = {
   matcher: ["/((?!.+\\.[\\w]+$|_next).*)", "/", "/(api|trpc)(.*)"],

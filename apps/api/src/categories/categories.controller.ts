@@ -1,3 +1,4 @@
+import { Category } from '@lounge/types';
 import {
   Body,
   Controller,
@@ -10,13 +11,13 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
+
 import { CategoriesService } from './categories.service';
 import {
   CreateCategoryDto,
   UpdateCategoryDto,
   UpdateCategoriesOrderDto,
 } from './dto';
-import { Category } from '@lounge/types';
 import { AuthGuard, Public } from '../auth/auth.guard';
 
 @Controller('categories')

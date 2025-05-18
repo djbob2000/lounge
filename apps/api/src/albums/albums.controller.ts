@@ -1,3 +1,4 @@
+import { Album } from '@lounge/types';
 import {
   Body,
   Controller,
@@ -10,9 +11,9 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
+
 import { AlbumsService } from './albums.service';
 import { CreateAlbumDto, UpdateAlbumDto, UpdateAlbumsOrderDto } from './dto';
-import { Album } from '@lounge/types';
 import { AuthGuard, Public } from '../auth/auth.guard';
 
 @Controller('albums')

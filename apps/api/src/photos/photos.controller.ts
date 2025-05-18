@@ -1,3 +1,4 @@
+import { Photo } from '@lounge/types';
 import {
   Controller,
   Get,
@@ -13,10 +14,10 @@ import {
   Query,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+
+import { UploadPhotoDto, UpdatePhotoDto, UpdatePhotosOrderDto } from './dto';
 import { PhotosService } from './photos.service';
 import { AuthGuard, Public } from '../auth/auth.guard';
-import { Photo } from '@lounge/types';
-import { UploadPhotoDto, UpdatePhotoDto, UpdatePhotosOrderDto } from './dto';
 
 @Controller('photos')
 @UseGuards(AuthGuard)

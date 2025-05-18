@@ -1,13 +1,13 @@
+import * as clerk from '@clerk/clerk-sdk-node';
 import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import * as clerk from '@clerk/clerk-sdk-node';
 
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
 
   constructor(private readonly configService: ConfigService) {
-    // Ініціалізація Clerk SDK
+    // Initialize Clerk SDK
     const secretKey = this.configService.get<string>('CLERK_SECRET_KEY');
 
     if (!secretKey) {
@@ -19,7 +19,7 @@ export class AuthService {
   }
 
   /**
-   * Перевірка валідності токена та отримання інформації про користувача
+   * Validate token and get user information
    */
   async validateToken(token: string): Promise<any> {
     try {
@@ -27,17 +27,19 @@ export class AuthService {
         throw new UnauthorizedException('Token not provided');
       }
 
-      // Перевірка сесійного токена Clerk
-      const sessionClaims = await clerk.verifyToken(token);
+      // Check Clerk session token
+      const sessionClaims = await clerk.verifyToken(token, {
+        jwtKey: this.configService.get<string>('CLERK_JWT_KEY'),
+      });
 
       if (!sessionClaims || !sessionClaims.sub) {
         throw new UnauthorizedException('Invalid token');
       }
 
-      // Отримання інформації про користувача
+      // Get user information
       const user = await clerk.users.getUser(sessionClaims.sub);
 
-      // Перевірка, чи має користувач права адміністратора
+      // Check if the user has administrator rights
       const isAdmin = user.privateMetadata.role === 'admin';
 
       if (!isAdmin) {

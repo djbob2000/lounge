@@ -33,7 +33,7 @@ export default function DraggableList({
   const onDragEnd = async (result: DropResult) => {
     const { destination, source } = result;
 
-    // Немає перетягування або перетягування до тієї самої позиції
+    // No drag or drag to the same position
     if (
       !destination ||
       (destination.droppableId === source.droppableId &&
@@ -42,24 +42,24 @@ export default function DraggableList({
       return;
     }
 
-    // Створюємо новий масив елементів з новим порядком
+    // Create a new array of items with the new order
     const updatedItems = Array.from(listItems);
     const [reorderedItem] = updatedItems.splice(source.index, 1);
     if (reorderedItem) {
       updatedItems.splice(destination.index, 0, reorderedItem);
     }
 
-    // Оновлюємо UI оптимістично
+    // Optimistically update the UI
     setListItems(updatedItems);
 
-    // Підготовка даних для API
+    // Prepare data for the API
     const updateData = updatedItems.map((item, index) => ({
       id: item.id,
       displayOrder: index,
     }));
 
     try {
-      // Визначаємо URL API залежно від типу елемента
+      // Determine API URL based on item type
       let url = `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}`;
 
       switch (itemType) {
@@ -74,7 +74,7 @@ export default function DraggableList({
           break;
       }
 
-      // Надсилаємо запит до API
+      // Send request to the API
       const response = await fetch(url, {
         method: "PATCH",
         headers: {
@@ -86,13 +86,13 @@ export default function DraggableList({
       });
 
       if (!response.ok) {
-        throw new Error(`Помилка оновлення порядку: ${response.statusText}`);
+        throw new Error(`Error updating order: ${response.statusText}`);
       }
     } catch (error) {
-      console.error("Помилка при оновленні порядку:", error);
-      // Повертаємо попередній стан при помилці
+      console.error("Error updating order:", error);
+      // Revert to previous state on error
       setListItems(items);
-      alert("Не вдалося оновити порядок. Спробуйте ще раз.");
+      alert("Unable to update order. Please try again.");
     }
   };
 

@@ -1,3 +1,5 @@
+import { UpdateAlbumsOrderRequest } from '@lounge/types';
+import { Type } from 'class-transformer';
 import {
   ArrayMinSize,
   IsArray,
@@ -5,8 +7,6 @@ import {
   IsUUID,
   ValidateNested,
 } from 'class-validator';
-import { Type } from 'class-transformer';
-import { UpdateAlbumsOrderRequest } from '@lounge/types';
 
 class AlbumOrderItem {
   @IsUUID(4, { message: 'ID альбому повинен бути валідним UUID' })

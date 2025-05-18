@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState, useCallback, useEffect } from "react";
-import useEmblaCarousel, { EmblaOptionsType } from "embla-carousel-react";
+
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import useEmblaCarousel, { EmblaOptionsType } from "embla-carousel-react";
 
 /**
  * Props for ImageSlider component
@@ -92,7 +93,7 @@ export function ImageSlider({
 
   const handleSlideClick = useCallback(
     (index: number) => {
-      if (onSlideClick) {
+      if (onSlideClick && index >= 0 && index < slides.length) {
         onSlideClick(index, slides[index]);
       }
     },

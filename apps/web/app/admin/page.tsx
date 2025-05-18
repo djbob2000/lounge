@@ -1,7 +1,7 @@
 import { currentUser } from "@clerk/nextjs/server";
 import Link from "next/link";
 
-// Функція для отримання статистики з API
+// Function to fetch stats from the API
 async function getStats() {
   try {
     const response = await fetch(

@@ -1,3 +1,4 @@
+import { CreateAlbumRequest } from '@lounge/types';
 import {
   IsBoolean,
   IsNotEmpty,
@@ -8,7 +9,6 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
-import { CreateAlbumRequest } from '@lounge/types';
 
 export class CreateAlbumDto implements CreateAlbumRequest {
   @IsNotEmpty({ message: 'Назва альбому не може бути порожньою' })

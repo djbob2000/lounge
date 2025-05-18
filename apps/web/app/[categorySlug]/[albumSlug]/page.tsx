@@ -1,20 +1,28 @@
 "use client";
 
+// export const runtime = 'edge';
+
 import { useState, useEffect } from "react";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { Album, Photo, Category } from "@lounge/types";
 import PhotoViewer from "../../../components/PhotoViewer";
+// import { 照片元数据T } from "@/../api/src/photos/types";
+// import { 相册T } from "@/../api/src/albums/types";
 
-interface AlbumPageParams {
+interface PageProps {
   params: {
     categorySlug: string;
     albumSlug: string;
   };
 }
 
-function AlbumPage({ params }: AlbumPageParams) {
+export default async function Page({ params }: PageProps) {
+  // const { categorySlug, albumSlug } = params;
+
+  // console.log('Page params', params);
+
   const [category, setCategory] = useState<Category | null>(null);
   const [album, setAlbum] = useState<Album | null>(null);
   const [photos, setPhotos] = useState<Photo[]>([]);
@@ -153,5 +161,3 @@ function AlbumPage({ params }: AlbumPageParams) {
     </div>
   );
 }
-
-export default AlbumPage;

@@ -1,3 +1,4 @@
+import { UpdateCategoryRequest } from '@lounge/types';
 import {
   IsOptional,
   IsString,
@@ -5,7 +6,6 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
-import { UpdateCategoryRequest } from '@lounge/types';
 
 export class UpdateCategoryDto implements UpdateCategoryRequest {
   @IsOptional()

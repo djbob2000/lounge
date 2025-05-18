@@ -1,3 +1,4 @@
+import { CreateCategoryRequest } from '@lounge/types';
 import {
   IsNotEmpty,
   IsOptional,
@@ -6,7 +7,6 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
-import { CreateCategoryRequest } from '@lounge/types';
 
 export class CreateCategoryDto implements CreateCategoryRequest {
   @IsNotEmpty({ message: 'Назва категорії не може бути порожньою' })

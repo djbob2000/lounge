@@ -1,13 +1,16 @@
+import { Album } from '@lounge/types';
 import {
   BadRequestException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { CreateAlbumDto, UpdateAlbumDto, UpdateAlbumsOrderDto } from './dto';
-import { Album } from '@lounge/types';
-import { CategoriesService } from '../categories/categories.service';
 import slugify from 'slugify';
+
+import { CreateAlbumDto, UpdateAlbumDto, UpdateAlbumsOrderDto } from './dto';
+import { CategoriesService } from '../categories/categories.service';
+import { PrismaService } from '../prisma/prisma.service';
+
+
 
 @Injectable()
 export class AlbumsService {
@@ -17,27 +20,27 @@ export class AlbumsService {
   ) {}
 
   /**
-   * Створення нового альбому
+   * Create a new album
    */
   async create(createAlbumDto: CreateAlbumDto): Promise<Album> {
     const { categoryId, slug, displayOrder, ...rest } = createAlbumDto;
 
-    // Перевірка існування категорії
+    // Check if category exists
     await this.categoriesService.findOne(categoryId);
 
-    // Генерація slug, якщо не передано
+    // Generate slug if not provided
     const albumSlug = slug || this.generateSlug(createAlbumDto.name);
 
-    // Перевірка унікальності slug
+    // Check slug uniqueness
     await this.validateSlugUniqueness(albumSlug, categoryId);
 
-    // Визначення порядку відображення, якщо не передано
+    // Determine display order if not provided
     const order =
       displayOrder !== undefined
         ? displayOrder
         : await this.getNextDisplayOrder(categoryId);
 
-    // Створення альбому
+    // Create the album
     const album = await this.prisma.album.create({
       data: {
         ...rest,
@@ -51,7 +54,7 @@ export class AlbumsService {
   }
 
   /**
-   * Отримання всіх альбомів
+   * Get all albums
    */
   async findAll(): Promise<Album[]> {
     const albums = await this.prisma.album.findMany({
@@ -62,10 +65,10 @@ export class AlbumsService {
   }
 
   /**
-   * Отримання альбомів за категорією
+   * Get albums by category
    */
   async findByCategory(categoryId: string): Promise<Album[]> {
-    // Перевірка існування категорії
+    // Check if category exists
     await this.categoriesService.findOne(categoryId);
 
     const albums = await this.prisma.album.findMany({
@@ -77,7 +80,7 @@ export class AlbumsService {
   }
 
   /**
-   * Отримання альбому за ID
+   * Get album by ID
    */
   async findOne(id: string): Promise<Album> {
     const album = await this.prisma.album.findUnique({
@@ -85,14 +88,14 @@ export class AlbumsService {
     });
 
     if (!album) {
-      throw new NotFoundException(`Альбом з ID ${id} не знайдено`);
+      throw new NotFoundException(`Album with ID ${id} not found`);
     }
 
     return this.mapPrismaAlbumToAlbum(album);
   }
 
   /**
-   * Отримання альбому за slug
+   * Get album by slug
    */
   async findBySlug(slug: string): Promise<Album> {
     const album = await this.prisma.album.findUnique({
@@ -100,27 +103,27 @@ export class AlbumsService {
     });
 
     if (!album) {
-      throw new NotFoundException(`Альбом зі slug ${slug} не знайдено`);
+      throw new NotFoundException(`Album with slug ${slug} not found`);
     }
 
     return this.mapPrismaAlbumToAlbum(album);
   }
 
   /**
-   * Оновлення альбому
+   * Update album
    */
   async update(id: string, updateAlbumDto: UpdateAlbumDto): Promise<Album> {
     const { slug, categoryId, ...rest } = updateAlbumDto;
 
-    // Отримання існуючого альбому
+    // Get existing album
     const existingAlbum = await this.findOne(id);
 
-    // Перевірка існування нової категорії, якщо вона змінюється
+    // Check if new category exists if it is being changed
     if (categoryId && categoryId !== existingAlbum.categoryId) {
       await this.categoriesService.findOne(categoryId);
     }
 
-    // Перевірка унікальності slug, якщо він змінюється
+    // Check slug uniqueness if it is being changed
     if (slug && slug !== existingAlbum.slug) {
       await this.validateSlugUniqueness(
         slug,
@@ -129,7 +132,7 @@ export class AlbumsService {
       );
     }
 
-    // Оновлення альбому
+    // Update the album
     const updatedAlbum = await this.prisma.album.update({
       where: { id },
       data: {
@@ -143,7 +146,7 @@ export class AlbumsService {
   }
 
   /**
-   * Видалення альбому
+   * Delete album
    */
   async remove(id: string): Promise<Album> {
     await this.findOne(id);
@@ -156,14 +159,14 @@ export class AlbumsService {
   }
 
   /**
-   * Оновлення порядку відображення альбомів
+   * Update display order of albums
    */
   async updateOrder(
     updateAlbumsOrderDto: UpdateAlbumsOrderDto,
   ): Promise<Album[]> {
     const { albums } = updateAlbumsOrderDto;
 
-    // Перевірка існування всіх альбомів
+    // Check if all albums exist
     const existingAlbums = await this.prisma.album.findMany({
       where: {
         id: {
@@ -173,10 +176,10 @@ export class AlbumsService {
     });
 
     if (existingAlbums.length !== albums.length) {
-      throw new BadRequestException('Деякі альбоми не знайдено');
+      throw new BadRequestException('Some albums were not found');
     }
 
-    // Оновлення порядку відображення
+    // Update display order
     const updatePromises = albums.map((album) =>
       this.prisma.album.update({
         where: { id: album.id },
@@ -189,7 +192,7 @@ export class AlbumsService {
   }
 
   /**
-   * Налаштування обкладинки альбому
+   * Set album cover image
    */
   async setCoverImage(id: string, coverImageUrl: string): Promise<Album> {
     await this.findOne(id);
@@ -203,7 +206,7 @@ export class AlbumsService {
   }
 
   /**
-   * Генерація slug з назви
+   * Generate slug from name
    */
   private generateSlug(name: string): string {
     return slugify(name, {
@@ -213,25 +216,25 @@ export class AlbumsService {
   }
 
   /**
-   * Перевірка унікальності slug
+   * Check slug uniqueness
    */
   private async validateSlugUniqueness(
     slug: string,
     categoryId: string,
     excludeId?: string,
   ): Promise<void> {
-    // Перевірка унікальності slug в системі
+    // Check slug uniqueness in the system
     const existingBySlug = await this.prisma.album.findUnique({
       where: { slug },
     });
 
     if (existingBySlug && (!excludeId || existingBySlug.id !== excludeId)) {
-      throw new BadRequestException(`Альбом зі slug "${slug}" вже існує`);
+      throw new BadRequestException(`Album with slug "${slug}" already exists`);
     }
   }
 
   /**
-   * Визначення наступного порядку відображення для альбому в категорії
+   * Determine display order if not provided
    */
   private async getNextDisplayOrder(categoryId: string): Promise<number> {
     const lastAlbum = await this.prisma.album.findFirst({
@@ -243,7 +246,7 @@ export class AlbumsService {
   }
 
   /**
-   * Перетворення об'єкта альбому з Prisma на об'єкт альбому для API
+   * Convert Prisma album object to API album object
    */
   private mapPrismaAlbumToAlbum(prismaAlbum: any): Album {
     return {

@@ -61,7 +61,7 @@
   }
 }
 
-/* Фотограф-специфічні стилі */
+/* Photographer-specific styles */
 .photo-grid {
   @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4;
 }
@@ -86,12 +86,12 @@
   @apply absolute bottom-0 left-0 right-0 bg-black/50 text-white p-2 text-center;
 }
 
-/* Додаткові стилі для повноекранного слайдера */
+/* Additional styles for fullscreen slider */
 .fullscreen-slider {
   @apply fixed inset-0 z-50 bg-black flex items-center justify-center;
 }
 
-/* Анімації для сторінок */
+/* Page animations */
 .page-enter {
   @apply opacity-0;
 }

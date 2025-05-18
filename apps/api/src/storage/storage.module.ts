@@ -1,10 +1,12 @@
+import { extname } from 'path';
+
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { StorageService } from './storage.service';
 import { MulterModule } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
-import { extname } from 'path';
 import { v4 as uuidv4 } from 'uuid';
+
+import { StorageService } from './storage.service';
 
 @Module({
   imports: [

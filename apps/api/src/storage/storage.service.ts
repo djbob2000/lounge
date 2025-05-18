@@ -1,3 +1,7 @@
+import * as fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
+
 import {
   Injectable,
   Logger,
@@ -8,9 +12,7 @@ import { ConfigService } from '@nestjs/config';
 import * as B2 from 'backblaze-b2';
 import * as sharp from 'sharp';
 import { v4 as uuidv4 } from 'uuid';
-import * as fs from 'fs';
-import * as path from 'path';
-import * as os from 'os';
+
 import { UploadFileResponseDto } from './dto/upload.dto';
 
 @Injectable()
@@ -37,7 +39,7 @@ export class StorageService {
   }
 
   /**
-   * Ініціалізація клієнта B2
+   * Initialize the B2 client
    */
   private async initializeB2() {
     try {
@@ -60,8 +62,8 @@ export class StorageService {
       }
 
       this.b2Client = new B2({
-        applicationKeyId,
-        applicationKey,
+        applicationKeyId: applicationKeyId,
+        applicationKey: applicationKey,
       });
 
       await this.b2Client.authorize();
@@ -72,11 +74,11 @@ export class StorageService {
   }
 
   /**
-   * Завантаження файлу в B2
+   * Upload file to B2
    */
   async uploadFile(file: Express.Multer.File): Promise<UploadFileResponseDto> {
     try {
-      // Перевірка типу файлу і розміру
+      // Check file type and size
       if (!this.allowedMimeTypes.includes(file.mimetype)) {
         throw new BadRequestException(
           'Invalid file type. Allowed types: JPEG, PNG, WebP, GIF',
@@ -89,13 +91,13 @@ export class StorageService {
         );
       }
 
-      // Генерація унікального імені файлу
+      // Generate unique file name
       const fileId = uuidv4();
       const fileExtension = path.extname(file.originalname);
       const fileName = `${fileId}${fileExtension}`;
       const metadata = await this.getImageMetadata(file.buffer);
 
-      // Завантаження оригінального файлу
+      // Upload original file
       const originalFileName = `photos/original/${fileName}`;
       const originalFileUrl = await this.uploadToB2(
         file.buffer,
@@ -103,7 +105,7 @@ export class StorageService {
         file.mimetype,
       );
 
-      // Генерація та завантаження мініатюри
+      // Generate and upload thumbnail
       const thumbnailBuffer = await this.generateThumbnail(file.buffer);
       const thumbnailFileName = `photos/thumbnails/${fileId}_thumbnail${fileExtension}`;
       const thumbnailUrl = await this.uploadToB2(
@@ -130,23 +132,23 @@ export class StorageService {
   }
 
   /**
-   * Видалення файлу з B2
+   * Delete file from B2
    */
   async deleteFile(fileId: string): Promise<boolean> {
     try {
-      // Якщо клієнт не ініціалізований, повторно ініціалізуємо
+      // If client is not initialized, re-initialize
       if (!this.b2Client) {
         await this.initializeB2();
       }
 
-      // Отримуємо інформацію про файл
+      // Get file information
       const { data: fileList } = await this.b2Client.listFileNames({
         bucketId: this.bucketId,
         prefix: fileId,
         maxFileCount: 10,
       });
 
-      // Видаляємо всі файли, що відповідають ID
+      // Delete all files matching the ID
       const deletePromises = fileList.files.map(async (file) => {
         try {
           await this.b2Client.deleteFileVersion({
@@ -172,7 +174,7 @@ export class StorageService {
   }
 
   /**
-   * Отримання URL до файлу
+   * Get file URL
    */
   getFileUrl(fileName: string): string {
     const downloadUrl = this.configService.get<string>('B2_DOWNLOAD_URL');
@@ -183,7 +185,7 @@ export class StorageService {
   }
 
   /**
-   * Завантаження буфера в B2
+   * Upload buffer to B2
    */
   private async uploadToB2(
     buffer: Buffer,
@@ -191,17 +193,17 @@ export class StorageService {
     contentType: string,
   ): Promise<string> {
     try {
-      // Якщо клієнт не ініціалізований, повторно ініціалізуємо
+      // If client is not initialized, re-initialize
       if (!this.b2Client) {
         await this.initializeB2();
       }
 
-      // Отримуємо URL для завантаження
+      // Get upload URL
       const { data: authData } = await this.b2Client.getUploadUrl({
         bucketId: this.bucketId,
       });
 
-      // Завантажуємо файл
+      // Upload file
       const { data } = await this.b2Client.uploadFile({
         uploadUrl: authData.uploadUrl,
         uploadAuthToken: authData.authorizationToken,
@@ -210,7 +212,7 @@ export class StorageService {
         data: buffer,
       });
 
-      // Повертаємо URL до файлу
+      // Return file URL
       return this.getFileUrl(fileName);
     } catch (error) {
       this.logger.error(`Upload to B2 error: ${error.message}`);
@@ -219,7 +221,7 @@ export class StorageService {
   }
 
   /**
-   * Отримання метаданих зображення
+   * Get image metadata
    */
   private async getImageMetadata(
     buffer: Buffer,
@@ -237,7 +239,7 @@ export class StorageService {
   }
 
   /**
-   * Генерація мініатюри
+   * Generate thumbnail
    */
   private async generateThumbnail(buffer: Buffer): Promise<Buffer> {
     try {
@@ -255,7 +257,7 @@ export class StorageService {
   }
 
   /**
-   * Генерація декількох мініатюр різних розмірів
+   * Generate multiple thumbnails of different sizes
    */
   async generateMultipleThumbnails(
     buffer: Buffer,
@@ -281,7 +283,7 @@ export class StorageService {
   }
 
   /**
-   * Зберігання тимчасового файлу
+   * Save temporary file
    */
   async saveTempFile(buffer: Buffer): Promise<string> {
     const tempDir = path.join(os.tmpdir(), 'lounge-uploads');
@@ -295,7 +297,7 @@ export class StorageService {
   }
 
   /**
-   * Видалення тимчасового файлу
+   * Delete temporary file
    */
   deleteTempFile(filePath: string): void {
     if (fs.existsSync(filePath)) {

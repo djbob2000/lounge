@@ -1,14 +1,17 @@
+import { Photo } from '@lounge/types';
 import {
   BadRequestException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { Photo as PrismaPhoto } from '@prisma/client';
+
+import { UpdatePhotoDto, UpdatePhotosOrderDto } from './dto';
+import { AlbumsService } from '../albums/albums.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { StorageService } from '../storage/storage.service';
-import { AlbumsService } from '../albums/albums.service';
-import { Photo } from '@lounge/types';
-import { UpdatePhotoDto, UpdatePhotosOrderDto } from './dto';
-import { Photo as PrismaPhoto } from '@prisma/client';
+
+
 
 @Injectable()
 export class PhotosService {
@@ -19,7 +22,7 @@ export class PhotosService {
   ) {}
 
   /**
-   * Завантаження фотографії
+   * Upload photo
    */
   async upload(
     file: Express.Multer.File,
@@ -27,19 +30,19 @@ export class PhotosService {
     displayOrder?: number,
     isSliderImage = false,
   ): Promise<Photo> {
-    // Перевірка існування альбому
+    // Check if album exists
     await this.albumsService.findOne(albumId);
 
-    // Завантаження файлу в сховище
+    // Upload file to storage
     const uploadResult = await this.storageService.uploadFile(file);
 
-    // Визначення порядку відображення, якщо не передано
+    // Determine display order if not provided
     const order =
       displayOrder !== undefined
         ? displayOrder
         : await this.getNextDisplayOrder(albumId);
 
-    // Створення запису про фотографію в базі даних
+    // Create photo record in database
     const photo = await this.prisma.photo.create({
       data: {
         albumId,
@@ -57,7 +60,7 @@ export class PhotosService {
   }
 
   /**
-   * Отримання всіх фотографій
+   * Get all photos
    */
   async findAll(): Promise<Photo[]> {
     const photos = await this.prisma.photo.findMany({
@@ -68,10 +71,10 @@ export class PhotosService {
   }
 
   /**
-   * Отримання фотографій альбому
+   * Get album photos
    */
   async findByAlbum(albumId: string): Promise<Photo[]> {
-    // Перевірка існування альбому
+    // Check if album exists
     await this.albumsService.findOne(albumId);
 
     const photos = await this.prisma.photo.findMany({
@@ -83,7 +86,7 @@ export class PhotosService {
   }
 
   /**
-   * Отримання фотографій для слайдера
+   * Get slider photos
    */
   async findSliderPhotos(): Promise<Photo[]> {
     const photos = await this.prisma.photo.findMany({
@@ -95,7 +98,7 @@ export class PhotosService {
   }
 
   /**
-   * Отримання фотографії за ID
+   * Get photo by ID
    */
   async findOne(id: string): Promise<Photo> {
     const photo = await this.prisma.photo.findUnique({
@@ -103,20 +106,20 @@ export class PhotosService {
     });
 
     if (!photo) {
-      throw new NotFoundException(`Фотографію з ID ${id} не знайдено`);
+      throw new NotFoundException(`Photo with ID ${id} not found`);
     }
 
     return this.mapPrismaPhotoToPhoto(photo);
   }
 
   /**
-   * Оновлення фотографії
+   * Update photo
    */
   async update(id: string, updatePhotoDto: UpdatePhotoDto): Promise<Photo> {
-    // Перевірка існування фотографії
+    // Check if photo exists
     await this.findOne(id);
 
-    // Оновлення фотографії
+    // Update photo
     const updatedPhoto = await this.prisma.photo.update({
       where: { id },
       data: {
@@ -129,37 +132,37 @@ export class PhotosService {
   }
 
   /**
-   * Видалення фотографії
+   * Delete photo
    */
   async remove(id: string): Promise<Photo> {
-    // Отримання фотографії для подальшого видалення файлів
+    // Get photo for subsequent file deletion
     const photo = await this.findOne(id);
 
-    // Видалення запису з бази даних
+    // Delete record from database
     const deletedPhoto = await this.prisma.photo.delete({
       where: { id },
     });
 
-    // Отримання ідентифікатора файлу з URL
+    // Get file ID from URL
     const fileId = this.extractFileIdFromUrl(
       photo.originalUrl || photo.thumbnailUrl,
     );
 
-    // Видалення файлів з хмарного сховища
+    // Delete files from cloud storage
     await this.storageService.deleteFile(fileId);
 
     return this.mapPrismaPhotoToPhoto(deletedPhoto);
   }
 
   /**
-   * Оновлення порядку фотографій
+   * Update photo order
    */
   async updateOrder(
     updatePhotosOrderDto: UpdatePhotosOrderDto,
   ): Promise<Photo[]> {
     const { photos } = updatePhotosOrderDto;
 
-    // Перевірка існування всіх фотографій
+    // Check if all photos exist
     const existingPhotos = await this.prisma.photo.findMany({
       where: {
         id: {
@@ -169,10 +172,10 @@ export class PhotosService {
     });
 
     if (existingPhotos.length !== photos.length) {
-      throw new BadRequestException('Деякі фотографії не знайдено');
+      throw new BadRequestException('Some photos were not found');
     }
 
-    // Оновлення порядку відображення
+    // Update display order
     const updatePromises = photos.map((photo) =>
       this.prisma.photo.update({
         where: { id: photo.id },
@@ -185,13 +188,13 @@ export class PhotosService {
   }
 
   /**
-   * Додавання/видалення фотографії до/з слайдера
+   * Add/remove photo to/from slider
    */
   async toggleSliderStatus(id: string, isSliderImage: boolean): Promise<Photo> {
-    // Перевірка існування фотографії
+    // Check if photo exists
     await this.findOne(id);
 
-    // Оновлення статусу слайдера
+    // Update slider status
     const updatedPhoto = await this.prisma.photo.update({
       where: { id },
       data: { isSliderImage },
@@ -201,7 +204,7 @@ export class PhotosService {
   }
 
   /**
-   * Отримання наступного порядкового номера для фотографії в альбомі
+   * Get the next display order number for a photo in an album
    */
   private async getNextDisplayOrder(albumId: string): Promise<number> {
     const maxOrderPhoto = await this.prisma.photo.findFirst({
@@ -214,7 +217,7 @@ export class PhotosService {
   }
 
   /**
-   * Конвертація Prisma моделі в доменну модель
+   * Convert Prisma model to domain model
    */
   private mapPrismaPhotoToPhoto(prismaPhoto: PrismaPhoto): Photo {
     return {
@@ -233,13 +236,13 @@ export class PhotosService {
   }
 
   /**
-   * Видобування ідентифікатора файлу з URL
+   * Extract file ID from URL
    */
   private extractFileIdFromUrl(url: string): string {
-    // URL має формат: https://endpoint/file/bucket/photos/[original|thumbnails]/[fileId][extension]
+    // URL format: https://endpoint/file/bucket/photos/[original|thumbnails]/[fileId][extension]
     const parts = url.split('/');
     const filename = parts[parts.length - 1];
-    // Видобуваємо UUID з імені файлу
+    // Extract UUID from file name
     const fileId = filename.split('_')[0].split('.')[0];
     return fileId;
   }

@@ -1,5 +1,5 @@
-import { IsBoolean, IsNumber, IsOptional, IsUUID } from 'class-validator';
 import { UploadPhotoRequest } from '@lounge/types';
+import { IsBoolean, IsNumber, IsOptional, IsUUID } from 'class-validator';
 
 export class UploadPhotoDto implements UploadPhotoRequest {
   @IsUUID()

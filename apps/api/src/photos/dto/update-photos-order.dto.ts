@@ -1,3 +1,4 @@
+import { UpdatePhotosOrderRequest } from '@lounge/types';
 import { Type } from 'class-transformer';
 import {
   ArrayNotEmpty,
@@ -6,7 +7,6 @@ import {
   IsUUID,
   ValidateNested,
 } from 'class-validator';
-import { UpdatePhotosOrderRequest } from '@lounge/types';
 
 class PhotoOrderItem {
   @IsUUID()

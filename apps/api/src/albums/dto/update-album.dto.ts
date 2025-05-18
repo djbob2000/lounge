@@ -1,3 +1,4 @@
+import { UpdateAlbumRequest } from '@lounge/types';
 import {
   IsBoolean,
   IsOptional,
@@ -7,7 +8,6 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
-import { UpdateAlbumRequest } from '@lounge/types';
 
 export class UpdateAlbumDto implements UpdateAlbumRequest {
   @IsOptional()

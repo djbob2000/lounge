@@ -5,18 +5,19 @@ import {
   SetMetadata,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { Request } from 'express';
-import { AuthService } from './auth.service';
+import { Request as ExpressRequest } from 'express';
 import { Observable } from 'rxjs';
 
+import { AuthService } from './auth.service';
+
 /**
- * Метадані для вказання публічних маршрутів
+ * Metadata to indicate public routes
  */
 export const IS_PUBLIC_KEY = 'isPublic';
 export const Public = () => SetMetadata(IS_PUBLIC_KEY, true);
 
 /**
- * Guard для перевірки аутентифікації через Clerk
+ * Guard for checking authentication via Clerk
  */
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -28,7 +29,7 @@ export class AuthGuard implements CanActivate {
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
-    // Перевірка, чи маршрут є публічним
+    // Check if the route is public
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
       context.getClass(),
@@ -38,14 +39,14 @@ export class AuthGuard implements CanActivate {
       return true;
     }
 
-    const request = context.switchToHttp().getRequest<Request>();
+    const request = context.switchToHttp().getRequest<ExpressRequest>();
     const token = this.extractTokenFromHeader(request);
 
-    // Валідація токена та отримання інформації про користувача
+    // Validate token and get user information
     return this.authService
       .validateToken(token)
       .then((user) => {
-        // Додавання користувача до запиту для подальшого використання
+        // Add user to the request for further use
         request['user'] = user;
         return true;
       })
@@ -53,9 +54,9 @@ export class AuthGuard implements CanActivate {
   }
 
   /**
-   * Отримання токена з заголовка Authorization
+   * Get token from Authorization header
    */
-  private extractTokenFromHeader(request: Request): string {
+  private extractTokenFromHeader(request: ExpressRequest): string {
     const [type, token] = request.headers.authorization?.split(' ') ?? [];
     return type === 'Bearer' ? token : '';
   }
