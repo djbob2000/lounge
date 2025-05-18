@@ -27,6 +27,8 @@ out/
 build
 dist
 
+# Uploads
+apps/api/uploads/
 
 # Debug
 npm-debug.log*

@@ -1,0 +1,68 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Модель категорії фотоальбомів
+model Category {
+  id           String   @id @default(uuid())
+  name         String
+  slug         String   @unique
+  displayOrder Int
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Зв'язки
+  albums Album[]
+
+  @@index([displayOrder])
+}
+
+// Модель фотоальбому
+model Album {
+  id            String   @id @default(uuid())
+  name          String
+  slug          String   @unique
+  description   String?
+  categoryId    String
+  displayOrder  Int
+  coverImageUrl String?
+  isHidden      Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Зв'язки
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  photos   Photo[]
+
+  @@index([categoryId, displayOrder])
+  @@index([slug])
+}
+
+// Модель фотографії
+model Photo {
+  id           String   @id @default(uuid())
+  albumId      String
+  filename     String
+  originalUrl  String
+  thumbnailUrl String
+  displayOrder Int
+  isSliderImage Boolean @default(false)
+  width        Int
+  height       Int
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Зв'язки
+  album Album @relation(fields: [albumId], references: [id], onDelete: Cascade)
+
+  @@index([albumId, displayOrder])
+  @@index([isSliderImage])
+} 
