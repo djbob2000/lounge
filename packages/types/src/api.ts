@@ -1,16 +1,16 @@
 /**
- * Інтерфейси API запитів та відповідей
+ * API request and response interfaces
  */
 
 import { Album, Category, Photo } from "./models";
 
 /**
- * Запити для категорій
+ * Category requests
  */
 export interface CreateCategoryRequest {
   name: string;
-  slug?: string; // Якщо не вказано, генерується на сервері
-  displayOrder?: number; // Якщо не вказано, встановлюється на сервері
+  slug?: string; // If not specified, generated on the server
+  displayOrder?: number; // If not specified, set on the server
 }
 
 export interface UpdateCategoryRequest {
@@ -27,15 +27,15 @@ export interface UpdateCategoriesOrderRequest {
 }
 
 /**
- * Запити для альбомів
+ * Album requests
  */
 export interface CreateAlbumRequest {
   name: string;
-  slug?: string; // Якщо не вказано, генерується на сервері
+  slug?: string; // If not specified, generated on the server
   description?: string;
   categoryId: string;
-  displayOrder?: number; // Якщо не вказано, встановлюється на сервері
-  isHidden?: boolean; // За замовчуванням false
+  displayOrder?: number; // If not specified, set on the server
+  isHidden?: boolean; // Default is false
 }
 
 export interface UpdateAlbumRequest {
@@ -56,12 +56,12 @@ export interface UpdateAlbumsOrderRequest {
 }
 
 /**
- * Запити для фотографій
+ * Photo requests
  */
 export interface UploadPhotoRequest {
   albumId: string;
-  displayOrder?: number; // Якщо не вказано, встановлюється на сервері
-  isSliderImage?: boolean; // За замовчуванням false
+  displayOrder?: number; // If not specified, set on the server
+  isSliderImage?: boolean; // Default is false
 }
 
 export interface UpdatePhotoRequest {
@@ -77,7 +77,7 @@ export interface UpdatePhotosOrderRequest {
 }
 
 /**
- * Відповіді API
+ * API responses
  */
 export interface ApiResponse<T> {
   status: "success" | "error";

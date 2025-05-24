@@ -1,4 +1,5 @@
 import { Album } from '@lounge/types';
+import { Album as PrismaAlbum } from '@prisma/client';
 import {
   BadRequestException,
   Injectable,
@@ -9,8 +10,6 @@ import slugify from 'slugify';
 import { CreateAlbumDto, UpdateAlbumDto, UpdateAlbumsOrderDto } from './dto';
 import { CategoriesService } from '../categories/categories.service';
 import { PrismaService } from '../prisma/prisma.service';
-
-
 
 @Injectable()
 export class AlbumsService {
@@ -248,7 +247,7 @@ export class AlbumsService {
   /**
    * Convert Prisma album object to API album object
    */
-  private mapPrismaAlbumToAlbum(prismaAlbum: any): Album {
+  private mapPrismaAlbumToAlbum(prismaAlbum: PrismaAlbum): Album {
     return {
       id: prismaAlbum.id,
       name: prismaAlbum.name,

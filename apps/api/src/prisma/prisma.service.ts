@@ -1,5 +1,5 @@
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
 
 @Injectable()
 export class PrismaService
@@ -15,28 +15,26 @@ export class PrismaService
     });
   }
 
-  async onModuleInit() {
+  async onModuleInit(): Promise<void> {
     await this.$connect();
   }
 
-  async onModuleDestroy() {
+  async onModuleDestroy(): Promise<void> {
     await this.$disconnect();
   }
 
-  async cleanDatabase() {
+  async cleanDatabase(): Promise<void> {
     if (process.env.NODE_ENV === 'production') {
       return;
     }
 
-    // Use with caution, for testing only!
-    const models = Reflect.ownKeys(this).filter(
-      (key) =>
-        typeof key === 'string' && key[0] !== '_' && key !== 'constructor',
-    );
+    const modelNames = Prisma.dmmf.datamodel.models.map((model) => model.name);
 
-    return Promise.all(
-      models.map((modelKey) => {
-        return this[modelKey as keyof PrismaService].deleteMany();
+    await Promise.all(
+      modelNames.map((modelName) => {
+        const prismaModelName =
+          modelName.charAt(0).toLowerCase() + modelName.slice(1);
+        return (this as any)[prismaModelName].deleteMany({});
       }),
     );
   }

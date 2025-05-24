@@ -11,41 +11,42 @@ import {
 
 export class UpdateAlbumDto implements UpdateAlbumRequest {
   @IsOptional()
-  @IsString({ message: 'Назва альбому повинна бути рядком' })
+  @IsString({ message: 'Album name must be a string' })
   @MinLength(2, {
-    message: 'Назва альбому повинна містити мінімум 2 символи',
+    message: 'Album name must be at least 2 characters',
   })
   @MaxLength(100, {
-    message: 'Назва альбому не може перевищувати 100 символів',
+    message: 'Album name cannot exceed 100 characters',
   })
   name?: string;
 
   @IsOptional()
-  @IsString({ message: 'Slug повинен бути рядком' })
+  @IsString({ message: 'Slug must be a string' })
   @Matches(/^[a-z0-9-]+$/, {
-    message: 'Slug може містити лише малі літери латиниці, цифри та дефіс',
+    message:
+      'Slug can only contain lowercase Latin letters, numbers, and hyphens',
   })
-  @MinLength(2, { message: 'Slug повинен містити мінімум 2 символи' })
-  @MaxLength(100, { message: 'Slug не може перевищувати 100 символів' })
+  @MinLength(2, { message: 'Slug must be at least 2 characters' })
+  @MaxLength(100, { message: 'Slug cannot exceed 100 characters' })
   slug?: string;
 
   @IsOptional()
-  @IsString({ message: 'Опис повинен бути рядком' })
-  @MaxLength(1000, { message: 'Опис не може перевищувати 1000 символів' })
+  @IsString({ message: 'Description must be a string' })
+  @MaxLength(1000, { message: 'Description cannot exceed 1000 characters' })
   description?: string;
 
   @IsOptional()
-  @IsUUID(4, { message: 'ID категорії повинен бути валідним UUID' })
+  @IsUUID(4, { message: 'Category ID must be a valid UUID' })
   categoryId?: string;
 
   @IsOptional()
   displayOrder?: number;
 
   @IsOptional()
-  @IsString({ message: 'URL обкладинки повинен бути рядком' })
+  @IsString({ message: 'Cover image URL must be a string' })
   coverImageUrl?: string;
 
   @IsOptional()
-  @IsBoolean({ message: 'isHidden повинен бути булевим значенням' })
+  @IsBoolean({ message: 'isHidden must be a boolean value' })
   isHidden?: boolean;
 }

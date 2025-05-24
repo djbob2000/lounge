@@ -22,7 +22,7 @@ export class AlbumsController {
   constructor(private readonly albumsService: AlbumsService) {}
 
   /**
-   * Створення нового альбому
+   * Create new album
    */
   @Post()
   @HttpCode(HttpStatus.CREATED)
@@ -31,7 +31,7 @@ export class AlbumsController {
   }
 
   /**
-   * Отримання всіх альбомів
+   * Get all albums
    */
   @Get()
   @Public()
@@ -40,7 +40,7 @@ export class AlbumsController {
   }
 
   /**
-   * Отримання альбомів за категорією
+   * Get albums by category
    */
   @Get('category/:categoryId')
   @Public()
@@ -49,7 +49,7 @@ export class AlbumsController {
   }
 
   /**
-   * Отримання альбому за ID
+   * Get album by ID
    */
   @Get(':id')
   @Public()
@@ -58,7 +58,7 @@ export class AlbumsController {
   }
 
   /**
-   * Отримання альбому за slug
+   * Get album by slug
    */
   @Get('slug/:slug')
   @Public()
@@ -67,7 +67,7 @@ export class AlbumsController {
   }
 
   /**
-   * Оновлення альбому
+   * Update album
    */
   @Patch(':id')
   update(
@@ -78,7 +78,7 @@ export class AlbumsController {
   }
 
   /**
-   * Встановлення обкладинки альбому
+   * Set album cover image
    */
   @Patch(':id/cover')
   setCoverImage(
@@ -89,7 +89,7 @@ export class AlbumsController {
   }
 
   /**
-   * Видалення альбому
+   * Delete album
    */
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
@@ -98,7 +98,7 @@ export class AlbumsController {
   }
 
   /**
-   * Оновлення порядку відображення альбомів
+   * Update albums order
    */
   @Patch('order/update')
   updateOrder(

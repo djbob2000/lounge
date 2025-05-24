@@ -18,7 +18,7 @@ import { UploadFileResponseDto } from './dto/upload.dto';
 @Injectable()
 export class StorageService {
   private readonly logger = new Logger(StorageService.name);
-  private b2Client: any;
+  private b2Client: B2;
   private bucketId: string;
   private bucketName: string;
   private readonly allowedMimeTypes = [
@@ -41,25 +41,29 @@ export class StorageService {
   /**
    * Initialize the B2 client
    */
-  private async initializeB2() {
+  private async initializeB2(): Promise<void> {
     try {
       const applicationKeyId = this.configService.get<string>(
         'B2_APPLICATION_KEY_ID',
       );
       const applicationKey =
         this.configService.get<string>('B2_APPLICATION_KEY');
-      this.bucketId = this.configService.get<string>('B2_BUCKET_ID');
-      this.bucketName = this.configService.get<string>('B2_BUCKET_NAME');
+      const bucketId = this.configService.get<string>('B2_BUCKET_ID');
+      const bucketName = this.configService.get<string>('B2_BUCKET_NAME');
 
-      if (
-        !applicationKeyId ||
-        !applicationKey ||
-        !this.bucketId ||
-        !this.bucketName
-      ) {
-        this.logger.error('Missing B2 configuration');
-        return;
+      if (!applicationKeyId || !applicationKey || !bucketId || !bucketName) {
+        this.logger.error(
+          'Missing B2 configuration: One or more B2 environment variables are not set.',
+        );
+        // Optionally, throw an error to prevent further execution if B2 is critical
+        throw new InternalServerErrorException(
+          'B2 configuration is incomplete.',
+        );
       }
+
+      // Now we are sure these values are strings
+      this.bucketId = bucketId;
+      this.bucketName = bucketName;
 
       this.b2Client = new B2({
         applicationKeyId: applicationKeyId,
@@ -204,7 +208,7 @@ export class StorageService {
       });
 
       // Upload file
-      const { data } = await this.b2Client.uploadFile({
+      await this.b2Client.uploadFile({
         uploadUrl: authData.uploadUrl,
         uploadAuthToken: authData.authorizationToken,
         fileName,

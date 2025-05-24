@@ -65,7 +65,7 @@ export default async function CategoryPage({ params }: CategoryPageParams) {
 
         {albums.length === 0 ? (
           <p className="text-muted-foreground">
-            У цій категорії поки немає альбомів.
+            There are no albums in this category yet.
           </p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -87,7 +87,7 @@ export default async function CategoryPage({ params }: CategoryPageParams) {
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                        Немає обкладинки
+                        No cover
                       </div>
                     )}
                   </div>

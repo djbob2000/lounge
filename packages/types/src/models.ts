@@ -1,9 +1,9 @@
 /**
- * Моделі даних для вебсайту фотографа
+ * Data models for the photographer's website
  */
 
 /**
- * Модель категорії фотоальбомів
+ * Photo album category model
  */
 export interface Category {
   id: string;
@@ -15,7 +15,7 @@ export interface Category {
 }
 
 /**
- * Модель фотоальбому
+ * Photo album model
  */
 export interface Album {
   id: string;
@@ -31,7 +31,7 @@ export interface Album {
 }
 
 /**
- * Модель фотографії
+ * Photo model
  */
 export interface Photo {
   id: string;

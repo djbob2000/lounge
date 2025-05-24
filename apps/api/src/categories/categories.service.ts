@@ -13,7 +13,6 @@ import {
 } from './dto';
 import { PrismaService } from '../prisma/prisma.service';
 
-
 @Injectable()
 export class CategoriesService {
   constructor(private readonly prisma: PrismaService) {}
@@ -102,10 +101,11 @@ export class CategoriesService {
     }
 
     // Update the category
-    return this.prisma.category.update({
+    const updatedCategory = await this.prisma.category.update({
       where: { id },
       data: updateCategoryDto,
     });
+    return updatedCategory;
   }
 
   /**
@@ -116,9 +116,10 @@ export class CategoriesService {
     await this.findOne(id);
 
     // Delete the category (note that albums will be deleted cascadingly via onDelete: Cascade relationship)
-    return this.prisma.category.delete({
+    const deletedCategory = await this.prisma.category.delete({
       where: { id },
     });
+    return deletedCategory;
   }
 
   /**

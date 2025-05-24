@@ -3,6 +3,7 @@ import {
   ExecutionContext,
   Injectable,
   SetMetadata,
+  CustomDecorator,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Request as ExpressRequest } from 'express';
@@ -14,7 +15,8 @@ import { AuthService } from './auth.service';
  * Metadata to indicate public routes
  */
 export const IS_PUBLIC_KEY = 'isPublic';
-export const Public = () => SetMetadata(IS_PUBLIC_KEY, true);
+export const Public = (): CustomDecorator<string> =>
+  SetMetadata(IS_PUBLIC_KEY, true);
 
 /**
  * Guard for checking authentication via Clerk

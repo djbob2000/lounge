@@ -112,7 +112,7 @@ export default async function Page({ params }: PageProps) {
                 d="M15 19l-7-7 7-7"
               />
             </svg>
-            Назад до {category.name}
+            Back to {category.name}
           </Link>
         </div>
 

@@ -71,14 +71,14 @@ export default async function PhotosPage({
   searchParams: { albumId?: string; slider?: string };
 }) {
   let photos: Photo[] = [];
-  let title = "Всі фотографії";
+  let title = "All photos";
 
   if (searchParams.slider === "true") {
     photos = await getSliderPhotos();
-    title = "Фотографії для слайдера";
+    title = "Slider photos";
   } else if (searchParams.albumId) {
     photos = await getPhotosByAlbum(searchParams.albumId);
-    title = "Фотографії альбому";
+    title = "Album photos";
   } else {
     photos = await getPhotos();
   }
@@ -91,7 +91,7 @@ export default async function PhotosPage({
           href="/admin/photos/upload"
           className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors"
         >
-          Завантажити фотографії
+          Upload photos
         </Link>
       </div>
 
@@ -139,13 +139,13 @@ export default async function PhotosPage({
                       href={`/admin/photos/${photo.id}/edit`}
                       className="text-blue-500 hover:text-blue-700"
                     >
-                      Редагувати
+                      Edit
                     </Link>
                     <button
                       className="text-red-500 hover:text-red-700"
                       data-id={photo.id}
                     >
-                      Видалити
+                      Delete
                     </button>
                   </div>
                 </div>

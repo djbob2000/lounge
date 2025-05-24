@@ -13,12 +13,12 @@ async function getAlbums(): Promise<Album[]> {
     );
 
     if (!response.ok) {
-      throw new Error("Помилка отримання альбомів");
+      throw new Error("Error fetching albums");
     }
 
     return response.json();
   } catch (error) {
-    console.error("Помилка отримання альбомів:", error);
+    console.error("Error fetching albums:", error);
     return [];
   }
 }
@@ -34,12 +34,12 @@ async function getAlbumsByCategory(categoryId: string): Promise<Album[]> {
     );
 
     if (!response.ok) {
-      throw new Error("Помилка отримання альбомів за категорією");
+      throw new Error("Error fetching albums by category");
     }
 
     return response.json();
   } catch (error) {
-    console.error("Помилка отримання альбомів за категорією:", error);
+    console.error("Error fetching albums by category:", error);
     return [];
   }
 }
@@ -53,9 +53,7 @@ export default async function AlbumsPage({
     ? await getAlbumsByCategory(searchParams.categoryId)
     : await getAlbums();
 
-  const title = searchParams.categoryId
-    ? "Альбоми для категорії"
-    : "Всі альбоми";
+  const title = searchParams.categoryId ? "Albums for category" : "All albums";
 
   return (
     <div>
@@ -65,18 +63,18 @@ export default async function AlbumsPage({
           href="/admin/albums/new"
           className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors"
         >
-          Додати альбом
+          Add album
         </Link>
       </div>
 
       {albums.length === 0 ? (
         <div className="bg-white rounded-lg shadow p-6 text-center">
-          <p className="text-gray-500 mb-4">Альбоми відсутні</p>
+          <p className="text-gray-500 mb-4">Albums are absent</p>
           <Link
             href="/admin/albums/new"
             className="text-blue-500 hover:text-blue-700 underline"
           >
-            Створити перший альбом
+            Create the first album
           </Link>
         </div>
       ) : (
@@ -93,7 +91,7 @@ export default async function AlbumsPage({
                       <div className="w-16 h-16 mr-4 rounded overflow-hidden">
                         <img
                           src={album.coverImageUrl}
-                          alt={`Обкладинка ${album.name}`}
+                          alt={`Cover ${album.name}`}
                           className="w-full h-full object-cover"
                         />
                       </div>
@@ -108,19 +106,19 @@ export default async function AlbumsPage({
                       href={`/admin/photos?albumId=${album.id}`}
                       className="text-green-500 hover:text-green-700"
                     >
-                      Фотографії
+                      Photos
                     </Link>
                     <Link
                       href={`/admin/albums/${album.id}/edit`}
                       className="text-blue-500 hover:text-blue-700"
                     >
-                      Редагувати
+                      Edit
                     </Link>
                     <button
                       className="text-red-500 hover:text-red-700"
                       data-id={album.id}
                     >
-                      Видалити
+                      Delete
                     </button>
                   </div>
                 </div>

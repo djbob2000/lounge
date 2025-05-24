@@ -35,7 +35,7 @@ const HomeSlider = ({ photos }: HomeSliderProps) => {
   if (safePhotos.length === 0) {
     return (
       <div className="w-full h-[60vh] flex items-center justify-center bg-muted">
-        <p className="text-muted-foreground">Завантаження фотографій...</p>
+        <p className="text-muted-foreground">Loading photos...</p>
       </div>
     );
   }
@@ -46,7 +46,7 @@ const HomeSlider = ({ photos }: HomeSliderProps) => {
   if (!currentPhoto) {
     return (
       <div className="w-full h-[60vh] flex items-center justify-center bg-muted">
-        <p className="text-muted-foreground">Помилка завантаження фотографій</p>
+        <p className="text-muted-foreground">Error loading photos</p>
       </div>
     );
   }
