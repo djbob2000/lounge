@@ -4,12 +4,12 @@ import {
   Injectable,
   SetMetadata,
   CustomDecorator,
+  UnauthorizedException,
+  Logger,
+  createParamDecorator,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Request as ExpressRequest } from 'express';
-import { Observable } from 'rxjs';
-
-import { AuthService } from './auth.service';
 
 /**
  * Metadata to indicate public routes
@@ -19,19 +19,26 @@ export const Public = (): CustomDecorator<string> =>
   SetMetadata(IS_PUBLIC_KEY, true);
 
 /**
+ * Decorator to get current user from request
+ */
+export const CurrentUser = createParamDecorator(
+  (data: unknown, ctx: ExecutionContext) => {
+    const request = ctx.switchToHttp().getRequest<ExpressRequest>();
+    return (request as any).auth;
+  },
+);
+
+/**
  * Guard for checking authentication via Clerk
  */
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(
-    private readonly reflector: Reflector,
-    private readonly authService: AuthService,
-  ) {}
+  private readonly logger = new Logger(AuthGuard.name);
 
-  canActivate(
-    context: ExecutionContext,
-  ): boolean | Promise<boolean> | Observable<boolean> {
-    // Check if the route is public
+  constructor(private readonly reflector: Reflector) {}
+
+  canActivate(context: ExecutionContext): boolean {
+    // Check if the route is marked as public
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
       context.getClass(),
@@ -42,24 +49,22 @@ export class AuthGuard implements CanActivate {
     }
 
     const request = context.switchToHttp().getRequest<ExpressRequest>();
-    const token = this.extractTokenFromHeader(request);
 
-    // Validate token and get user information
-    return this.authService
-      .validateToken(token)
-      .then((user) => {
-        // Add user to the request for further use
-        request['user'] = user;
-        return true;
-      })
-      .catch(() => false);
-  }
+    // Development mode fallback
+    if (!process.env.CLERK_SECRET_KEY) {
+      this.logger.warn(
+        'CLERK_SECRET_KEY is missing. All routes are accessible without authentication in development mode!',
+      );
+      return true;
+    }
 
-  /**
-   * Get token from Authorization header
-   */
-  private extractTokenFromHeader(request: ExpressRequest): string {
-    const [type, token] = request.headers.authorization?.split(' ') ?? [];
-    return type === 'Bearer' ? token : '';
+    // Check if Clerk middleware set auth information
+    if ((request as any).auth?.userId) {
+      return true;
+    }
+
+    throw new UnauthorizedException(
+      'Authentication required. Please provide valid credentials.',
+    );
   }
 }

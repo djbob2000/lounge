@@ -1,78 +1,67 @@
-import Clerk from '@clerk/clerk-sdk-node';
-import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { createClerkClient, type User } from '@clerk/backend';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
-// Define an interface for the authenticated user object
-interface AuthUser {
+// Interface for the user object we'll return
+export interface AuthenticatedUser {
   userId: string;
   email: string | undefined;
   firstName: string | null | undefined;
   lastName: string | null | undefined;
-  role: unknown; // Clerk's privateMetadata can be anything, so use unknown
+  privateMetadata: Record<string, unknown>;
+  // Add other relevant fields from Clerk User object if needed
 }
 
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
-  private clerkClient;
+  private backendClerkClient: ReturnType<typeof createClerkClient>;
 
-  constructor(private readonly configService: ConfigService) {
-    const secretKey = this.configService.get<string>('CLERK_SECRET_KEY');
+  constructor(configService: ConfigService) {
+    const secretKey = configService.get<string>('CLERK_SECRET_KEY');
     if (!secretKey) {
-      this.logger.error(
-        'Clerk secret key is not set. Ensure CLERK_SECRET_KEY env var is available or SDK is initialized correctly.',
-      );
-      // Potentially throw, or rely on Clerk to throw if not configured
+      const errorMsg =
+        'CLERK_SECRET_KEY is not set. Cannot initialize Clerk backend client.';
+      this.logger.error(errorMsg);
+      throw new Error(errorMsg);
     }
-    // Attempt to get instance. Clerk SDK should pick up CLERK_SECRET_KEY from environment.
-    // If Clerk itself is the instance or namespace with static methods, adjust accordingly.
-    this.clerkClient = Clerk.getInstance(); // Assuming getInstance is on the main export
+    this.backendClerkClient = createClerkClient({ secretKey });
   }
 
   /**
-   * Validate token and get user information
+   * Get full user information by userId.
+   * Assumes userId is already validated (e.g., from req.auth.userId via clerkMiddleware).
    */
-  async validateToken(token: string): Promise<AuthUser> {
+  async getUserByUserId(userId: string): Promise<AuthenticatedUser> {
     try {
-      if (!token || token === 'undefined' || token === 'null') {
-        throw new UnauthorizedException('Token not provided');
+      if (!userId) {
+        throw new Error('User ID not provided to getUserByUserId');
       }
+      const user: User = await this.backendClerkClient.users.getUser(userId);
 
-      const jwtKey = this.configService.get<string>('CLERK_JWT_KEY');
-      if (!jwtKey) {
-        this.logger.error('CLERK_JWT_KEY is not configured.');
-        throw new UnauthorizedException('Server configuration error.');
-      }
-
-      // Check Clerk session token
-      const sessionClaims = await this.clerkClient.verifyToken(token, {
-        jwtKey: jwtKey,
-      });
-
-      if (!sessionClaims || !sessionClaims.sub) {
-        throw new UnauthorizedException('Invalid token');
-      }
-
-      // Get user information
-      const user = await this.clerkClient.users.getUser(sessionClaims.sub);
-
-      // Check if the user has administrator rights
-      const isAdmin = user.privateMetadata.role === 'admin';
-
-      if (!isAdmin) {
-        throw new UnauthorizedException('User is not an admin');
+      if (!user) {
+        throw new NotFoundException(`User with ID ${userId} not found`);
       }
 
       return {
         userId: user.id,
-        email: user.emailAddresses[0]?.emailAddress,
+        email: user.emailAddresses.find(
+          (e) => e.id === user.primaryEmailAddressId,
+        )?.emailAddress,
         firstName: user.firstName,
         lastName: user.lastName,
-        role: user.privateMetadata.role,
+        privateMetadata: user.privateMetadata as Record<string, unknown>, // Cast if necessary, ensure type safety
       };
     } catch (error) {
-      this.logger.error(`Token validation error: ${error.message}`);
-      throw new UnauthorizedException('Invalid or expired token');
+      this.logger.error(
+        `Error fetching user ${userId}: ${error.message}`,
+        error.stack,
+      );
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      // Consider throwing a more generic error or re-throwing based on specific needs
+      throw new Error(`Failed to fetch user data for user ID ${userId}`);
     }
   }
 }

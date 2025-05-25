@@ -12,17 +12,13 @@ import PhotoViewer from "../../../components/PhotoViewer";
 // import { 相册T } from "@/../api/src/albums/types";
 
 interface PageProps {
-  params: {
+  params: Promise<{
     categorySlug: string;
     albumSlug: string;
-  };
+  }>;
 }
 
-export default async function Page({ params }: PageProps) {
-  // const { categorySlug, albumSlug } = params;
-
-  // console.log('Page params', params);
-
+export default function Page({ params }: PageProps) {
   const [category, setCategory] = useState<Category | null>(null);
   const [album, setAlbum] = useState<Album | null>(null);
   const [photos, setPhotos] = useState<Photo[]>([]);
@@ -30,13 +26,27 @@ export default async function Page({ params }: PageProps) {
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(
     null
   );
+  const [resolvedParams, setResolvedParams] = useState<{
+    categorySlug: string;
+    albumSlug: string;
+  } | null>(null);
 
   useEffect(() => {
+    async function resolveParams() {
+      const resolved = await params;
+      setResolvedParams(resolved);
+    }
+    resolveParams();
+  }, [params]);
+
+  useEffect(() => {
+    if (!resolvedParams) return;
+
     async function fetchData() {
       try {
         // Fetch category
         const categoryResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/categories/${params.categorySlug}`
+          `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/categories/${resolvedParams!.categorySlug}`
         );
 
         if (!categoryResponse.ok) {
@@ -48,7 +58,7 @@ export default async function Page({ params }: PageProps) {
 
         // Fetch album
         const albumResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/albums/${params.albumSlug}`
+          `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/albums/${resolvedParams!.albumSlug}`
         );
 
         if (!albumResponse.ok) {
@@ -76,7 +86,7 @@ export default async function Page({ params }: PageProps) {
     }
 
     fetchData();
-  }, [params.albumSlug, params.categorySlug]);
+  }, [resolvedParams]);
 
   if (isLoading) {
     return (

@@ -2,6 +2,7 @@ import { UserButton } from "@clerk/nextjs";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth, currentUser } from "@clerk/nextjs/server";
+import { UserRole } from "@lounge/types";
 
 export default async function AdminLayout({
   children,
@@ -17,7 +18,9 @@ export default async function AdminLayout({
   }
 
   // Role check (additional protection, main check in middleware)
-  if (user.privateMetadata.role !== "admin") {
+  const userRole = user.privateMetadata.role;
+
+  if (userRole !== UserRole.ADMIN) {
     return redirect("/");
   }
 
