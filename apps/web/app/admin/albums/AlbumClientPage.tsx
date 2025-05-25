@@ -8,11 +8,13 @@ import AlbumListItem from "../../../components/admin/AlbumListItem"; // Assuming
 interface AlbumClientPageProps {
   initialAlbums: Album[];
   categorySlug?: string; // Optional, if needed for links or other logic
+  categoryId?: string; // Add categoryId prop
 }
 
 export default function AlbumClientPage({
   initialAlbums,
   categorySlug,
+  categoryId,
 }: AlbumClientPageProps) {
   const albums = initialAlbums;
 
@@ -23,8 +25,8 @@ export default function AlbumClientPage({
           <p className="text-gray-500 mb-4">Альбоми відсутні</p>
           <Link
             href={
-              categorySlug
-                ? `/admin/categories/${categorySlug}/albums/new`
+              categoryId
+                ? `/admin/albums/new?categoryId=${categoryId}`
                 : "/admin/albums/new"
             }
             className="text-blue-500 hover:text-blue-700 underline"

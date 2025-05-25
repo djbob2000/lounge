@@ -100,6 +100,7 @@ export default async function AlbumsPage() {
               <AlbumClientPage
                 initialAlbums={category.albums}
                 categorySlug={category.slug}
+                categoryId={category.id}
               />
             </div>
           ))}

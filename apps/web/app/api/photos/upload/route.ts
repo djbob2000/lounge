@@ -15,14 +15,43 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Get the form data from the request
     const formData = await request.formData();
+
+    // Log formData entries for debugging
+    console.log("FormData entries:");
+    for (const [key, value] of formData.entries()) {
+      console.log(
+        `${key}: ${value instanceof File ? `File: ${value.name}` : value}`
+      );
+    }
+
+    // Ensure the file field is named correctly
+    const file = formData.get("file");
+    if (!file || !(file instanceof File)) {
+      return NextResponse.json(
+        { error: "No file provided or invalid file" },
+        { status: 400 }
+      );
+    }
+
+    // Create a new FormData to ensure correct field names
+    const apiFormData = new FormData();
+    apiFormData.append("file", file);
+
+    // Add all other form fields
+    for (const [key, value] of formData.entries()) {
+      if (key !== "file") {
+        apiFormData.append(key, value);
+      }
+    }
 
     const response = await fetch(`${API_BASE_URL}/photos/upload`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
       },
-      body: formData,
+      body: apiFormData,
     });
 
     if (!response.ok) {
