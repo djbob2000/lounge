@@ -1,5 +1,6 @@
 import { CreateCategoryRequest } from '@lounge/types';
 import {
+  IsBoolean,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -30,4 +31,8 @@ export class CreateCategoryDto implements CreateCategoryRequest {
 
   @IsOptional()
   displayOrder?: number;
+
+  @IsOptional()
+  @IsBoolean({ message: 'showInMenu повинен бути булевим значенням' })
+  showInMenu?: boolean;
 }

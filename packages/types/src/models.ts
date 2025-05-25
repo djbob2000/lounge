@@ -10,6 +10,7 @@ export interface Category {
   name: string;
   slug: string;
   displayOrder: number;
+  showInMenu: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -39,6 +40,7 @@ export interface Photo {
   filename: string;
   originalUrl: string;
   thumbnailUrl: string;
+  description?: string;
   displayOrder: number;
   isSliderImage: boolean;
   width: number;

@@ -11,7 +11,13 @@ async function bootstrap(): Promise<void> {
   app.enableCors();
 
   // Додаємо Clerk middleware для автентифікації
-  app.use(clerkMiddleware());
+  app.use(
+    clerkMiddleware({
+      publishableKey: process.env.CLERK_PUBLISHABLE_KEY,
+      secretKey: process.env.CLERK_SECRET_KEY,
+    }),
+  );
+
   logger.log('Clerk middleware активовано');
 
   const port = process.env.PORT ?? 3001;

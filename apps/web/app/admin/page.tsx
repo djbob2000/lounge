@@ -4,7 +4,8 @@ import Link from "next/link";
 // Function to fetch stats from the API
 async function getStats() {
   try {
-    const response = await fetch(`/api/stats`, {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+    const response = await fetch(`${apiUrl}/stats`, {
       cache: "no-store",
     });
 

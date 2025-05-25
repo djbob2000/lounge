@@ -4,9 +4,9 @@ import Image from "next/image";
 import { Category, Album } from "@lounge/types";
 
 interface CategoryPageParams {
-  params: {
+  params: Promise<{
     categorySlug: string;
-  };
+  }>;
 }
 
 async function getCategory(slug: string): Promise<Category | null> {
@@ -48,7 +48,8 @@ async function getCategoryAlbums(categoryId: string): Promise<Album[]> {
 }
 
 export default async function CategoryPage({ params }: CategoryPageParams) {
-  const category = await getCategory(params.categorySlug);
+  const { categorySlug } = await params;
+  const category = await getCategory(categorySlug);
 
   if (!category) {
     notFound();

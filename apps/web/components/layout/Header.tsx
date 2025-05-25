@@ -67,31 +67,37 @@ export const Header = ({ initialCategories = [] }: HeaderProps) => {
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex space-x-6">
-          {categories.map((category) => (
-            <Link
-              key={category.id}
-              href={`/${category.slug}`}
-              className={`text-base ${pathname === `/${category.slug}` ? "font-semibold" : "font-normal"} hover:text-primary transition-colors`}
-            >
-              {category.name}
-            </Link>
-          ))}
+          {categories
+            .filter((category) => category.showInMenu)
+            .sort((a, b) => a.displayOrder - b.displayOrder)
+            .map((category) => (
+              <Link
+                key={category.id}
+                href={`/${category.slug}`}
+                className={`text-base ${pathname === `/${category.slug}` ? "font-semibold" : "font-normal"} hover:text-primary transition-colors`}
+              >
+                {category.name}
+              </Link>
+            ))}
         </nav>
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
           <div className="md:hidden absolute top-16 left-0 right-0 bg-background border-b py-4 px-6">
             <nav className="flex flex-col space-y-4">
-              {categories.map((category) => (
-                <Link
-                  key={category.id}
-                  href={`/${category.slug}`}
-                  className={`text-base ${pathname === `/${category.slug}` ? "font-semibold" : "font-normal"} hover:text-primary transition-colors`}
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  {category.name}
-                </Link>
-              ))}
+              {categories
+                .filter((category) => category.showInMenu)
+                .sort((a, b) => a.displayOrder - b.displayOrder)
+                .map((category) => (
+                  <Link
+                    key={category.id}
+                    href={`/${category.slug}`}
+                    className={`text-base ${pathname === `/${category.slug}` ? "font-semibold" : "font-normal"} hover:text-primary transition-colors`}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    {category.name}
+                  </Link>
+                ))}
             </nav>
           </div>
         )}

@@ -5,6 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import slugify from 'slugify';
+import { Prisma } from '@prisma/client';
 
 import {
   CreateCategoryDto,
@@ -38,6 +39,7 @@ export class CategoriesService {
         name: createCategoryDto.name,
         slug,
         displayOrder,
+        showInMenu: createCategoryDto.showInMenu ?? false,
       },
     });
   }
@@ -128,19 +130,47 @@ export class CategoriesService {
   async updateOrder(
     updateCategoriesOrderDto: UpdateCategoriesOrderDto,
   ): Promise<Category[]> {
-    // Array of update operations
-    const updateOperations = updateCategoriesOrderDto.categories.map((item) => {
-      return this.prisma.category.update({
-        where: { id: item.id },
-        data: { displayOrder: item.displayOrder },
-      });
-    });
+    try {
+      // Validate that all categories exist before attempting to update
+      for (const item of updateCategoriesOrderDto.categories) {
+        const exists = await this.prisma.category.findUnique({
+          where: { id: item.id },
+          select: { id: true },
+        });
 
-    // Execute all update operations in a transaction
-    await this.prisma.$transaction(updateOperations);
+        if (!exists) {
+          throw new NotFoundException(`Category with ID ${item.id} not found`);
+        }
+      }
 
-    // Return the updated list of categories
-    return this.findAll();
+      const updateOperations = updateCategoriesOrderDto.categories.map((item) =>
+        this.prisma.category.update({
+          where: { id: item.id },
+          data: { displayOrder: item.displayOrder },
+        }),
+      );
+
+      await this.prisma.$transaction(updateOperations);
+      return this.findAll();
+    } catch (error) {
+      console.error('Error during category order update transaction:', error);
+
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2025' // Record to update not found
+      ) {
+        throw new NotFoundException(
+          'One or more categories to update were not found.',
+        );
+      }
+
+      // Re-throw other errors with more context
+      throw new Error(`Failed to update category order: ${error.message}`);
+    }
   }
 
   // Helper methods

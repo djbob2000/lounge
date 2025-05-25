@@ -11,12 +11,14 @@ export interface CreateCategoryRequest {
   name: string;
   slug?: string; // If not specified, generated on the server
   displayOrder?: number; // If not specified, set on the server
+  showInMenu?: boolean; // Default is false
 }
 
 export interface UpdateCategoryRequest {
   name?: string;
   slug?: string;
   displayOrder?: number;
+  showInMenu?: boolean;
 }
 
 export interface UpdateCategoriesOrderRequest {
@@ -67,6 +69,7 @@ export interface UploadPhotoRequest {
 export interface UpdatePhotoRequest {
   displayOrder?: number;
   isSliderImage?: boolean;
+  description?: string;
 }
 
 export interface UpdatePhotosOrderRequest {

@@ -11,8 +11,6 @@ import { AlbumsService } from '../albums/albums.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { StorageService } from '../storage/storage.service';
 
-
-
 @Injectable()
 export class PhotosService {
   constructor(
@@ -125,6 +123,7 @@ export class PhotosService {
       data: {
         displayOrder: updatePhotoDto.displayOrder,
         isSliderImage: updatePhotoDto.isSliderImage,
+        description: updatePhotoDto.description,
       },
     });
 

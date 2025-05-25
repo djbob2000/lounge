@@ -62,6 +62,16 @@ export class CategoriesController {
   }
 
   /**
+   * Оновлення порядку відображення категорій
+   */
+  @Patch('order/update')
+  updateOrder(
+    @Body() updateCategoriesOrderDto: UpdateCategoriesOrderDto,
+  ): Promise<Category[]> {
+    return this.categoriesService.updateOrder(updateCategoriesOrderDto);
+  }
+
+  /**
    * Оновлення категорії
    */
   @Patch(':id')
@@ -79,15 +89,5 @@ export class CategoriesController {
   @HttpCode(HttpStatus.NO_CONTENT)
   remove(@Param('id') id: string): Promise<Category> {
     return this.categoriesService.remove(id);
-  }
-
-  /**
-   * Оновлення порядку відображення категорій
-   */
-  @Patch('order/update')
-  updateOrder(
-    @Body() updateCategoriesOrderDto: UpdateCategoriesOrderDto,
-  ): Promise<Category[]> {
-    return this.categoriesService.updateOrder(updateCategoriesOrderDto);
   }
 }
