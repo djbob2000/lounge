@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from 'react';
+import { useAuth } from "@clerk/nextjs";
 // Assuming UploadPhotoRequest might be useful for type hints if not directly for FormData
 // import { UploadPhotoDto } from '@lounge/types';
 
@@ -10,6 +11,7 @@ interface PhotoUploadFormProps {
 }
 
 export default function PhotoUploadForm({ albumId, onUploadComplete }: PhotoUploadFormProps) {
+  const { getToken } = useAuth();
   const [files, setFiles] = useState<FileList | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<string[]>([]); // To show individual file status
@@ -35,6 +37,13 @@ export default function PhotoUploadForm({ albumId, onUploadComplete }: PhotoUplo
     let successfulUploads = 0;
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'; // Ensure /api if needed
 
+    const token = await getToken();
+    if (!token) {
+      setOverallMessage("Authentication token not found. Please try logging in again.");
+      setIsUploading(false);
+      return;
+    }
+
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       newProgress.push(`Uploading ${file.name}...`);
@@ -50,8 +59,10 @@ export default function PhotoUploadForm({ albumId, onUploadComplete }: PhotoUplo
       try {
         const response = await fetch(`${apiUrl}/photos/upload`, { // Ensure this matches your API endpoint
           method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
           body: formData,
-          // Headers are not typically needed for FormData with fetch, browser sets them.
         });
 
         if (response.ok) {
