@@ -13,12 +13,12 @@ async function getCategories(): Promise<Category[]> {
     );
 
     if (!response.ok) {
-      throw new Error("Помилка отримання категорій");
+      throw new Error("Error fetching categories");
     }
 
     return response.json();
   } catch (error) {
-    console.error("Помилка отримання категорій:", error);
+    console.error("Error fetching categories:", error);
     return [];
   }
 }
@@ -34,12 +34,12 @@ async function getAlbumsByCategory(categoryId: string): Promise<Album[]> {
     );
 
     if (!response.ok) {
-      throw new Error("Помилка отримання альбомів");
+      throw new Error("Error fetching albums");
     }
 
     return response.json();
   } catch (error) {
-    console.error("Помилка отримання альбомів:", error);
+    console.error("Error fetching albums:", error);
     return [];
   }
 }
@@ -58,23 +58,23 @@ export default async function AlbumsPage() {
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Альбоми</h1>
+        <h1 className="text-2xl font-bold">Albums</h1>
         <Link
           href="/admin/albums/new"
           className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors"
         >
-          Додати альбом
+          Add Album
         </Link>
       </div>
 
       {categories.length === 0 ? (
         <div className="bg-white rounded-lg shadow p-6 text-center">
-          <p className="text-gray-500 mb-4">Спочатку створіть категорії</p>
+          <p className="text-gray-500 mb-4">Create categories first</p>
           <Link
             href="/admin/categories/new"
             className="text-blue-500 hover:text-blue-700 underline"
           >
-            Створити категорію
+            Create Category
           </Link>
         </div>
       ) : (
@@ -93,7 +93,7 @@ export default async function AlbumsPage() {
                     href={`/admin/albums/new?categoryId=${category.id}`}
                     className="text-sm bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded transition-colors"
                   >
-                    Додати альбом
+                    Add Album
                   </Link>
                 </div>
               </div>
