@@ -39,11 +39,11 @@ async function getAlbumPhotos(albumId: string): Promise<Photo[]> {
 }
 
 interface AlbumDetailPageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
-export default async function AlbumDetailPage({ params }: AlbumDetailPageProps) {
-  const albumId = params.id;
+export default async function AlbumDetailPage({ params: paramsPromise }: AlbumDetailPageProps) {
+  const { id: albumId } = await paramsPromise;
 
   // Fetch in parallel
   const [album, photos] = await Promise.all([
