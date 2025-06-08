@@ -22,7 +22,7 @@ export default function AlbumClientPage({
     <>
       {albums.length === 0 ? (
         <div className="bg-white rounded-lg shadow p-6 text-center">
-          <p className="text-gray-500 mb-4">Альбоми відсутні</p>
+          <p className="text-gray-500 mb-4">No albums found</p>
           <Link
             href={
               categoryId
@@ -31,7 +31,7 @@ export default function AlbumClientPage({
             }
             className="text-blue-500 hover:text-blue-700 underline"
           >
-            Створити перший альбом
+            Create your first album
           </Link>
         </div>
       ) : (
