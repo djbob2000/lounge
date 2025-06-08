@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { useAuth } from "@clerk/nextjs"; // Import useAuth
 import PhotoUploadForm from './PhotoUploadForm';
 import PhotoGrid from "./PhotoGrid"; // Ensure this path is correct
 import { Photo } from "@lounge/types";
@@ -13,6 +14,7 @@ interface AlbumActionsProps {
 
 export default function AlbumActions({ albumId, initialPhotos }: AlbumActionsProps) {
   const router = useRouter();
+  const { getToken } = useAuth(); // Get getToken function
   const [selectedPhotoIds, setSelectedPhotoIds] = useState<string[]>([]);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteMessage, setDeleteMessage] = useState('');
@@ -36,26 +38,40 @@ export default function AlbumActions({ albumId, initialPhotos }: AlbumActionsPro
 
   const handleDeleteSelectedPhotos = async () => {
     if (selectedPhotoIds.length === 0) {
-      setDeleteMessage("Будь ласка, виберіть фотографії для видалення.");
+      setDeleteMessage("Please select photos to delete.");
       return;
     }
-    if (!confirm(`Ви впевнені, що хочете видалити ${selectedPhotoIds.length} фотографію(й)? Цю дію неможливо буде скасувати.`)) {
+    if (!confirm(`Are you sure you want to delete ${selectedPhotoIds.length} photo(s)? This action cannot be undone.`)) {
       return;
     }
 
     setIsDeleting(true);
-    setDeleteMessage(`Видалення ${selectedPhotoIds.length} фото...`);
+    setDeleteMessage(`Deleting ${selectedPhotoIds.length} photo(s)...`);
     let successfulDeletes = 0;
     const failedDeletes: string[] = [];
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'; // Ensure /api if needed
 
+    const token = await getToken();
+    if (!token) {
+      setDeleteMessage("Authentication token not found. Please try logging in again.");
+      setIsDeleting(false);
+      console.error("AlbumActions: Halting delete due to missing token.");
+      return;
+    }
+
     for (const photoId of selectedPhotoIds) {
       try {
-        const response = await fetch(`${apiUrl}/photos/${photoId}`, { method: 'DELETE' });
+        const response = await fetch(`${apiUrl}/photos/${photoId}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          }
+        });
         if (response.ok) {
           successfulDeletes++;
         } else {
-          const errorData = await response.json().catch(() => ({ message: "Не вдалося отримати деталі помилки" }));
+          const errorData = await response.json().catch(() => ({ message: "Failed to get error details" }));
           console.error(`Failed to delete photo ${photoId}: ${errorData.message}`);
           failedDeletes.push(photoId);
         }
@@ -66,9 +82,9 @@ export default function AlbumActions({ albumId, initialPhotos }: AlbumActionsPro
     }
 
     setIsDeleting(false);
-    let message = `Видалення завершено. Успішно видалено: ${successfulDeletes}/${selectedPhotoIds.length}.`;
+    let message = `Deletion complete. Successfully deleted: ${successfulDeletes}/${selectedPhotoIds.length}.`;
     if (failedDeletes.length > 0) {
-      message += ` Не вдалося видалити: ${failedDeletes.length} фото.`;
+      message += ` Failed to delete: ${failedDeletes.length} photo(s).`;
     }
     setDeleteMessage(message);
 
@@ -88,21 +104,21 @@ export default function AlbumActions({ albumId, initialPhotos }: AlbumActionsPro
       <PhotoUploadForm albumId={albumId} onUploadComplete={handleUploadComplete} />
 
       <div>
-        <h3 className="text-xl font-semibold mb-3 text-gray-700">Фотографії в Альбомі</h3>
+        <h3 className="text-xl font-semibold mb-3 text-gray-700">Photos in Album</h3>
         {initialPhotos.length === 0 ? (
-            <p className="text-gray-600">Фотографій в цьому альбомі ще немає. Завантажте перші!</p>
+            <p className="text-gray-600">No photos in this album yet. Upload the first ones!</p>
         ) : (
           <>
             <PhotoGrid photos={initialPhotos} onSelectionChange={handlePhotoSelectionChange} />
             {selectedPhotoIds.length > 0 && (
               <div className="mt-6 p-4 border-t border-gray-200">
-                 <h4 className="text-md font-semibold mb-2 text-gray-700">Керування вибраними фото:</h4>
+                 <h4 className="text-md font-semibold mb-2 text-gray-700">Manage selected photos:</h4>
                 <button
                   onClick={handleDeleteSelectedPhotos}
                   disabled={isDeleting || selectedPhotoIds.length === 0}
                   className="px-5 py-2.5 bg-red-600 text-white font-medium text-sm rounded-lg hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-150 ease-in-out"
                 >
-                  {isDeleting ? `Видалення... (${selectedPhotoIds.length})` : `Видалити вибрані (${selectedPhotoIds.length})`}
+                  {isDeleting ? `Deleting... (${selectedPhotoIds.length})` : `Delete Selected (${selectedPhotoIds.length})`}
                 </button>
                 {deleteMessage && <p className="mt-2.5 text-sm text-gray-600">{deleteMessage}</p>}
               </div>
@@ -110,7 +126,7 @@ export default function AlbumActions({ albumId, initialPhotos }: AlbumActionsPro
           </>
         )}
          {initialPhotos.length > 0 && selectedPhotoIds.length === 0 && (
-            <p className="mt-4 text-sm text-gray-500">Клікніть на фотографії, щоб вибрати їх для масового видалення.</p>
+            <p className="mt-4 text-sm text-gray-500">Click on photos to select them for bulk deletion.</p>
         )}
       </div>
     </div>
