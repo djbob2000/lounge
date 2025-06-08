@@ -196,32 +196,85 @@ export class StorageService {
     fileName: string,
     contentType: string,
   ): Promise<string> {
-    try {
-      // If client is not initialized, re-initialize
-      if (!this.b2Client) {
-        await this.initializeB2();
+    const MAX_RETRIES = 3;
+    const RETRY_DELAY_MS = 1000;
+    let lastError: any = null;
+
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+      try {
+        if (!this.b2Client) {
+          this.logger.log(
+            `B2 client not initialized (attempt ${attempt} for ${fileName}), re-initializing...`,
+          );
+          await this.initializeB2();
+          if (!this.b2Client) {
+            // Check again after attempt to initialize
+            throw new InternalServerErrorException(
+              'B2 client could not be initialized for upload',
+            );
+          }
+        }
+
+        this.logger.log(
+          `Attempt ${attempt}/${MAX_RETRIES} to upload ${fileName}`,
+        );
+
+        const { data: authData } = await this.b2Client.getUploadUrl({
+          bucketId: this.bucketId,
+        });
+
+        await this.b2Client.uploadFile({
+          uploadUrl: authData.uploadUrl,
+          uploadAuthToken: authData.authorizationToken,
+          fileName,
+          contentType,
+          data: buffer,
+        });
+
+        this.logger.log(
+          `Successfully uploaded ${fileName} on attempt ${attempt}`,
+        );
+        return this.getFileUrl(fileName); // Success
+      } catch (error) {
+        lastError = error;
+        this.logger.warn(
+          `Attempt ${attempt}/${MAX_RETRIES} failed for ${fileName}: ${error.message}`,
+        );
+
+        // Check if it's an Axios error from backblaze-b2 and if it's a retryable status
+        // B2 library uses axios, so error.response.status should be available for HTTP errors
+        const statusCode = error.response?.status || error.status;
+        const retryableStatuses = [500, 502, 503, 504]; // Common transient server errors
+
+        if (retryableStatuses.includes(statusCode) && attempt < MAX_RETRIES) {
+          const delay = RETRY_DELAY_MS * attempt; // Exponential backoff
+          this.logger.log(
+            `Retryable error (status ${statusCode}). Retrying in ${delay / 1000}s...`,
+          );
+          await new Promise((resolve) => setTimeout(resolve, delay));
+          // continue; // Loop will continue to the next iteration
+        } else {
+          this.logger.error(
+            `Upload to B2 failed for ${fileName} after ${attempt} attempts. Last error: ${error.message}`,
+            error.stack,
+          );
+          throw new InternalServerErrorException(
+            `Failed to upload to B2 after ${attempt} attempts: ${error.message}`,
+          );
+        }
       }
-
-      // Get upload URL
-      const { data: authData } = await this.b2Client.getUploadUrl({
-        bucketId: this.bucketId,
-      });
-
-      // Upload file
-      await this.b2Client.uploadFile({
-        uploadUrl: authData.uploadUrl,
-        uploadAuthToken: authData.authorizationToken,
-        fileName,
-        contentType,
-        data: buffer,
-      });
-
-      // Return file URL
-      return this.getFileUrl(fileName);
-    } catch (error) {
-      this.logger.error(`Upload to B2 error: ${error.message}`);
-      throw new InternalServerErrorException('Failed to upload to B2');
     }
+
+    // This part should ideally not be reached if MAX_RETRIES > 0,
+    // as the loop's else block should throw.
+    // However, it's a fallback for an exhaustive failure.
+    this.logger.error(
+      `Upload to B2 failed definitively for ${fileName}. Last error: ${lastError?.message}`,
+      lastError?.stack,
+    );
+    throw new InternalServerErrorException(
+      `Failed to upload to B2 definitively: ${lastError?.message}`,
+    );
   }
 
   /**
