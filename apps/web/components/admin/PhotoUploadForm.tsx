@@ -12,7 +12,7 @@ interface PhotoUploadFormProps {
 
 export default function PhotoUploadForm({ albumId, onUploadComplete }: PhotoUploadFormProps) {
   const { getToken } = useAuth();
-  const [fileItems, setFileItems] = useState<{ file: File; previewUrl: string }[]>([]);
+  const [fileItems, setFileItems] = useState<{ id: string; file: File; previewUrl: string }[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<string[]>([]);
   const [overallMessage, setOverallMessage] = useState('');
@@ -29,6 +29,7 @@ export default function PhotoUploadForm({ albumId, onUploadComplete }: PhotoUplo
       const newFileItems = Array.from(selectedFiles)
         .filter(file => file.type.startsWith('image/'))
         .map(file => ({
+          id: self.crypto.randomUUID(), // Generate unique ID
           file: file,
           previewUrl: URL.createObjectURL(file)
         }));
@@ -38,11 +39,11 @@ export default function PhotoUploadForm({ albumId, onUploadComplete }: PhotoUplo
     }
   };
 
-  const handleRemoveFile = (indexToRemove: number) => {
-    const itemToRemove = fileItems[indexToRemove];
+  const handleRemoveFile = (idToRemove: string) => {
+    const itemToRemove = fileItems.find(item => item.id === idToRemove);
     if (itemToRemove) {
       URL.revokeObjectURL(itemToRemove.previewUrl);
-      setFileItems(prevItems => prevItems.filter((_, index) => index !== indexToRemove));
+      setFileItems(prevItems => prevItems.filter(item => item.id !== idToRemove));
     }
   };
 
@@ -158,8 +159,8 @@ export default function PhotoUploadForm({ albumId, onUploadComplete }: PhotoUplo
         <div className="mt-4 mb-4 p-3 border border-gray-200 rounded-lg bg-gray-50"> {/* Added mb-4 */}
           <p className="text-sm font-medium text-gray-700 mb-2">Selected image previews:</p>
           <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3">
-            {fileItems.map((item, index) => (
-              <div key={index} className="relative group">
+            {fileItems.map((item) => (
+              <div key={item.id} className="relative group">
                 <img
                   src={item.previewUrl}
                   alt={`Preview of ${item.file.name}`}
@@ -168,11 +169,11 @@ export default function PhotoUploadForm({ albumId, onUploadComplete }: PhotoUplo
                 />
                 <button
                   type="button"
-                  onClick={() => handleRemoveFile(index)}
-                  className="absolute top-0.5 right-0.5 bg-red-500 text-white rounded-full p-0.5 leading-none text-xs opacity-75 group-hover:opacity-100 transition-opacity"
+                  onClick={() => handleRemoveFile(item.id)}
+                  className="absolute top-1 right-1 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-80 hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1"
                   aria-label="Remove image"
                 >
-                  &#x2715; {/* Close symbol (X) */}
+                  <span className="block leading-none -mt-px">&#x2715;</span> {/* Adjust vertical alignment of X if needed */}
                 </button>
               </div>
             ))}
