@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react'; // Import useEffect
 import { useAuth } from "@clerk/nextjs";
 // Assuming UploadPhotoRequest might be useful for type hints if not directly for FormData
 // import { UploadPhotoDto } from '@lounge/types';
@@ -13,15 +13,38 @@ interface PhotoUploadFormProps {
 export default function PhotoUploadForm({ albumId, onUploadComplete }: PhotoUploadFormProps) {
   const { getToken } = useAuth();
   const [files, setFiles] = useState<FileList | null>(null);
+  const [previews, setPreviews] = useState<string[]>([]); // State for preview URLs
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<string[]>([]); // To show individual file status
   const [overallMessage, setOverallMessage] = useState('');
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setFiles(event.target.files);
+    // Revoke old previews
+    previews.forEach(url => URL.revokeObjectURL(url));
+    setPreviews([]);
+
+    const selectedFiles = event.target.files;
+    setFiles(selectedFiles);
     setOverallMessage('');
     setUploadProgress([]);
+
+    if (selectedFiles && selectedFiles.length > 0) {
+      const newPreviewUrls: string[] = [];
+      Array.from(selectedFiles).forEach(file => {
+        if (file.type.startsWith('image/')) {
+          newPreviewUrls.push(URL.createObjectURL(file));
+        }
+      });
+      setPreviews(newPreviewUrls);
+    }
   };
+
+  // Effect for cleaning up preview URLs on component unmount or when previews change
+  useEffect(() => {
+    return () => {
+      previews.forEach(url => URL.revokeObjectURL(url));
+    };
+  }, [previews]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -95,6 +118,9 @@ export default function PhotoUploadForm({ albumId, onUploadComplete }: PhotoUplo
             event.target.reset(); // Resets the form, clearing the file input
         }
         setFiles(null);
+        // Clear previews as well after successful upload and form reset
+        previews.forEach(url => URL.revokeObjectURL(url)); // Revoke current previews
+        setPreviews([]); // Clear previews state
     }, 3000);
 
 
@@ -123,6 +149,25 @@ export default function PhotoUploadForm({ albumId, onUploadComplete }: PhotoUplo
       {files && files.length > 0 && !isUploading && (
         <p className="text-sm text-gray-600 mt-2 mb-3">{files.length} file(s) selected. Click "Upload" to start.</p>
       )}
+
+      {previews.length > 0 && !isUploading && (
+        <div className="mt-4 p-3 border border-gray-200 rounded-lg bg-gray-50">
+          <p className="text-sm font-medium text-gray-700 mb-2">Selected image previews:</p>
+          <div className="flex flex-wrap gap-3">
+            {previews.map((previewUrl, index) => (
+              <img
+                key={index}
+                src={previewUrl}
+                alt={`Preview ${index + 1}`}
+                className="h-24 w-24 object-cover rounded-md border border-gray-300 shadow-sm"
+                onLoad={() => { /* Optional: if you need to do something on load */ }}
+                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; /* Hide broken previews */ }}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
       <button
         type="submit"
         disabled={isUploading || !files || files.length === 0}
