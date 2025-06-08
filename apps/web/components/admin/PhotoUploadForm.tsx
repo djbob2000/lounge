@@ -38,7 +38,10 @@ export default function PhotoUploadForm({ albumId, onUploadComplete }: PhotoUplo
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'; // Ensure /api if needed
 
     const token = await getToken();
+    console.log('Clerk token fetched in PhotoUploadForm:', token ? `Token length: ${token.length}` : 'Token is null/undefined');
+
     if (!token) {
+      console.error('PhotoUploadForm: Halting upload due to missing token.');
       setOverallMessage("Authentication token not found. Please try logging in again.");
       setIsUploading(false);
       return;
@@ -57,11 +60,14 @@ export default function PhotoUploadForm({ albumId, onUploadComplete }: PhotoUplo
       // formData.append('displayOrder', String(i)); // Example: order based on selection sequence
 
       try {
+        const headers = {
+          'Authorization': `Bearer ${token}`,
+        };
+        console.log(`PhotoUploadForm: Uploading ${file.name} with headers:`, JSON.stringify(headers));
+
         const response = await fetch(`${apiUrl}/photos/upload`, { // Ensure this matches your API endpoint
           method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
+          headers: headers,
           body: formData,
         });
 

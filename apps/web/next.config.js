@@ -12,6 +12,12 @@ const nextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'f003.backblazeb2.com',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
 };
