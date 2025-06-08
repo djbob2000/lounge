@@ -12,53 +12,60 @@ interface PhotoUploadFormProps {
 
 export default function PhotoUploadForm({ albumId, onUploadComplete }: PhotoUploadFormProps) {
   const { getToken } = useAuth();
-  const [files, setFiles] = useState<FileList | null>(null);
-  const [previews, setPreviews] = useState<string[]>([]); // State for preview URLs
+  const [fileItems, setFileItems] = useState<{ file: File; previewUrl: string }[]>([]);
   const [isUploading, setIsUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState<string[]>([]); // To show individual file status
+  const [uploadProgress, setUploadProgress] = useState<string[]>([]);
   const [overallMessage, setOverallMessage] = useState('');
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    // Revoke old previews
-    previews.forEach(url => URL.revokeObjectURL(url));
-    setPreviews([]);
+    // Revoke old preview URLs
+    fileItems.forEach(item => URL.revokeObjectURL(item.previewUrl));
 
     const selectedFiles = event.target.files;
-    setFiles(selectedFiles);
     setOverallMessage('');
     setUploadProgress([]);
 
     if (selectedFiles && selectedFiles.length > 0) {
-      const newPreviewUrls: string[] = [];
-      Array.from(selectedFiles).forEach(file => {
-        if (file.type.startsWith('image/')) {
-          newPreviewUrls.push(URL.createObjectURL(file));
-        }
-      });
-      setPreviews(newPreviewUrls);
+      const newFileItems = Array.from(selectedFiles)
+        .filter(file => file.type.startsWith('image/'))
+        .map(file => ({
+          file: file,
+          previewUrl: URL.createObjectURL(file)
+        }));
+      setFileItems(newFileItems);
+    } else {
+      setFileItems([]); // Clear if no files selected or selection is cancelled
     }
   };
 
-  // Effect for cleaning up preview URLs on component unmount or when previews change
+  const handleRemoveFile = (indexToRemove: number) => {
+    const itemToRemove = fileItems[indexToRemove];
+    if (itemToRemove) {
+      URL.revokeObjectURL(itemToRemove.previewUrl);
+      setFileItems(prevItems => prevItems.filter((_, index) => index !== indexToRemove));
+    }
+  };
+
+  // Effect for cleaning up preview URLs
   useEffect(() => {
     return () => {
-      previews.forEach(url => URL.revokeObjectURL(url));
+      fileItems.forEach(item => URL.revokeObjectURL(item.previewUrl));
     };
-  }, [previews]);
+  }, [fileItems]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!files || files.length === 0) {
+    if (fileItems.length === 0) {
       setOverallMessage('Please select files to upload.');
       return;
     }
 
     setIsUploading(true);
-    setOverallMessage(`Uploading ${files.length} photo(s)...`);
+    setOverallMessage(`Uploading ${fileItems.length} photo(s)...`);
     const newProgress: string[] = [];
 
     let successfulUploads = 0;
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'; // Ensure /api if needed
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 
     const token = await getToken();
     console.log('Clerk token fetched in PhotoUploadForm:', token ? `Token length: ${token.length}` : 'Token is null/undefined');
@@ -70,8 +77,8 @@ export default function PhotoUploadForm({ albumId, onUploadComplete }: PhotoUplo
       return;
     }
 
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
+    for (let i = 0; i < fileItems.length; i++) {
+      const { file } = fileItems[i]; // Get the file from the item
       newProgress.push(`Uploading ${file.name}...`);
       setUploadProgress([...newProgress]);
 
@@ -110,19 +117,16 @@ export default function PhotoUploadForm({ albumId, onUploadComplete }: PhotoUplo
     }
 
     setIsUploading(false);
-    setOverallMessage(`Upload complete. Successful: ${successfulUploads}/${files.length}.`);
+    setOverallMessage(`Upload complete. Successful: ${successfulUploads}/${fileItems.length}.`);
 
-    // Reset file input after a short delay to allow user to see individual statuses
+    // Reset file input and fileItems state after a short delay
     setTimeout(() => {
         if (event.target instanceof HTMLFormElement) {
-            event.target.reset(); // Resets the form, clearing the file input
+            event.target.reset();
         }
-        setFiles(null);
-        // Clear previews as well after successful upload and form reset
-        previews.forEach(url => URL.revokeObjectURL(url)); // Revoke current previews
-        setPreviews([]); // Clear previews state
+        // URLs are revoked by useEffect when fileItems changes to []
+        setFileItems([]);
     }, 3000);
-
 
     if (successfulUploads > 0) {
       // Call callback after another delay to ensure messages are read
@@ -146,23 +150,31 @@ export default function PhotoUploadForm({ albumId, onUploadComplete }: PhotoUplo
           disabled={isUploading}
         />
       </div>
-      {files && files.length > 0 && !isUploading && (
-        <p className="text-sm text-gray-600 mt-2 mb-3">{files.length} file(s) selected. Click "Upload" to start.</p>
+      {fileItems.length > 0 && !isUploading && (
+        <p className="text-sm text-gray-600 mt-2 mb-3">{fileItems.length} file(s) selected. Click "Upload" to start.</p>
       )}
 
-      {previews.length > 0 && !isUploading && (
-        <div className="mt-4 p-3 border border-gray-200 rounded-lg bg-gray-50">
+      {fileItems.length > 0 && !isUploading && (
+        <div className="mt-4 mb-4 p-3 border border-gray-200 rounded-lg bg-gray-50"> {/* Added mb-4 */}
           <p className="text-sm font-medium text-gray-700 mb-2">Selected image previews:</p>
-          <div className="flex flex-wrap gap-3">
-            {previews.map((previewUrl, index) => (
-              <img
-                key={index}
-                src={previewUrl}
-                alt={`Preview ${index + 1}`}
-                className="h-24 w-24 object-cover rounded-md border border-gray-300 shadow-sm"
-                onLoad={() => { /* Optional: if you need to do something on load */ }}
-                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; /* Hide broken previews */ }}
-              />
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3">
+            {fileItems.map((item, index) => (
+              <div key={index} className="relative group">
+                <img
+                  src={item.previewUrl}
+                  alt={`Preview of ${item.file.name}`}
+                  className="h-24 w-full object-cover rounded-md border border-gray-300 shadow-sm"
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                />
+                <button
+                  type="button"
+                  onClick={() => handleRemoveFile(index)}
+                  className="absolute top-0.5 right-0.5 bg-red-500 text-white rounded-full p-0.5 leading-none text-xs opacity-75 group-hover:opacity-100 transition-opacity"
+                  aria-label="Remove image"
+                >
+                  &#x2715; {/* Close symbol (X) */}
+                </button>
+              </div>
             ))}
           </div>
         </div>
@@ -170,10 +182,10 @@ export default function PhotoUploadForm({ albumId, onUploadComplete }: PhotoUplo
 
       <button
         type="submit"
-        disabled={isUploading || !files || files.length === 0}
+        disabled={isUploading || fileItems.length === 0}
         className="w-full sm:w-auto px-6 py-2.5 bg-blue-600 text-white font-medium text-sm rounded-lg hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-150 ease-in-out"
       >
-        {isUploading ? 'Uploading...' : `Upload ${files ? files.length : ''} photo(s)`}
+        {isUploading ? 'Uploading...' : `Upload ${fileItems.length} photo(s)`}
       </button>
 
       {uploadProgress.length > 0 && (
