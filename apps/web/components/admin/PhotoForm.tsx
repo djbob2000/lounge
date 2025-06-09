@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Album, Photo } from "@lounge/types";
+import { useAuth } from "@clerk/nextjs";
 
 interface PhotoFormProps {
   photo?: Photo;
@@ -18,6 +19,7 @@ export default function PhotoForm({
   onCancel,
 }: PhotoFormProps) {
   const router = useRouter();
+  const { getToken } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(
@@ -54,8 +56,24 @@ export default function PhotoForm({
 
         const method = photo ? "PATCH" : "POST";
 
+        const token = await getToken();
+        console.log('PhotoForm: Fetched token for submission:', token ? `Token length: ${token.length}` : 'Token is null/undefined');
+
+        if (!token) {
+          console.error('PhotoForm: Authentication token not found. Halting submission.');
+          alert("Authentication token not found. Please try logging in again.");
+          setIsSubmitting(false);
+          return;
+        }
+
+        const headers: HeadersInit = {
+          'Authorization': `Bearer ${token}`,
+          // 'Content-Type' for FormData is set by the browser
+        };
+
         const response = await fetch(endpoint, {
           method,
+          headers: headers,
           body: formData,
         });
 
