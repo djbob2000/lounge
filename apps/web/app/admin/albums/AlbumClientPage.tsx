@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { Album } from "@lounge/types";
-import DraggableList from "../../../components/admin/DraggableList";
-import AlbumListItem from "../../../components/admin/AlbumListItem"; // Assuming you have or will create this
+import Link from 'next/link';
+import { Album } from '@lounge/types';
+import DraggableList from '../../../components/admin/DraggableList';
+import AlbumListItem from '../../../components/admin/AlbumListItem'; // Assuming you have or will create this
 
 interface AlbumClientPageProps {
   initialAlbums: Album[];
@@ -27,11 +27,11 @@ export default function AlbumClientPage({
             href={
               categoryId
                 ? `/admin/albums/new?categoryId=${categoryId}`
-                : "/admin/albums/new"
+                : '/admin/albums/new'
             }
             className="text-blue-500 hover:text-blue-700 underline"
           >
-            Create your first album
+            Add photos
           </Link>
         </div>
       ) : (

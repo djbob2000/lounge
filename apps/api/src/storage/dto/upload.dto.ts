@@ -1,25 +1,25 @@
 import { IsBoolean, IsNumber, IsOptional, IsUUID } from 'class-validator';
 
 /**
- * DTO для завантаження файлу
+ * DTO for file upload
  */
 export class UploadFileDto {
   /**
-   * ID альбому, до якого належить фото (необов'язково)
+   * Album ID to which the photo belongs (optional)
    */
   @IsUUID()
   @IsOptional()
   readonly albumId?: string;
 
   /**
-   * Чи відображати фото на слайдері (необов'язково)
+   * Whether to display photo in slider (optional)
    */
   @IsBoolean()
   @IsOptional()
   readonly isSliderImage?: boolean;
 
   /**
-   * Порядок відображення фото (необов'язково)
+   * Photo display order (optional)
    */
   @IsNumber()
   @IsOptional()
@@ -27,41 +27,41 @@ export class UploadFileDto {
 }
 
 /**
- * DTO з результатом завантаження файлу
+ * DTO with file upload result
  */
 export class UploadFileResponseDto {
   /**
-   * ID завантаженого файлу
+   * Uploaded file ID
    */
   id: string;
 
   /**
-   * Оригінальна назва файлу
+   * Original filename
    */
   filename: string;
 
   /**
-   * URL до оригінального зображення
+   * URL to original image
    */
   originalUrl: string;
 
   /**
-   * URL до мініатюри зображення
+   * URL to thumbnail image
    */
   thumbnailUrl: string;
 
   /**
-   * Ширина зображення
+   * Image width
    */
   width: number;
 
   /**
-   * Висота зображення
+   * Image height
    */
   height: number;
 
   /**
-   * ID альбому, до якого належить фото (якщо вказано)
+   * Album ID to which the photo belongs (if specified)
    */
   albumId?: string;
 }

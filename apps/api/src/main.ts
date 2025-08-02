@@ -8,12 +8,13 @@ async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
   const logger = new Logger('Bootstrap');
 
-  // Дозволяємо CORS для розробки
+  // Enable CORS for development
   app.enableCors();
 
   // Conditionally apply Clerk middleware
   app.use((req: Request, res: Response, next: NextFunction) => {
-    if (req.path === '/api/photos/upload') { // Adjust path if your app is not at the root
+    if (req.path === '/api/photos/upload') {
+      // Adjust path if your app is not at the root
       return next();
     }
     return clerkMiddleware({
@@ -22,10 +23,10 @@ async function bootstrap(): Promise<void> {
     })(req, res, next);
   });
 
-  logger.log('Clerk middleware активовано');
+  logger.log('Clerk middleware activated');
 
   const port = process.env.PORT ?? 3001;
   await app.listen(port);
-  logger.log(`API запущено на порту ${port}`);
+  logger.log(`API started on port ${port}`);
 }
 bootstrap();

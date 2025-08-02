@@ -1,18 +1,21 @@
-"use client";
+'use client';
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { useAuth } from "@clerk/nextjs"; // Import useAuth
+import { useAuth } from '@clerk/nextjs'; // Import useAuth
 import PhotoUploadForm from './PhotoUploadForm';
-import PhotoGrid from "./PhotoGrid"; // Ensure this path is correct
-import { Photo } from "@lounge/types";
+import PhotoGrid from './PhotoGrid'; // Ensure this path is correct
+import { Photo } from '@lounge/types';
 
 interface AlbumActionsProps {
   albumId: string;
   initialPhotos: Photo[];
 }
 
-export default function AlbumActions({ albumId, initialPhotos }: AlbumActionsProps) {
+export default function AlbumActions({
+  albumId,
+  initialPhotos,
+}: AlbumActionsProps) {
   const router = useRouter();
   const { getToken } = useAuth(); // Get getToken function
   const [selectedPhotoIds, setSelectedPhotoIds] = useState<string[]>([]);
@@ -20,7 +23,6 @@ export default function AlbumActions({ albumId, initialPhotos }: AlbumActionsPro
   const [deleteMessage, setDeleteMessage] = useState('');
   // To manage the photos list if we want to update UI immediately after delete without full refresh
   // const [currentPhotos, setCurrentPhotos] = useState<Photo[]>(initialPhotos);
-
 
   const handleUploadComplete = () => {
     setDeleteMessage(''); // Clear any previous delete messages
@@ -38,10 +40,14 @@ export default function AlbumActions({ albumId, initialPhotos }: AlbumActionsPro
 
   const handleDeleteSelectedPhotos = async () => {
     if (selectedPhotoIds.length === 0) {
-      setDeleteMessage("Please select photos to delete.");
+      setDeleteMessage('Please select photos to delete.');
       return;
     }
-    if (!confirm(`Are you sure you want to delete ${selectedPhotoIds.length} photo(s)? This action cannot be undone.`)) {
+    if (
+      !confirm(
+        `Are you sure you want to delete ${selectedPhotoIds.length} photo(s)? This action cannot be undone.`
+      )
+    ) {
       return;
     }
 
@@ -49,13 +55,15 @@ export default function AlbumActions({ albumId, initialPhotos }: AlbumActionsPro
     setDeleteMessage(`Deleting ${selectedPhotoIds.length} photo(s)...`);
     let successfulDeletes = 0;
     const failedDeletes: string[] = [];
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'; // Ensure /api if needed
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
     const token = await getToken();
     if (!token) {
-      setDeleteMessage("Authentication token not found. Please try logging in again.");
+      setDeleteMessage(
+        'Authentication token not found. Please try logging in again.'
+      );
       setIsDeleting(false);
-      console.error("AlbumActions: Halting delete due to missing token.");
+      console.error('AlbumActions: Halting delete due to missing token.');
       return;
     }
 
@@ -64,15 +72,19 @@ export default function AlbumActions({ albumId, initialPhotos }: AlbumActionsPro
         const response = await fetch(`${apiUrl}/photos/${photoId}`, {
           method: 'DELETE',
           headers: {
-            'Authorization': `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
-          }
+          },
         });
         if (response.ok) {
           successfulDeletes++;
         } else {
-          const errorData = await response.json().catch(() => ({ message: "Failed to get error details" }));
-          console.error(`Failed to delete photo ${photoId}: ${errorData.message}`);
+          const errorData = await response
+            .json()
+            .catch(() => ({ message: 'Failed to get error details' }));
+          console.error(
+            `Failed to delete photo ${photoId}: ${errorData.message}`
+          );
           failedDeletes.push(photoId);
         }
       } catch (error: any) {
@@ -95,38 +107,61 @@ export default function AlbumActions({ albumId, initialPhotos }: AlbumActionsPro
 
     if (successfulDeletes > 0) {
       // Refresh after a short delay to allow user to read the message
-      setTimeout(() => router.refresh(), failedDeletes.length > 0 ? 3000 : 1500);
+      setTimeout(
+        () => router.refresh(),
+        failedDeletes.length > 0 ? 3000 : 1500
+      );
     }
   };
 
   return (
     <div className="space-y-8 my-6">
-      <PhotoUploadForm albumId={albumId} onUploadComplete={handleUploadComplete} />
+      <PhotoUploadForm
+        albumId={albumId}
+        onUploadComplete={handleUploadComplete}
+      />
 
       <div>
-        <h3 className="text-xl font-semibold mb-3 text-gray-700">Photos in Album</h3>
+        <h3 className="text-xl font-semibold mb-3 text-gray-700">
+          Photos in Album
+        </h3>
         {initialPhotos.length === 0 ? (
-            <p className="text-gray-600">No photos in this album yet. Upload the first ones!</p>
+          <p className="text-gray-600">
+            No photos in this album yet. Upload the first ones!
+          </p>
         ) : (
           <>
-            <PhotoGrid photos={initialPhotos} onSelectionChange={handlePhotoSelectionChange} />
+            <PhotoGrid
+              photos={initialPhotos}
+              onSelectionChange={handlePhotoSelectionChange}
+            />
             {selectedPhotoIds.length > 0 && (
               <div className="mt-6 p-4 border-t border-gray-200">
-                 <h4 className="text-md font-semibold mb-2 text-gray-700">Manage selected photos:</h4>
+                <h4 className="text-md font-semibold mb-2 text-gray-700">
+                  Manage selected photos:
+                </h4>
                 <button
                   onClick={handleDeleteSelectedPhotos}
                   disabled={isDeleting || selectedPhotoIds.length === 0}
                   className="px-5 py-2.5 bg-red-600 text-white font-medium text-sm rounded-lg hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-150 ease-in-out"
                 >
-                  {isDeleting ? `Deleting... (${selectedPhotoIds.length})` : `Delete Selected (${selectedPhotoIds.length})`}
+                  {isDeleting
+                    ? `Deleting... (${selectedPhotoIds.length})`
+                    : `Delete Selected (${selectedPhotoIds.length})`}
                 </button>
-                {deleteMessage && <p className="mt-2.5 text-sm text-gray-600">{deleteMessage}</p>}
+                {deleteMessage && (
+                  <p className="mt-2.5 text-sm text-gray-600">
+                    {deleteMessage}
+                  </p>
+                )}
               </div>
             )}
           </>
         )}
-         {initialPhotos.length > 0 && selectedPhotoIds.length === 0 && (
-            <p className="mt-4 text-sm text-gray-500">Click on photos to select them for bulk deletion.</p>
+        {initialPhotos.length > 0 && selectedPhotoIds.length === 0 && (
+          <p className="mt-4 text-sm text-gray-500">
+            Click on photos to select them for bulk deletion.
+          </p>
         )}
       </div>
     </div>

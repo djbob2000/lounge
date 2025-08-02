@@ -1,28 +1,85 @@
-# Turborepo starter
+# Photo Gallery - Lounge Project
 
-This Turborepo starter is maintained by the Turborepo core team.
+Современная фотогалерея с административной панелью, построенная на Next.js, NestJS и Supabase.
 
-## Using this example
+## Технологический стек
 
-Run the following command:
+- **Frontend**: Next.js 15, React 19, TypeScript, Tailwind CSS
+- **Backend**: NestJS, TypeScript
+- **База данных**: PostgreSQL (Supabase)
+- **Хранилище файлов**: Backblaze B2
+- **Аутентификация**: Clerk
+- **ORM**: Prisma
+- **Монорепозиторий**: Turborepo
 
-```sh
-npx create-turbo@latest
+## Структура проекта
+
+### Apps и Packages
+
+- `apps/web`: Next.js приложение (фронтенд)
+- `apps/api`: NestJS API (бэкенд)
+- `packages/ui`: Общие React компоненты
+- `packages/types`: Общие TypeScript типы
+- `packages/eslint-config`: Конфигурация ESLint
+- `packages/typescript-config`: Конфигурация TypeScript
+
+## Быстрый старт
+
+### 1. Установка зависимостей
+
+```bash
+pnpm install
 ```
 
-## What's inside?
+### 2. Настройка сервисов
 
-This Turborepo includes the following packages/apps:
+Следуйте инструкциям в [SETUP.md](./SETUP.md) для настройки базы данных Supabase и хранилища Backblaze B2.
 
-### Apps and Packages
+### 3. Настройка переменных окружения
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+Скопируйте файлы `.env.example` и заполните необходимые значения:
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+```bash
+# Корневой .env
+cp .env.example .env
+
+# API .env
+cp apps/api/.env.example apps/api/.env
+
+# Web .env
+cp apps/web/.env.example apps/web/.env
+```
+
+### 4. Миграция базы данных
+
+```bash
+cd apps/api
+pnpm run prisma:generate
+pnpm run prisma:migrate
+```
+
+### 5. Запуск проекта
+
+```bash
+# Запуск всех сервисов
+pnpm dev
+
+# Или запуск по отдельности:
+# API
+cd apps/api && pnpm run start:dev
+
+# Frontend
+cd apps/web && pnpm run dev
+```
+
+## Основные возможности
+
+- 📸 **Управление фотографиями**: Загрузка, редактирование, удаление
+- 📁 **Категории и альбомы**: Организация контента
+- 🔐 **Административная панель**: Полное управление контентом
+- 🎨 **Адаптивный дизайн**: Оптимизация для всех устройств
+- ⚡ **Быстрая загрузка**: Оптимизация изображений и кэширование
+- 🔒 **Безопасность**: Аутентификация и авторизация
 
 ### Utilities
 

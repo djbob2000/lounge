@@ -1,7 +1,7 @@
-import Link from "next/link";
-import { Album } from "@lounge/types";
-import { Button } from "../../components/ui/button";
-import { PencilIcon, Trash2Icon, EyeIcon, EyeOffIcon } from "lucide-react";
+import Link from 'next/link';
+import { Album } from '@lounge/types';
+import { Button } from '@/components/ui/button';
+import { PencilIcon, Trash2Icon, EyeIcon, EyeOffIcon } from 'lucide-react';
 
 interface AlbumListItemProps {
   item: Album;
@@ -12,7 +12,12 @@ interface AlbumListItemProps {
 export default function AlbumListItem({ item, index }: AlbumListItemProps) {
   return (
     <div className="flex items-center justify-between p-4 border-b border-gray-200 last:border-b-0">
-      <Link href={`/admin/albums/${item.id}`} className="flex items-center flex-grow min-w-0"> {/* Added Link and classes */}
+      <Link
+        href={`/admin/albums/${item.id}`}
+        className="flex items-center flex-grow min-w-0"
+      >
+        {' '}
+        {/* Added Link and classes */}
         {item.coverImageUrl && (
           <div className="w-16 h-12 mr-4 rounded overflow-hidden flex-shrink-0">
             <img
@@ -22,16 +27,27 @@ export default function AlbumListItem({ item, index }: AlbumListItemProps) {
             />
           </div>
         )}
-        <div className="flex-grow min-w-0"> {/* Added min-w-0 for proper truncation if needed */}
-          <h3 className="font-medium text-sm md:text-base truncate">{item.name}</h3> {/* Added truncate */}
-          <p className="text-xs text-gray-500 md:text-sm truncate">/{item.slug}</p> {/* Added truncate */}
+        <div className="flex-grow min-w-0">
+          {' '}
+          {/* Added min-w-0 for proper truncation if needed */}
+          <h3 className="font-medium text-sm md:text-base truncate">
+            {item.name}
+          </h3>{' '}
+          {/* Added truncate */}
+          <p className="text-xs text-gray-500 md:text-sm truncate">
+            /{item.slug}
+          </p>{' '}
+          {/* Added truncate */}
           {item.description && (
-            <p className="text-xs text-gray-600 mt-1 hidden md:block truncate"> {/* Added truncate */}
+            <p className="text-xs text-gray-600 mt-1 hidden md:block truncate">
+              {' '}
+              {/* Added truncate */}
               {item.description}
             </p>
           )}
         </div>
-      </Link> {/* Closing Link tag */}
+      </Link>{' '}
+      {/* Closing Link tag */}
       <div className="flex items-center space-x-2 flex-shrink-0 ml-2">
         <Button variant="outline" size="icon" asChild>
           <Link href={`/admin/albums/${item.id}/edit`}>
@@ -46,9 +62,7 @@ export default function AlbumListItem({ item, index }: AlbumListItemProps) {
           ) : (
             <EyeIcon className="h-4 w-4" />
           )}
-          <span className="sr-only">
-            {item.isHidden ? "Show" : "Hide"}
-          </span>
+          <span className="sr-only">{item.isHidden ? 'Show' : 'Hide'}</span>
         </Button>
         <Button variant="destructive" size="icon" disabled>
           <Trash2Icon className="h-4 w-4" />
