@@ -26,7 +26,7 @@ export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
 
   /**
-   * Створення нової категорії
+   * Create new category
    */
   @Post()
   @HttpCode(HttpStatus.CREATED)
@@ -35,7 +35,7 @@ export class CategoriesController {
   }
 
   /**
-   * Отримання всіх категорій
+   * Get all categories
    */
   @Get()
   @Public()
@@ -44,7 +44,7 @@ export class CategoriesController {
   }
 
   /**
-   * Отримання категорії за ID
+   * Get category by ID
    */
   @Get(':id')
   @Public()
@@ -53,7 +53,7 @@ export class CategoriesController {
   }
 
   /**
-   * Отримання категорії за slug
+   * Get category by slug
    */
   @Get('slug/:slug')
   @Public()
@@ -62,7 +62,7 @@ export class CategoriesController {
   }
 
   /**
-   * Оновлення порядку відображення категорій
+   * Update categories display order
    */
   @Patch('order/update')
   updateOrder(
@@ -72,7 +72,7 @@ export class CategoriesController {
   }
 
   /**
-   * Оновлення категорії
+   * Update category
    */
   @Patch(':id')
   update(
@@ -83,7 +83,7 @@ export class CategoriesController {
   }
 
   /**
-   * Видалення категорії
+   * Delete category
    */
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)

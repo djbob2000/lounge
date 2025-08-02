@@ -1,9 +1,23 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { Album, Category } from "@lounge/types";
-import { useAuth } from "@clerk/nextjs";
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Album, Category } from '@lounge/types';
+import { useAuth } from '@clerk/nextjs';
+import CategorySelect from './CategorySelect';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import {
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormDescription,
+  FormMessage,
+} from '@/components/ui/form';
+import { AlertCircle } from 'lucide-react';
 
 interface AlbumFormProps {
   album?: Album;
@@ -20,10 +34,10 @@ export default function AlbumForm({
   const { getToken } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
-    name: album?.name || "",
-    slug: album?.slug || "",
-    description: album?.description || "",
-    categoryId: album?.categoryId || defaultCategoryId || "",
+    name: album?.name || '',
+    slug: album?.slug || '',
+    description: album?.description || '',
+    categoryId: album?.categoryId || defaultCategoryId || '',
     isHidden: album?.isHidden || false,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -50,15 +64,15 @@ export default function AlbumForm({
       const token = await getToken();
 
       const url = album
-        ? `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/albums/${album.id}`
-        : `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/albums`;
+        ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/albums/${album.id}`
+        : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/albums`;
 
-      const method = album ? "PATCH" : "POST";
+      const method = album ? 'PATCH' : 'POST';
 
       const response = await fetch(url, {
         method,
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(formData),
@@ -69,30 +83,30 @@ export default function AlbumForm({
         if (errorData.message && Array.isArray(errorData.message)) {
           const fieldErrors: Record<string, string> = {};
           errorData.message.forEach((msg: string) => {
-            if (msg.includes("назва") || msg.includes("name")) {
+            if (msg.includes('назва') || msg.includes('name')) {
               fieldErrors.name = msg;
-            } else if (msg.includes("slug")) {
+            } else if (msg.includes('slug')) {
               fieldErrors.slug = msg;
-            } else if (msg.includes("categoryId")) {
+            } else if (msg.includes('categoryId')) {
               fieldErrors.categoryId = msg;
-            } else if (msg.includes("description")) {
+            } else if (msg.includes('description')) {
               fieldErrors.description = msg;
             }
           });
           setErrors(fieldErrors);
         } else {
           setErrors({
-            general: errorData.message || "Помилка збереження альбому",
+            general: errorData.message || 'Помилка збереження альбому',
           });
         }
         return;
       }
 
-      router.push("/admin/albums");
+      router.push('/admin/albums');
       router.refresh();
     } catch (error) {
-      console.error("Error saving album:", error);
-      setErrors({ general: "Помилка збереження альбому" });
+      console.error('Error saving album:', error);
+      setErrors({ general: 'Помилка збереження альбому' });
     } finally {
       setIsLoading(false);
     }
@@ -108,162 +122,136 @@ export default function AlbumForm({
 
     setFormData((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value,
+      [name]: type === 'checkbox' ? checked : value,
     }));
 
     // Clear error when user starts typing
     if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: "" }));
+      setErrors((prev) => ({ ...prev, [name]: '' }));
     }
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {errors.general && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-          {errors.general}
-        </div>
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{errors.general}</AlertDescription>
+        </Alert>
       )}
 
-      <div>
-        <label
-          htmlFor="name"
-          className="block text-sm font-medium text-gray-700 mb-2"
-        >
-          Назва альбому *
-        </label>
-        <input
-          type="text"
-          id="name"
-          name="name"
-          value={formData.name}
-          onChange={handleInputChange}
-          className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-            errors.name ? "border-red-300" : "border-gray-300"
-          }`}
-          placeholder="Введіть назву альбому"
-          required
-        />
-        {errors.name && (
-          <p className="mt-1 text-sm text-red-600">{errors.name}</p>
-        )}
-      </div>
-
-      <div>
-        <label
-          htmlFor="categoryId"
-          className="block text-sm font-medium text-gray-700 mb-2"
-        >
-          Категорія *
-        </label>
-        <select
-          id="categoryId"
-          name="categoryId"
-          value={formData.categoryId}
-          onChange={handleInputChange}
-          className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-            errors.categoryId ? "border-red-300" : "border-gray-300"
-          }`}
-          required
-        >
-          <option value="">Оберіть категорію</option>
-          {categories.map((category) => (
-            <option key={category.id} value={category.id}>
-              {category.name}
-            </option>
-          ))}
-        </select>
-        {errors.categoryId && (
-          <p className="mt-1 text-sm text-red-600">{errors.categoryId}</p>
-        )}
-      </div>
-
-      <div>
-        <label
-          htmlFor="slug"
-          className="block text-sm font-medium text-gray-700 mb-2"
-        >
-          Slug (URL)
-        </label>
-        <input
-          type="text"
-          id="slug"
-          name="slug"
-          value={formData.slug}
-          onChange={handleInputChange}
-          className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-            errors.slug ? "border-red-300" : "border-gray-300"
-          }`}
-          placeholder="Залиште порожнім для автоматичної генерації"
-        />
-        {errors.slug && (
-          <p className="mt-1 text-sm text-red-600">{errors.slug}</p>
-        )}
-        <p className="mt-1 text-sm text-gray-500">
-          Якщо залишити порожнім, буде згенеровано автоматично з назви
-        </p>
-      </div>
-
-      <div>
-        <label
-          htmlFor="description"
-          className="block text-sm font-medium text-gray-700 mb-2"
-        >
-          Опис
-        </label>
-        <textarea
-          id="description"
-          name="description"
-          value={formData.description}
-          onChange={handleInputChange}
-          rows={3}
-          className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-            errors.description ? "border-red-300" : "border-gray-300"
-          }`}
-          placeholder="Введіть опис альбому (необов'язково)"
-        />
-        {errors.description && (
-          <p className="mt-1 text-sm text-red-600">{errors.description}</p>
-        )}
-      </div>
-
-      <div>
-        <div className="flex items-center">
-          <input
-            type="checkbox"
-            id="isHidden"
-            name="isHidden"
-            checked={formData.isHidden}
+      <FormItem>
+        <FormLabel htmlFor="name">
+          Назва альбому <span className="text-destructive">*</span>
+        </FormLabel>
+        <FormControl>
+          <Input
+            id="name"
+            name="name"
+            value={formData.name}
             onChange={handleInputChange}
-            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            placeholder="Введіть назву альбому"
+            className={
+              errors.name
+                ? 'border-destructive focus-visible:ring-destructive'
+                : ''
+            }
           />
-          <label
-            htmlFor="isHidden"
-            className="ml-2 block text-sm text-gray-700"
-          >
+        </FormControl>
+        <FormMessage>{errors.name}</FormMessage>
+      </FormItem>
+
+      <FormItem>
+        <FormLabel>
+          Категорія <span className="text-destructive">*</span>
+        </FormLabel>
+        <FormControl>
+          <CategorySelect
+            categories={categories}
+            value={formData.categoryId}
+            onChange={(categoryId) => {
+              setFormData((prev) => ({ ...prev, categoryId }));
+              // Clear error when user selects a category
+              if (errors.categoryId) {
+                setErrors((prev) => ({ ...prev, categoryId: '' }));
+              }
+            }}
+            error={errors.categoryId}
+            placeholder="Оберіть категорію"
+          />
+        </FormControl>
+        <FormMessage>{errors.categoryId}</FormMessage>
+      </FormItem>
+
+      <FormItem>
+        <FormLabel htmlFor="slug">Slug (URL)</FormLabel>
+        <FormControl>
+          <Input
+            id="slug"
+            name="slug"
+            value={formData.slug}
+            onChange={handleInputChange}
+            placeholder="Залиште порожнім для автоматичної генерації"
+            className={
+              errors.slug
+                ? 'border-destructive focus-visible:ring-destructive'
+                : ''
+            }
+          />
+        </FormControl>
+        <FormMessage>{errors.slug}</FormMessage>
+        <FormDescription>
+          Якщо залишити порожнім, буде згенеровано автоматично з назви
+        </FormDescription>
+      </FormItem>
+
+      <FormItem>
+        <FormLabel htmlFor="description">Опис</FormLabel>
+        <FormControl>
+          <Textarea
+            id="description"
+            name="description"
+            value={formData.description}
+            onChange={handleInputChange}
+            rows={3}
+            placeholder="Введіть опис альбому (необов'язково)"
+            className={
+              errors.description
+                ? 'border-destructive focus-visible:ring-destructive'
+                : ''
+            }
+          />
+        </FormControl>
+        <FormMessage>{errors.description}</FormMessage>
+      </FormItem>
+
+      <FormItem>
+        <div className="flex items-center space-x-2">
+          <FormControl>
+            <Checkbox
+              id="isHidden"
+              checked={formData.isHidden}
+              onCheckedChange={(checked) => {
+                setFormData((prev) => ({ ...prev, isHidden: !!checked }));
+              }}
+            />
+          </FormControl>
+          <FormLabel htmlFor="isHidden" className="text-sm font-normal">
             Приховати альбом
-          </label>
+          </FormLabel>
         </div>
-        <p className="mt-1 text-sm text-gray-500">
+        <FormDescription>
           Якщо увімкнено, альбом не буде відображатися на сайті
-        </p>
-      </div>
+        </FormDescription>
+      </FormItem>
 
       <div className="flex items-center justify-between pt-4">
-        <button
-          type="button"
-          onClick={() => router.back()}
-          className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-        >
+        <Button type="button" variant="outline" onClick={() => router.back()}>
           Скасувати
-        </button>
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {isLoading ? "Збереження..." : album ? "Оновити" : "Створити"}
-        </button>
+        </Button>
+        <Button type="submit" disabled={isLoading}>
+          {isLoading ? 'Збереження...' : album ? 'Оновити' : 'Створити'}
+        </Button>
       </div>
     </form>
   );

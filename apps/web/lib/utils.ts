@@ -1,5 +1,5 @@
-import { type ClassValue, clsx } from "clsx";
-import { twMerge } from "tailwind-merge";
+import { type ClassValue, clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
 /**
  * Utility function to merge Tailwind CSS and clsx classes
@@ -9,48 +9,48 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 /**
- * Переводить текст у формат slug
- * @param text - текст для конвертації в slug
+ * Converts text to slug format
+ * @param text - text to convert to slug
  * @returns slug
  */
 export function slugify(text: string): string {
   return text
     .toLowerCase()
     .trim()
-    .replace(/[^\w\s-]/g, "") // Видалення не букв, цифр, підкреслень, пробілів та дефісів
-    .replace(/[\s_-]+/g, "-") // Заміна пробілів, підкреслень та дефісів на одиночний дефіс
-    .replace(/^-+|-+$/g, ""); // Видалення дефісів з початку та кінця рядка
+    .replace(/[^\w\s-]/g, '') // Remove non-letters, digits, underscores, spaces and hyphens
+    .replace(/[\s_-]+/g, '-') // Replace spaces, underscores and hyphens with single hyphen
+    .replace(/^-+|-+$/g, ''); // Remove hyphens from beginning and end of string
 }
 
 /**
- * Форматує дату у локалізований рядок
- * @param date - дата для форматування
- * @returns форматована дата
+ * Formats date to localized string
+ * @param date - date to format
+ * @returns formatted date
  */
 export function formatDate(date: Date | string): string {
-  const dateObj = typeof date === "string" ? new Date(date) : date;
-  return dateObj.toLocaleDateString("uk-UA", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  return dateObj.toLocaleDateString('uk-UA', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
   });
 }
 
 /**
- * Обрізає текст, якщо він перевищує максимальну довжину
- * @param text - текст для обрізання
- * @param maxLength - максимальна довжина тексту
- * @returns обрізаний текст з трьома крапками в кінці або оригінальний текст
+ * Truncates text if it exceeds maximum length
+ * @param text - text to truncate
+ * @param maxLength - maximum text length
+ * @returns truncated text with three dots at the end or original text
  */
 export function truncateText(text: string, maxLength: number): string {
   if (text.length <= maxLength) return text;
-  return text.slice(0, maxLength) + "...";
+  return text.slice(0, maxLength) + '...';
 }
 
 /**
- * Генерує випадковий ID
- * @param length - довжина ID
- * @returns випадковий ID
+ * Generates random ID
+ * @param length - ID length
+ * @returns random ID
  */
 export function generateId(length: number = 8): string {
   return Math.random()

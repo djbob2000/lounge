@@ -1,8 +1,10 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { Album, Photo } from "@lounge/types";
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Album, Photo } from '@lounge/types';
+import { useAuth } from '@clerk/nextjs';
+import AlbumSelect from './AlbumSelect';
 
 interface PhotoFormProps {
   photo?: Photo;
@@ -18,10 +20,14 @@ export default function PhotoForm({
   onCancel,
 }: PhotoFormProps) {
   const router = useRouter();
+  const { getToken } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(
     photo?.thumbnailUrl || null
+  );
+  const [selectedAlbumId, setSelectedAlbumId] = useState<string>(
+    photo?.albumId || ''
   );
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -41,7 +47,7 @@ export default function PhotoForm({
       const formData = new FormData(e.currentTarget);
 
       if (selectedFile) {
-        formData.append("file", selectedFile);
+        formData.append('file', selectedFile);
       }
 
       if (onSubmit) {
@@ -50,25 +56,46 @@ export default function PhotoForm({
         // Default submission logic
         const endpoint = photo
           ? `/api/photos/${photo.id}`
-          : "/api/photos/upload";
+          : '/api/photos/upload';
 
-        const method = photo ? "PATCH" : "POST";
+        const method = photo ? 'PATCH' : 'POST';
+
+        const token = await getToken();
+        console.log(
+          'PhotoForm: Fetched token for submission:',
+          token ? `Token length: ${token.length}` : 'Token is null/undefined'
+        );
+
+        if (!token) {
+          console.error(
+            'PhotoForm: Authentication token not found. Halting submission.'
+          );
+          alert('Authentication token not found. Please try logging in again.');
+          setIsSubmitting(false);
+          return;
+        }
+
+        const headers: HeadersInit = {
+          Authorization: `Bearer ${token}`,
+          // 'Content-Type' for FormData is set by the browser
+        };
 
         const response = await fetch(endpoint, {
           method,
+          headers: headers,
           body: formData,
         });
 
         if (!response.ok) {
-          throw new Error("Failed to save photo");
+          throw new Error('Failed to save photo');
         }
 
-        router.push("/admin/photos");
+        router.push('/admin/photos');
         router.refresh();
       }
     } catch (error) {
-      console.error("Error saving photo:", error);
-      alert("Error saving photo. Please try again.");
+      console.error('Error saving photo:', error);
+      alert('Error saving photo. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -85,7 +112,7 @@ export default function PhotoForm({
   return (
     <div className="bg-white rounded-lg shadow p-6">
       <h2 className="text-xl font-semibold mb-6">
-        {photo ? "Edit Photo" : "Upload New Photo"}
+        {photo ? 'Edit Photo' : 'Upload New Photo'}
       </h2>
 
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -128,26 +155,16 @@ export default function PhotoForm({
 
         {/* Album Selection */}
         <div>
-          <label
-            htmlFor="albumId"
-            className="block text-sm font-medium text-gray-700 mb-2"
-          >
+          <label className="block text-sm font-medium text-gray-700 mb-2">
             Album *
           </label>
-          <select
-            id="albumId"
-            name="albumId"
-            required
-            defaultValue={photo?.albumId || ""}
-            className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-          >
-            <option value="">Select an album</option>
-            {albums.map((album) => (
-              <option key={album.id} value={album.id}>
-                {album.name}
-              </option>
-            ))}
-          </select>
+          <AlbumSelect
+            albums={albums}
+            value={selectedAlbumId}
+            onChange={setSelectedAlbumId}
+            placeholder="Select an album"
+          />
+          <input type="hidden" name="albumId" value={selectedAlbumId} />
         </div>
 
         {/* Description */}
@@ -162,7 +179,7 @@ export default function PhotoForm({
             id="description"
             name="description"
             rows={3}
-            defaultValue={photo?.description || ""}
+            defaultValue={photo?.description || ''}
             placeholder="Optional description for this photo"
             className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
           />
@@ -218,10 +235,10 @@ export default function PhotoForm({
             className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSubmitting
-              ? "Saving..."
+              ? 'Saving...'
               : photo
-                ? "Update Photo"
-                : "Upload Photo"}
+                ? 'Update Photo'
+                : 'Upload Photo'}
           </button>
         </div>
       </form>

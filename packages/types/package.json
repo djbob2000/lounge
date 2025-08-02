@@ -10,8 +10,8 @@
     "build": "tsc"
   },
   "devDependencies": {
-    "@repo/eslint-config": "workspace:*",
-    "@repo/typescript-config": "workspace:*",
+    "@lounge/eslint-config": "workspace:*",
+    "@lounge/typescript-config": "workspace:*",
     "eslint-plugin-unicorn": "^59.0.1",
     "typescript": "^5.4.5"
   }
