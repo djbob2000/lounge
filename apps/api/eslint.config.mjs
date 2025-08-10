@@ -1,5 +1,5 @@
 // @ts-check
-import { nestJsConfig } from '@repo/eslint-config/nest-js';
+import { nestJsConfig } from '@lounge/eslint-config/nest-js';
 
 export default [
   ...nestJsConfig,

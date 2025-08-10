@@ -47,7 +47,7 @@ export default async function RootLayout({
   const categories = await getCategories();
 
   return (
-    <ClerkProvider localization={ukUA}>
+    <ClerkProvider localization={ukUA as any}>
       <html lang="uk">
         <body suppressHydrationWarning={true}>
           <ClientLayout

@@ -102,14 +102,14 @@ export default function PhotoGrid({ photos, onSelectionChange }: PhotoGridProps)
             </div>
             <Image
               src={photo.thumbnailUrl || photo.originalUrl || "/placeholder-image.svg"}
-              alt={`Photo ${photo.id} (${photo.originalName})`}
+              alt={`Photo ${photo.id} (${photo.filename})`}
               width={300} // Adjust as per your design needs
               height={200} // Adjust as per your design needs
               className="w-full h-auto object-cover aspect-[3/2] transition-transform duration-200 ease-in-out group-hover:scale-105"
               onError={(e) => { e.currentTarget.src = "/placeholder-image.svg"; }}
             />
             <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-1.5 text-xs truncate">
-              {photo.originalName || photo.id}
+              {photo.filename || photo.id}
             </div>
           </div>
         ))}

@@ -1,4 +1,4 @@
-import { config } from "@repo/eslint-config/base";
+import { config } from "@lounge/eslint-config/base";
 
 export default [
   ...config,
