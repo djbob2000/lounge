@@ -181,6 +181,9 @@ importers:
       '@lounge/types':
         specifier: workspace:*
         version: link:../../packages/types
+      '@lounge/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
       '@radix-ui/react-checkbox':
         specifier: ^1.3.2
         version: 1.3.2(@types/react-dom@19.1.1(@types/react@19.1.0))(@types/react@19.1.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
@@ -205,9 +208,6 @@ importers:
       '@radix-ui/react-slot':
         specifier: ^1.0.2
         version: 1.2.2(@types/react@19.1.0)(react@19.1.1)
-      '@repo/ui':
-        specifier: workspace:*
-        version: link:../../packages/ui
       class-variance-authority:
         specifier: ^0.7.0
         version: 0.7.1
@@ -239,10 +239,10 @@ importers:
         specifier: ^1.0.7
         version: 1.0.7(tailwindcss@3.4.17(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.15))(@types/node@22.15.21)(typescript@5.8.2)))
     devDependencies:
-      '@repo/eslint-config':
+      '@lounge/eslint-config':
         specifier: workspace:*
         version: link:../../packages/eslint-config
-      '@repo/typescript-config':
+      '@lounge/typescript-config':
         specifier: workspace:*
         version: link:../../packages/typescript-config
       '@types/node':
@@ -323,10 +323,10 @@ importers:
 
   packages/types:
     devDependencies:
-      '@repo/eslint-config':
+      '@lounge/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
-      '@repo/typescript-config':
+      '@lounge/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config
       eslint-plugin-unicorn:
@@ -353,10 +353,10 @@ importers:
         specifier: ^19.1.0
         version: 19.1.0(react@19.1.0)
     devDependencies:
-      '@repo/eslint-config':
+      '@lounge/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
-      '@repo/typescript-config':
+      '@lounge/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config
       '@turbo/gen':
