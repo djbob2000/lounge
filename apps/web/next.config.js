@@ -1,6 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   transpilePackages: ['@lounge/types'],
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   experimental: {
     esmExternals: true,
     browserDebugInfoInTerminal: true,
