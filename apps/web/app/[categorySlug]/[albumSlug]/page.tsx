@@ -153,7 +153,7 @@ export default function Page({ params }: PageProps) {
                   }}
                   role="button"
                   tabIndex={0}
-                  aria-label={`View photo ${photo.title || `${index + 1}`}`}
+                  aria-label={`View photo ${index + 1}`}
                 >
                   <Image
                     src={photo.thumbnailUrl}

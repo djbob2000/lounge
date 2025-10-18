@@ -45,7 +45,9 @@ export class ClerkStrategy {
         error instanceof Error ? error.stack : '',
       );
       // Consider logging specific Clerk error codes if available: error.status, error.errors
-      throw new UnauthorizedException(`Invalid token: ${error.message}`);
+      throw new UnauthorizedException(
+        `Invalid token: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 }

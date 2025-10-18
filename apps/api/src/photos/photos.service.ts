@@ -34,7 +34,14 @@ export class PhotosService {
     }
 
     // Upload file to storage
-    let uploadResult: { url: string; thumbnailUrl: string };
+    let uploadResult: {
+      id: string;
+      filename: string;
+      originalUrl: string;
+      thumbnailUrl: string;
+      width: number;
+      height: number;
+    };
     try {
       console.log('Uploading file to storage...');
       uploadResult = await this.storageService.uploadFile(file);
@@ -49,7 +56,7 @@ export class PhotosService {
       displayOrder !== undefined ? displayOrder : await this.getNextDisplayOrder(albumId);
 
     // Create photo record in database
-    let photo: { id: string; title: string; url: string; thumbnailUrl: string };
+    let photo: PrismaPhoto;
     try {
       console.log('Creating photo record in database...');
       photo = await this.prisma.photo.create({
