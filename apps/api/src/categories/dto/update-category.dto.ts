@@ -1,37 +1,30 @@
 import { UpdateCategoryRequest } from '@lounge/types';
-import {
-  IsBoolean,
-  IsOptional,
-  IsString,
-  Matches,
-  MaxLength,
-  MinLength,
-} from 'class-validator';
+import { IsBoolean, IsOptional, IsString, Matches, MaxLength, MinLength } from 'class-validator';
 
 export class UpdateCategoryDto implements UpdateCategoryRequest {
   @IsOptional()
-  @IsString({ message: 'Назва категорії повинна бути рядком' })
+  @IsString({ message: 'Category name must be a string' })
   @MinLength(2, {
-    message: 'Назва категорії повинна містити мінімум 2 символи',
+    message: 'Category name must contain at least 2 characters',
   })
   @MaxLength(100, {
-    message: 'Назва категорії не може перевищувати 100 символів',
+    message: 'Category name cannot exceed 100 characters',
   })
   name?: string;
 
   @IsOptional()
-  @IsString({ message: 'Slug повинен бути рядком' })
+  @IsString({ message: 'Slug must be a string' })
   @Matches(/^[a-z0-9-]+$/, {
-    message: 'Slug може містити лише малі літери латиниці, цифри та дефіс',
+    message: 'Slug can only contain lowercase letters, numbers, and hyphens',
   })
-  @MinLength(2, { message: 'Slug повинен містити мінімум 2 символи' })
-  @MaxLength(100, { message: 'Slug не може перевищувати 100 символів' })
+  @MinLength(2, { message: 'Slug must contain at least 2 characters' })
+  @MaxLength(100, { message: 'Slug cannot exceed 100 characters' })
   slug?: string;
 
   @IsOptional()
   displayOrder?: number;
 
   @IsOptional()
-  @IsBoolean({ message: 'showInMenu повинен бути булевим значенням' })
+  @IsBoolean({ message: 'showInMenu must be a boolean value' })
   showInMenu?: boolean;
 }

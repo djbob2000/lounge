@@ -7,24 +7,32 @@
     "./*": "./src/*.tsx"
   },
   "scripts": {
-    "lint": "eslint . --max-warnings 0",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write .",
     "generate:component": "turbo gen react-component",
     "check-types": "tsc --noEmit"
   },
   "devDependencies": {
-    "@lounge/eslint-config": "workspace:*",
     "@lounge/typescript-config": "workspace:*",
-    "@turbo/gen": "^2.5.0",
-    "@types/node": "^22.15.3",
-    "@types/react": "19.1.0",
-    "@types/react-dom": "19.1.1",
-    "eslint": "^9.26.0",
-    "typescript": "5.8.2"
+    "@turbo/gen": "^2.5.8",
+    "@types/node": "^24.8.1",
+    "@types/react": "19.2.2",
+    "@types/react-dom": "19.2.2",
+    "typescript": "5.9.3"
   },
   "dependencies": {
-    "embla-carousel-react": "^8.0.0",
-    "lucide-react": "^0.330.0",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "@hookform/resolvers": "^5.2.2",
+    "@radix-ui/react-label": "^2.1.7",
+    "@radix-ui/react-slot": "^1.2.3",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "embla-carousel": "^8.6.0",
+    "embla-carousel-react": "^8.6.0",
+    "lucide-react": "^0.546.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-hook-form": "^7.65.0",
+    "tailwind-merge": "^3.3.1"
   }
 }

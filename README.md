@@ -1,46 +1,46 @@
 # Photo Gallery - Lounge Project
 
-Современная фотогалерея с административной панелью, построенная на Next.js, NestJS и Supabase.
+A modern photo gallery with an admin panel, built on Next.js, NestJS, and Supabase.
 
-## Технологический стек
+## Tech Stack
 
 - **Frontend**: Next.js 15, React 19, TypeScript, Tailwind CSS
 - **Backend**: NestJS, TypeScript
-- **База данных**: PostgreSQL (Supabase)
-- **Хранилище файлов**: Backblaze B2
-- **Аутентификация**: Clerk
+- **Database**: PostgreSQL (Supabase)
+- **File Storage**: Backblaze B2
+- **Authentication**: Clerk
 - **ORM**: Prisma
-- **Монорепозиторий**: Turborepo
+- **Monorepo**: Turborepo
 
-## Структура проекта
+## Project Structure
 
-### Apps и Packages
+### Apps and Packages
 
-- `apps/web`: Next.js приложение (фронтенд)
-- `apps/api`: NestJS API (бэкенд)
-- `packages/ui`: Общие React компоненты
-- `packages/types`: Общие TypeScript типы
-- `packages/eslint-config`: Конфигурация ESLint
-- `packages/typescript-config`: Конфигурация TypeScript
+- `apps/web`: Next.js application (frontend)
+- `apps/api`: NestJS API (backend)
+- `packages/ui`: Shared React components
+- `packages/types`: Shared TypeScript types
+- `packages/eslint-config`: ESLint configuration
+- `packages/typescript-config`: TypeScript configuration
 
-## Быстрый старт
+## Quick Start
 
-### 1. Установка зависимостей
+### 1. Install Dependencies
 
 ```bash
 pnpm install
 ```
 
-### 2. Настройка сервисов
+### 2. Configure Services
 
-Следуйте инструкциям в [SETUP.md](./SETUP.md) для настройки базы данных Supabase и хранилища Backblaze B2.
+Follow the instructions in [SETUP.md](./SETUP.md) to set up the Supabase database and Backblaze B2 storage.
 
-### 3. Настройка переменных окружения
+### 3. Set Up Environment Variables
 
-Скопируйте файлы `.env.example` и заполните необходимые значения:
+Copy the `.env.example` files and fill in the required values:
 
 ```bash
-# Корневой .env
+# Root .env
 cp .env.example .env
 
 # API .env
@@ -50,7 +50,7 @@ cp apps/api/.env.example apps/api/.env
 cp apps/web/.env.example apps/web/.env
 ```
 
-### 4. Миграция базы данных
+### 4. Database Migration
 
 ```bash
 cd apps/api
@@ -58,13 +58,13 @@ pnpm run prisma:generate
 pnpm run prisma:migrate
 ```
 
-### 5. Запуск проекта
+### 5. Run the Project
 
 ```bash
-# Запуск всех сервисов
+# Run all services
 pnpm dev
 
-# Или запуск по отдельности:
+# Or run separately:
 # API
 cd apps/api && pnpm run start:dev
 
@@ -72,18 +72,18 @@ cd apps/api && pnpm run start:dev
 cd apps/web && pnpm run dev
 ```
 
-## Основные возможности
+## Key Features
 
-- 📸 **Управление фотографиями**: Загрузка, редактирование, удаление
-- 📁 **Категории и альбомы**: Организация контента
-- 🔐 **Административная панель**: Полное управление контентом
-- 🎨 **Адаптивный дизайн**: Оптимизация для всех устройств
-- ⚡ **Быстрая загрузка**: Оптимизация изображений и кэширование
-- 🔒 **Безопасность**: Аутентификация и авторизация
+- 📸 **Photo Management**: Upload, edit, delete
+- 📁 **Categories and Albums**: Content organization
+- 🔐 **Admin Panel**: Full content management
+- 🎨 **Responsive Design**: Optimized for all devices
+- ⚡ **Fast Loading**: Image optimization and caching
+- 🔒 **Security**: Authentication and authorization
 
 ### Utilities
 
-This Turborepo has some additional tools already setup for you:
+This Turborepo has some additional tools already set up for you:
 
 - [TypeScript](https://www.typescriptlang.org/) for static type checking
 - [ESLint](https://eslint.org/) for code linting

@@ -1,6 +1,7 @@
 import { UpdateAlbumRequest } from '@lounge/types';
 import {
   IsBoolean,
+  IsNumber,
   IsOptional,
   IsString,
   IsUUID,
@@ -23,8 +24,7 @@ export class UpdateAlbumDto implements UpdateAlbumRequest {
   @IsOptional()
   @IsString({ message: 'Slug must be a string' })
   @Matches(/^[a-z0-9-]+$/, {
-    message:
-      'Slug can only contain lowercase Latin letters, numbers, and hyphens',
+    message: 'Slug can only contain lowercase Latin letters, numbers, and hyphens',
   })
   @MinLength(2, { message: 'Slug must be at least 2 characters' })
   @MaxLength(100, { message: 'Slug cannot exceed 100 characters' })
@@ -40,6 +40,7 @@ export class UpdateAlbumDto implements UpdateAlbumRequest {
   categoryId?: string;
 
   @IsOptional()
+  @IsNumber({}, { message: 'Display order must be a number' })
   displayOrder?: number;
 
   @IsOptional()

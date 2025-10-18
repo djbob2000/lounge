@@ -1,5 +1,5 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { verifyToken } from '@clerk/backend';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Request as ExpressRequest } from 'express';
 
@@ -7,13 +7,15 @@ import { Request as ExpressRequest } from 'express';
 export class ClerkStrategy {
   constructor(private readonly configService: ConfigService) {}
 
-  async validate(req: ExpressRequest): Promise<any> {
+  async validate(req: ExpressRequest): Promise<{ userId: string; sessionId: string }> {
     console.log(`ClerkStrategy: validate called for path: ${req.originalUrl}`);
     const authHeader = req.headers.authorization;
     console.log(`ClerkStrategy: Authorization header: ${authHeader}`);
 
     const token = authHeader?.split(' ').pop();
-    console.log(`ClerkStrategy: Extracted token: ${token ? 'Token present (length ' + token.length + ')' : 'No token extracted'}`);
+    console.log(
+      `ClerkStrategy: Extracted token: ${token ? `Token present (length ${token.length})` : 'No token extracted'}`,
+    );
 
     if (!token) {
       console.warn('ClerkStrategy: No token provided in Authorization header.');
@@ -35,8 +37,13 @@ export class ClerkStrategy {
         sessionId: tokenPayload.sid,
         ...tokenPayload,
       };
-    } catch (error: any) { // Explicitly type error if possible, or use 'any'/'unknown'
-      console.error('ClerkStrategy: Token verification error:', error.message, error.stack);
+    } catch (error: unknown) {
+      // Explicitly type error if possible, or use 'any'/'unknown'
+      console.error(
+        'ClerkStrategy: Token verification error:',
+        error instanceof Error ? error.message : 'Unknown error',
+        error instanceof Error ? error.stack : '',
+      );
       // Consider logging specific Clerk error codes if available: error.status, error.errors
       throw new UnauthorizedException(`Invalid token: ${error.message}`);
     }

@@ -1,16 +1,17 @@
-import { Metadata } from "next";
-import { notFound } from "next/navigation";
-import { Album, Category } from "@lounge/types";
-import AlbumForm from "../../../../../components/admin/AlbumForm";
+import type { Album, Category } from '@lounge/types';
+import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
+
+import AlbumForm from '../../../../../components/admin/album-form';
 
 // Function to fetch album by ID
 async function getAlbum(id: string): Promise<Album | null> {
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/albums/${id}`,
+      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/albums/${id}`,
       {
-        cache: "no-store",
-      }
+        cache: 'no-store',
+      },
     );
 
     if (!response.ok) {
@@ -19,7 +20,7 @@ async function getAlbum(id: string): Promise<Album | null> {
 
     return response.json();
   } catch (error) {
-    console.error("Помилка отримання альбому:", error);
+    console.error('Помилка отримання альбому:', error);
     return null;
   }
 }
@@ -28,26 +29,26 @@ async function getAlbum(id: string): Promise<Album | null> {
 async function getCategories(): Promise<Category[]> {
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/categories`,
+      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/categories`,
       {
-        cache: "no-store",
-      }
+        cache: 'no-store',
+      },
     );
 
     if (!response.ok) {
-      throw new Error("Помилка отримання категорій");
+      throw new Error('Помилка отримання категорій');
     }
 
     return response.json();
   } catch (error) {
-    console.error("Помилка отримання категорій:", error);
+    console.error('Помилка отримання категорій:', error);
     return [];
   }
 }
 
 export const metadata: Metadata = {
-  title: "Редагувати альбом | Адмін панель",
-  description: "Редагування альбому фотографій",
+  title: 'Редагувати альбом | Адмін панель',
+  description: 'Редагування альбому фотографій',
 };
 
 interface EditAlbumPageProps {
@@ -58,10 +59,7 @@ interface EditAlbumPageProps {
 
 export default async function EditAlbumPage({ params }: EditAlbumPageProps) {
   const { id } = await params;
-  const [album, categories] = await Promise.all([
-    getAlbum(id),
-    getCategories(),
-  ]);
+  const [album, categories] = await Promise.all([getAlbum(id), getCategories()]);
 
   if (!album) {
     notFound();
@@ -71,11 +69,11 @@ export default async function EditAlbumPage({ params }: EditAlbumPageProps) {
     <div>
       <div className="mb-6">
         <h1 className="text-2xl font-bold">Редагувати альбом</h1>
-        <p className="text-gray-600 mt-2">Редагування альбому "{album.name}"</p>
+        <p className="text-gray-600 mt-2">Редагування альбому &quot;{album.name}&quot;</p>
       </div>
 
       <div className="bg-white rounded-lg shadow p-6">
-        <AlbumForm album={album} categories={categories} />
+        <AlbumForm album={album} categories={categories} categoryId={album.categoryId} />
       </div>
     </div>
   );

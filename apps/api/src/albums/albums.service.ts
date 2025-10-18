@@ -1,15 +1,10 @@
 import { Album } from '@lounge/types';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { Album as PrismaAlbum } from '@prisma/client';
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
 import slugify from 'slugify';
-
-import { CreateAlbumDto, UpdateAlbumDto, UpdateAlbumsOrderDto } from './dto';
 import { CategoriesService } from '../categories/categories.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { CreateAlbumDto, UpdateAlbumDto, UpdateAlbumsOrderDto } from './dto';
 
 @Injectable()
 export class AlbumsService {
@@ -35,9 +30,7 @@ export class AlbumsService {
 
     // Determine display order if not provided
     const order =
-      displayOrder !== undefined
-        ? displayOrder
-        : await this.getNextDisplayOrder(categoryId);
+      displayOrder !== undefined ? displayOrder : await this.getNextDisplayOrder(categoryId);
 
     // Create the album
     const album = await this.prisma.album.create({
@@ -124,11 +117,7 @@ export class AlbumsService {
 
     // Check slug uniqueness if it is being changed
     if (slug && slug !== existingAlbum.slug) {
-      await this.validateSlugUniqueness(
-        slug,
-        categoryId || existingAlbum.categoryId,
-        id,
-      );
+      await this.validateSlugUniqueness(slug, categoryId || existingAlbum.categoryId, id);
     }
 
     // Update the album
@@ -160,9 +149,7 @@ export class AlbumsService {
   /**
    * Update display order of albums
    */
-  async updateOrder(
-    updateAlbumsOrderDto: UpdateAlbumsOrderDto,
-  ): Promise<Album[]> {
+  async updateOrder(updateAlbumsOrderDto: UpdateAlbumsOrderDto): Promise<Album[]> {
     const { albums } = updateAlbumsOrderDto;
 
     // Check if all albums exist
@@ -219,7 +206,7 @@ export class AlbumsService {
    */
   private async validateSlugUniqueness(
     slug: string,
-    categoryId: string,
+    _categoryId: string,
     excludeId?: string,
   ): Promise<void> {
     // Check slug uniqueness in the system

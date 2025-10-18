@@ -1,16 +1,16 @@
-import { Metadata } from "next";
-import { notFound } from "next/navigation";
-import { Category } from "@lounge/types";
-import CategoryForm from "../../../../../components/admin/CategoryForm";
+import type { Category } from '@lounge/types';
+import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
+import CategoryForm from '../../../../../components/admin/category-form';
 
 // Function to fetch category by ID
 async function getCategory(id: string): Promise<Category | null> {
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/categories/${id}`,
+      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/categories/${id}`,
       {
-        cache: "no-store",
-      }
+        cache: 'no-store',
+      },
     );
 
     if (!response.ok) {
@@ -19,14 +19,14 @@ async function getCategory(id: string): Promise<Category | null> {
 
     return response.json();
   } catch (error) {
-    console.error("Помилка отримання категорії:", error);
+    console.error('Помилка отримання категорії:', error);
     return null;
   }
 }
 
 export const metadata: Metadata = {
-  title: "Редагувати категорію | Адмін панель",
-  description: "Редагування категорії фотоальбомів",
+  title: 'Редагувати категорію | Адмін панель',
+  description: 'Редагування категорії фотоальбомів',
 };
 
 interface EditCategoryPageProps {
@@ -35,9 +35,7 @@ interface EditCategoryPageProps {
   }>;
 }
 
-export default async function EditCategoryPage({
-  params,
-}: EditCategoryPageProps) {
+export default async function EditCategoryPage({ params }: EditCategoryPageProps) {
   const { id } = await params;
   const category = await getCategory(id);
 
@@ -49,9 +47,7 @@ export default async function EditCategoryPage({
     <div>
       <div className="mb-6">
         <h1 className="text-2xl font-bold">Редагувати категорію</h1>
-        <p className="text-gray-600 mt-2">
-          Редагування категорії "{category.name}"
-        </p>
+        <p className="text-gray-600 mt-2">Редагування категорії "{category.name}"</p>
       </div>
 
       <div className="bg-white rounded-lg shadow p-6">

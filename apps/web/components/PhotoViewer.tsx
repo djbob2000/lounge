@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useCallback } from "react";
-import Image from "next/image";
-import { Photo } from "@lounge/types";
+import type { Photo } from '@lounge/types';
+import Image from 'next/image';
+import { useCallback, useEffect, useState } from 'react';
 
 interface PhotoViewerProps {
   photos: Photo[];
@@ -10,48 +10,40 @@ interface PhotoViewerProps {
   onClose: () => void;
 }
 
-export const PhotoViewer = ({
-  photos,
-  initialIndex = 0,
-  onClose,
-}: PhotoViewerProps) => {
+export const PhotoViewer = ({ photos, initialIndex = 0, onClose }: PhotoViewerProps) => {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [isLoading, setIsLoading] = useState(true);
 
   const handlePrevious = useCallback(() => {
     setIsLoading(true);
-    setCurrentIndex((prevIndex) =>
-      prevIndex > 0 ? prevIndex - 1 : photos.length - 1
-    );
+    setCurrentIndex((prevIndex) => (prevIndex > 0 ? prevIndex - 1 : photos.length - 1));
   }, [photos.length]);
 
   const handleNext = useCallback(() => {
     setIsLoading(true);
-    setCurrentIndex((prevIndex) =>
-      prevIndex < photos.length - 1 ? prevIndex + 1 : 0
-    );
+    setCurrentIndex((prevIndex) => (prevIndex < photos.length - 1 ? prevIndex + 1 : 0));
   }, [photos.length]);
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
+      if (event.key === 'Escape') {
         onClose();
-      } else if (event.key === "ArrowLeft") {
+      } else if (event.key === 'ArrowLeft') {
         handlePrevious();
-      } else if (event.key === "ArrowRight") {
+      } else if (event.key === 'ArrowRight') {
         handleNext();
       }
     },
-    [handleNext, handlePrevious, onClose]
+    [handleNext, handlePrevious, onClose],
   );
 
   useEffect(() => {
-    document.addEventListener("keydown", handleKeyDown);
-    document.body.style.overflow = "hidden";
+    document.addEventListener('keydown', handleKeyDown);
+    document.body.style.overflow = 'hidden';
 
     return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "auto";
+      document.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'auto';
     };
   }, [handleKeyDown]);
 
@@ -96,12 +88,7 @@ export const PhotoViewer = ({
           stroke="currentColor"
           className="w-8 h-8"
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M15 19l-7-7 7-7"
-          />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
         </svg>
       </button>
 
@@ -133,12 +120,7 @@ export const PhotoViewer = ({
           stroke="currentColor"
           className="w-8 h-8"
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M9 5l7 7-7 7"
-          />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
         </svg>
       </button>
 

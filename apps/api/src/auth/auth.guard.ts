@@ -1,33 +1,31 @@
 import {
   CanActivate,
+  CustomDecorator,
+  createParamDecorator,
   ExecutionContext,
   Injectable,
-  SetMetadata,
-  CustomDecorator,
-  UnauthorizedException,
   Logger,
-  createParamDecorator,
+  SetMetadata,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Request as ExpressRequest } from 'express';
+
 import { ClerkStrategy } from './clerk.strategy';
 
 /**
  * Metadata to indicate public routes
  */
 export const IS_PUBLIC_KEY = 'isPublic';
-export const Public = (): CustomDecorator<string> =>
-  SetMetadata(IS_PUBLIC_KEY, true);
+export const Public = (): CustomDecorator<string> => SetMetadata(IS_PUBLIC_KEY, true);
 
 /**
  * Decorator to get current user from request
  */
-export const CurrentUser = createParamDecorator(
-  (data: unknown, ctx: ExecutionContext) => {
-    const request = ctx.switchToHttp().getRequest<ExpressRequest>();
-    return (request as any).user;
-  },
-);
+export const CurrentUser = createParamDecorator((_data: unknown, ctx: ExecutionContext) => {
+  const request = ctx.switchToHttp().getRequest<ExpressRequest>();
+  return request.user;
+});
 
 /**
  * Guard for checking authentication via Clerk
@@ -59,15 +57,13 @@ export class AuthGuard implements CanActivate {
       const user = await this.clerkStrategy.validate(request);
 
       // Attach user to request
-      (request as any).user = user;
+      request.user = user;
 
       this.logger.debug(`User authenticated: ${user.userId}`);
       return true;
     } catch (error) {
       this.logger.warn(`Authentication failed: ${error.message}`);
-      throw new UnauthorizedException(
-        'Authentication required. Please provide valid credentials.',
-      );
+      throw new UnauthorizedException('Authentication required. Please provide valid credentials.');
     }
   }
 }

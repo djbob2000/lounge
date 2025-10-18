@@ -1,4 +1,4 @@
-import GlobalNotFound from '@/components/GlobalNotFound';
+import GlobalNotFound from '@/components/global-not-found';
 
 export default function NotFound() {
   return <GlobalNotFound />;

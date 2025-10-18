@@ -1,7 +1,8 @@
-import { Module, Global } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { ClerkStrategy } from './clerk.strategy';
+
 import { AuthGuard } from './auth.guard';
+import { ClerkStrategy } from './clerk.strategy';
 
 @Global()
 @Module({

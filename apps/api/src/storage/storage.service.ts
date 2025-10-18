@@ -1,12 +1,11 @@
-import * as fs from 'fs';
-import * as os from 'os';
-import * as path from 'path';
-
+import * as fs from 'node:fs';
+import * as os from 'node:os';
+import * as path from 'node:path';
 import {
-  Injectable,
-  Logger,
   BadRequestException,
+  Injectable,
   InternalServerErrorException,
+  Logger,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as B2 from 'backblaze-b2';
@@ -21,12 +20,7 @@ export class StorageService {
   private b2Client: B2;
   private bucketId: string;
   private bucketName: string;
-  private readonly allowedMimeTypes = [
-    'image/jpeg',
-    'image/png',
-    'image/webp',
-    'image/gif',
-  ];
+  private readonly allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
   private readonly maxFileSize = 10 * 1024 * 1024; // 10MB
   private readonly thumbnailSizes = {
     small: { width: 320, height: 320 },
@@ -43,11 +37,8 @@ export class StorageService {
    */
   private async initializeB2(): Promise<void> {
     try {
-      const applicationKeyId = this.configService.get<string>(
-        'B2_APPLICATION_KEY_ID',
-      );
-      const applicationKey =
-        this.configService.get<string>('B2_APPLICATION_KEY');
+      const applicationKeyId = this.configService.get<string>('B2_APPLICATION_KEY_ID');
+      const applicationKey = this.configService.get<string>('B2_APPLICATION_KEY');
       const bucketId = this.configService.get<string>('B2_BUCKET_ID');
       const bucketName = this.configService.get<string>('B2_BUCKET_NAME');
 
@@ -56,9 +47,7 @@ export class StorageService {
           'Missing B2 configuration: One or more B2 environment variables are not set.',
         );
         // Optionally, throw an error to prevent further execution if B2 is critical
-        throw new InternalServerErrorException(
-          'B2 configuration is incomplete.',
-        );
+        throw new InternalServerErrorException('B2 configuration is incomplete.');
       }
 
       // Now we are sure these values are strings
@@ -84,9 +73,7 @@ export class StorageService {
     try {
       // Check file type and size
       if (!this.allowedMimeTypes.includes(file.mimetype)) {
-        throw new BadRequestException(
-          'Invalid file type. Allowed types: JPEG, PNG, WebP, GIF',
-        );
+        throw new BadRequestException('Invalid file type. Allowed types: JPEG, PNG, WebP, GIF');
       }
 
       if (file.size > this.maxFileSize) {
@@ -103,20 +90,12 @@ export class StorageService {
 
       // Upload original file
       const originalFileName = `photos/original/${fileName}`;
-      const originalFileUrl = await this.uploadToB2(
-        file.buffer,
-        originalFileName,
-        file.mimetype,
-      );
+      const originalFileUrl = await this.uploadToB2(file.buffer, originalFileName, file.mimetype);
 
       // Generate and upload thumbnail
       const thumbnailBuffer = await this.generateThumbnail(file.buffer);
       const thumbnailFileName = `photos/thumbnails/${fileId}_thumbnail${fileExtension}`;
-      const thumbnailUrl = await this.uploadToB2(
-        thumbnailBuffer,
-        thumbnailFileName,
-        file.mimetype,
-      );
+      const thumbnailUrl = await this.uploadToB2(thumbnailBuffer, thumbnailFileName, file.mimetype);
 
       return {
         id: fileId,
@@ -162,9 +141,7 @@ export class StorageService {
           this.logger.log(`Deleted file: ${file.fileName}`);
           return true;
         } catch (error) {
-          this.logger.error(
-            `Failed to delete file ${file.fileName}: ${error.message}`,
-          );
+          this.logger.error(`Failed to delete file ${file.fileName}: ${error.message}`);
           return false;
         }
       });
@@ -191,11 +168,7 @@ export class StorageService {
   /**
    * Upload buffer to B2
    */
-  private async uploadToB2(
-    buffer: Buffer,
-    fileName: string,
-    contentType: string,
-  ): Promise<string> {
+  private async uploadToB2(buffer: Buffer, fileName: string, contentType: string): Promise<string> {
     const MAX_RETRIES = 3;
     const RETRY_DELAY_MS = 1000;
     let lastError: any = null;
@@ -209,15 +182,11 @@ export class StorageService {
           await this.initializeB2();
           if (!this.b2Client) {
             // Check again after attempt to initialize
-            throw new InternalServerErrorException(
-              'B2 client could not be initialized for upload',
-            );
+            throw new InternalServerErrorException('B2 client could not be initialized for upload');
           }
         }
 
-        this.logger.log(
-          `Attempt ${attempt}/${MAX_RETRIES} to upload ${fileName}`,
-        );
+        this.logger.log(`Attempt ${attempt}/${MAX_RETRIES} to upload ${fileName}`);
 
         const { data: authData } = await this.b2Client.getUploadUrl({
           bucketId: this.bucketId,
@@ -231,9 +200,7 @@ export class StorageService {
           data: buffer,
         });
 
-        this.logger.log(
-          `Successfully uploaded ${fileName} on attempt ${attempt}`,
-        );
+        this.logger.log(`Successfully uploaded ${fileName} on attempt ${attempt}`);
         return this.getFileUrl(fileName); // Success
       } catch (error) {
         lastError = error;
@@ -280,9 +247,7 @@ export class StorageService {
   /**
    * Get image metadata
    */
-  private async getImageMetadata(
-    buffer: Buffer,
-  ): Promise<{ width: number; height: number }> {
+  private async getImageMetadata(buffer: Buffer): Promise<{ width: number; height: number }> {
     try {
       const metadata = await sharp(buffer).metadata();
       return {
@@ -316,9 +281,7 @@ export class StorageService {
   /**
    * Generate multiple thumbnails of different sizes
    */
-  async generateMultipleThumbnails(
-    buffer: Buffer,
-  ): Promise<{ [key: string]: Buffer }> {
+  async generateMultipleThumbnails(buffer: Buffer): Promise<{ [key: string]: Buffer }> {
     const thumbnails: { [key: string]: Buffer } = {};
 
     try {
@@ -332,9 +295,7 @@ export class StorageService {
       }
       return thumbnails;
     } catch (error) {
-      this.logger.error(
-        `Multiple thumbnails generation error: ${error.message}`,
-      );
+      this.logger.error(`Multiple thumbnails generation error: ${error.message}`);
       throw new InternalServerErrorException('Failed to generate thumbnails');
     }
   }

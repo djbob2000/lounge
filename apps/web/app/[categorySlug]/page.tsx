@@ -1,7 +1,7 @@
-import { notFound } from "next/navigation";
-import Link from "next/link";
-import Image from "next/image";
-import { Category, Album } from "@lounge/types";
+import type { Album, Category } from '@lounge/types';
+import Image from 'next/image';
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
 
 interface CategoryPageParams {
   params: Promise<{
@@ -12,19 +12,21 @@ interface CategoryPageParams {
 async function getCategory(slug: string): Promise<Category | null> {
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/categories/${slug}`,
+      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/categories/slug/${slug}`,
       {
-        cache: "no-store",
-      }
+        cache: 'no-store',
+      },
     );
 
     if (!response.ok) {
       return null;
     }
 
-    return response.json();
+    const categoryData = await response.json();
+    console.log('Fetched category:', categoryData);
+    return categoryData;
   } catch (error) {
-    console.error("Error fetching category:", error);
+    console.error('Error fetching category:', error);
     return null;
   }
 }
@@ -32,17 +34,19 @@ async function getCategory(slug: string): Promise<Category | null> {
 async function getCategoryAlbums(categoryId: string): Promise<Album[]> {
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/albums?categoryId=${categoryId}`,
-      { cache: "no-store" }
+      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/albums?categoryId=${categoryId}`,
+      { cache: 'no-store' },
     );
 
     if (!response.ok) {
       return [];
     }
 
-    return response.json();
+    const albumsData = await response.json();
+    console.log('Fetched albums for category', categoryId, ':', albumsData);
+    return albumsData;
   } catch (error) {
-    console.error("Error fetching albums:", error);
+    console.error('Error fetching albums:', error);
     return [];
   }
 }
@@ -60,24 +64,16 @@ export default async function CategoryPage({ params }: CategoryPageParams) {
   return (
     <div className="py-8 px-6">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl md:text-4xl font-semibold mb-6">
-          {category.name}
-        </h1>
+        <h1 className="text-3xl md:text-4xl font-semibold mb-6">{category.name}</h1>
 
         {albums.length === 0 ? (
-          <p className="text-muted-foreground">
-            There are no albums in this category yet.
-          </p>
+          <p className="text-muted-foreground">There are no albums in this category yet.</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {albums
               .filter((album) => !album.isHidden)
               .map((album) => (
-                <Link
-                  key={album.id}
-                  href={`/${category.slug}/${album.slug}`}
-                  className="group"
-                >
+                <Link key={album.id} href={`/${category.slug}/${album.slug}`} className="group">
                   <div className="aspect-square relative overflow-hidden rounded-md border bg-muted transition-all hover:shadow-md">
                     {album.coverImageUrl ? (
                       <Image

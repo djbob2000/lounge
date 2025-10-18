@@ -4,21 +4,22 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev-all",
-    "lint": "turbo run lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write .",
     "check-types": "turbo run check-types",
-    "lint:fix": "turbo run lint -- --fix"
+    "check": "biome check ."
   },
   "devDependencies": {
-    "prettier": "^3.6.2",
-    "turbo": "^2.5.5",
-    "typescript": "5.8.2"
+    "@biomejs/biome": "^2.2.6",
+    "turbo": "^2.5.8",
+    "typescript": "5.9.3"
   },
   "packageManager": "pnpm@9.0.0",
   "engines": {
     "node": ">=18"
   },
   "dependencies": {
-    "@clerk/localizations": "^3.20.6"
+    "@clerk/localizations": "^3.26.2"
   }
 }

@@ -1,8 +1,10 @@
-import { NestFactory } from '@nestjs/core';
 import { clerkMiddleware } from '@clerk/express';
-import { AppModule } from './app.module';
 import { Logger } from '@nestjs/common';
-import { NextFunction, Request, Response } from 'express'; // Import Request, Response, NextFunction
+import { NestFactory } from '@nestjs/core';
+
+import type { Request as ExpressRequest, Response as ExpressResponse, NextFunction } from 'express';
+
+import { AppModule } from './app.module';
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
@@ -12,7 +14,7 @@ async function bootstrap(): Promise<void> {
   app.enableCors();
 
   // Conditionally apply Clerk middleware
-  app.use((req: Request, res: Response, next: NextFunction) => {
+  app.use((req: ExpressRequest, res: ExpressResponse, next: NextFunction) => {
     if (req.path === '/api/photos/upload') {
       // Adjust path if your app is not at the root
       return next();

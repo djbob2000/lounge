@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
 import { Check, ChevronsUpDown } from 'lucide-react';
+import { useState } from 'react';
 import { cn } from '../../lib/utils';
 import { Button } from './button';
 import {
@@ -58,17 +58,14 @@ export default function SelectCombobox({
             className={cn(
               'w-full justify-between',
               error && 'border-destructive focus-visible:ring-destructive',
-              !selectedOption && 'text-muted-foreground'
+              !selectedOption && 'text-muted-foreground',
             )}
           >
             {selectedOption ? selectedOption.label : placeholder}
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent
-          className="w-[--radix-popover-trigger-width] p-0"
-          align="start"
-        >
+        <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
           <Command>
             <CommandInput placeholder={searchPlaceholder} />
             <CommandList>
@@ -86,7 +83,7 @@ export default function SelectCombobox({
                     <Check
                       className={cn(
                         'mr-2 h-4 w-4',
-                        value === option.value ? 'opacity-100' : 'opacity-0'
+                        value === option.value ? 'opacity-100' : 'opacity-0',
                       )}
                     />
                     {option.label}

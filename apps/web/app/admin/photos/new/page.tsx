@@ -1,40 +1,34 @@
-import { Album } from "@lounge/types";
-import PhotoForm from "../../../../components/admin/PhotoForm";
+import type { Album } from '@lounge/types';
 
-// Function to fetch albums from the API
-async function getAlbums(): Promise<Album[]> {
-  try {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/albums`,
-      {
-        cache: "no-store",
-      }
-    );
+import PhotoUploadForm from '@/components/admin/photo-upload-form';
 
-    if (!response.ok) {
-      throw new Error("Failed to fetch albums");
-    }
+export default async function NewPhotoPage({
+  searchParams,
+}: {
+  searchParams: { albumId?: string };
+}) {
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/albums`,
+    {
+      cache: 'no-store',
+    },
+  );
 
-    return response.json();
-  } catch (error) {
-    console.error("Error fetching albums:", error);
-    return [];
+  if (!response.ok) {
+    throw new Error('Failed to fetch albums');
   }
-}
 
-export default async function NewPhotoPage() {
-  const albums = await getAlbums();
+  const albums: Album[] = await response.json();
+  const albumId = searchParams.albumId;
 
   return (
     <div>
       <div className="mb-6">
         <h1 className="text-2xl font-bold">Upload New Photo</h1>
-        <p className="text-gray-600 mt-2">
-          Upload a new photo to one of your albums
-        </p>
+        <p className="text-gray-600 mt-2">Upload a new photo to one of your albums</p>
       </div>
 
-      <PhotoForm albums={albums} />
+      <PhotoUploadForm albums={albums} albumId={albumId} />
     </div>
   );
 }

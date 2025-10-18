@@ -1,6 +1,7 @@
 // Export shared types
-export * from "./models";
-export * from "./api";
+
+export * from './api';
+export * from './models';
 
 // Legacy types
 export interface Message {
@@ -11,8 +12,8 @@ export interface Message {
  * User roles constants
  */
 export const UserRole = {
-  ADMIN: "admin",
-  USER: "user",
+  ADMIN: 'admin',
+  USER: 'user',
 } as const;
 
 export type UserRole = (typeof UserRole)[keyof typeof UserRole];

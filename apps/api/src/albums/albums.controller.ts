@@ -11,10 +11,9 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-
+import { AuthGuard, Public } from '../auth/auth.guard';
 import { AlbumsService } from './albums.service';
 import { CreateAlbumDto, UpdateAlbumDto, UpdateAlbumsOrderDto } from './dto';
-import { AuthGuard, Public } from '../auth/auth.guard';
 
 @Controller('albums')
 @UseGuards(AuthGuard)
@@ -70,10 +69,7 @@ export class AlbumsController {
    * Update album
    */
   @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateAlbumDto: UpdateAlbumDto,
-  ): Promise<Album> {
+  update(@Param('id') id: string, @Body() updateAlbumDto: UpdateAlbumDto): Promise<Album> {
     return this.albumsService.update(id, updateAlbumDto);
   }
 
@@ -101,9 +97,7 @@ export class AlbumsController {
    * Update albums order
    */
   @Patch('order/update')
-  updateOrder(
-    @Body() updateAlbumsOrderDto: UpdateAlbumsOrderDto,
-  ): Promise<Album[]> {
+  updateOrder(@Body() updateAlbumsOrderDto: UpdateAlbumsOrderDto): Promise<Album[]> {
     return this.albumsService.updateOrder(updateAlbumsOrderDto);
   }
 }

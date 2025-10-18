@@ -1,9 +1,8 @@
-"use client";
+'use client';
 
-import React, { useState } from "react";
-
-import { X } from "lucide-react";
-import { ImageSlider } from "./slider";
+import { X } from 'lucide-react';
+import { useState } from 'react';
+import { ImageSlider } from './slider';
 
 /**
  * Props for an image in the gallery
@@ -66,7 +65,7 @@ interface PhotoGalleryProps {
  */
 export function PhotoGallery({
   images,
-  className = "",
+  className = '',
   columns = 3,
   gap = 4,
   enableFullscreen = true,
@@ -79,7 +78,7 @@ export function PhotoGallery({
     if (enableFullscreen) {
       setFullscreenIndex(index);
       // Prevent body scroll when fullscreen is open
-      document.body.style.overflow = "hidden";
+      document.body.style.overflow = 'hidden';
     }
   };
 
@@ -87,7 +86,7 @@ export function PhotoGallery({
   const closeFullscreen = () => {
     setFullscreenIndex(null);
     // Restore body scroll when fullscreen is closed
-    document.body.style.overflow = "";
+    document.body.style.overflow = '';
   };
 
   if (!images.length) {
@@ -96,9 +95,7 @@ export function PhotoGallery({
 
   return (
     <>
-      <div
-        className={`grid grid-cols-1 md:grid-cols-${columns} gap-${gap} ${className}`}
-      >
+      <div className={`grid grid-cols-1 md:grid-cols-${columns} gap-${gap} ${className}`}>
         {images.map((image, index) => (
           <div
             key={image.id || index}

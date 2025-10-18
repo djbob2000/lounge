@@ -1,5 +1,4 @@
-import { extname } from 'path';
-
+import { extname } from 'node:path';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { MulterModule } from '@nestjs/platform-express';
@@ -14,7 +13,7 @@ import { StorageService } from './storage.service';
     MulterModule.register({
       storage: diskStorage({
         destination: './uploads/temp',
-        filename: (req, file, callback) => {
+        filename: (_req, file, callback) => {
           const uniqueSuffix = `${Date.now()}-${uuidv4()}`;
           const ext = extname(file.originalname);
           callback(null, `${uniqueSuffix}${ext}`);
@@ -23,7 +22,7 @@ import { StorageService } from './storage.service';
       limits: {
         fileSize: 10 * 1024 * 1024, // 10MB
       },
-      fileFilter: (req, file, callback) => {
+      fileFilter: (_req, file, callback) => {
         if (!file.originalname.match(/\.(jpg|jpeg|png|gif|webp)$/)) {
           return callback(new Error('Only image files are allowed!'), false);
         }

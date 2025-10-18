@@ -1,18 +1,18 @@
-import { auth, currentUser } from "@clerk/nextjs/server";
-import { NextResponse } from "next/server";
+import { auth, currentUser } from '@clerk/nextjs/server';
+import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {
     const { userId } = await auth();
 
     if (!userId) {
-      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
     const user = await currentUser();
 
     if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
     return NextResponse.json({
@@ -22,14 +22,14 @@ export async function GET() {
       lastName: user.lastName,
       privateMetadata: user.privateMetadata,
       role: user.privateMetadata.role,
-      hasAdminRole: user.privateMetadata.role === "admin",
+      hasAdminRole: user.privateMetadata.role === 'admin',
       isMiddlewareAdmin: hasAdminRole(user),
     });
   } catch (error) {
-    console.error("Error in debug-user route:", error);
+    console.error('Error in debug-user route:', error);
     return NextResponse.json(
-      { error: "Internal server error", details: (error as Error).message },
-      { status: 500 }
+      { error: 'Internal server error', details: (error as Error).message },
+      { status: 500 },
     );
   }
 }
@@ -38,11 +38,11 @@ export async function GET() {
 const hasAdminRole = (user: any): boolean => {
   if (
     user &&
-    typeof user.privateMetadata === "object" &&
+    typeof user.privateMetadata === 'object' &&
     user.privateMetadata !== null &&
-    "role" in user.privateMetadata
+    'role' in user.privateMetadata
   ) {
-    return (user.privateMetadata as { role?: unknown }).role === "admin";
+    return (user.privateMetadata as { role?: unknown }).role === 'admin';
   }
   return false;
 };

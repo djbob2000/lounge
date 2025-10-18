@@ -1,18 +1,9 @@
 import { Category } from '@lounge/types';
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
-import slugify from 'slugify';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-
-import {
-  CreateCategoryDto,
-  UpdateCategoryDto,
-  UpdateCategoriesOrderDto,
-} from './dto';
+import slugify from 'slugify';
 import { PrismaService } from '../prisma/prisma.service';
+import { CreateCategoryDto, UpdateCategoriesOrderDto, UpdateCategoryDto } from './dto';
 
 @Injectable()
 export class CategoriesService {
@@ -23,15 +14,13 @@ export class CategoriesService {
    */
   async create(createCategoryDto: CreateCategoryDto): Promise<Category> {
     // Generate slug from name if not provided
-    const slug =
-      createCategoryDto.slug || this.generateSlug(createCategoryDto.name);
+    const slug = createCategoryDto.slug || this.generateSlug(createCategoryDto.name);
 
     // Check slug uniqueness
     await this.checkSlugUniqueness(slug);
 
     // Find the maximum display order to add the new category at the end
-    const displayOrder =
-      createCategoryDto.displayOrder ?? (await this.getNextDisplayOrder());
+    const displayOrder = createCategoryDto.displayOrder ?? (await this.getNextDisplayOrder());
 
     // Create the category
     return this.prisma.category.create({
@@ -74,9 +63,11 @@ export class CategoriesService {
    * Get category by slug
    */
   async findBySlug(slug: string): Promise<Category> {
+    console.log('Service searching for slug:', slug);
     const category = await this.prisma.category.findUnique({
       where: { slug },
     });
+    console.log('Prisma findBySlug result:', category);
 
     if (!category) {
       throw new NotFoundException(`Category with slug ${slug} not found`);
@@ -88,10 +79,7 @@ export class CategoriesService {
   /**
    * Update category
    */
-  async update(
-    id: string,
-    updateCategoryDto: UpdateCategoryDto,
-  ): Promise<Category> {
+  async update(id: string, updateCategoryDto: UpdateCategoryDto): Promise<Category> {
     // Check if category exists
     await this.findOne(id);
 
@@ -127,9 +115,7 @@ export class CategoriesService {
   /**
    * Update display order of categories
    */
-  async updateOrder(
-    updateCategoriesOrderDto: UpdateCategoriesOrderDto,
-  ): Promise<Category[]> {
+  async updateOrder(updateCategoriesOrderDto: UpdateCategoriesOrderDto): Promise<Category[]> {
     try {
       // Validate that all categories exist before attempting to update
       for (const item of updateCategoriesOrderDto.categories) {
@@ -163,9 +149,7 @@ export class CategoriesService {
         error instanceof Prisma.PrismaClientKnownRequestError &&
         error.code === 'P2025' // Record to update not found
       ) {
-        throw new NotFoundException(
-          'One or more categories to update were not found.',
-        );
+        throw new NotFoundException('One or more categories to update were not found.');
       }
 
       // Re-throw other errors with more context
@@ -178,18 +162,13 @@ export class CategoriesService {
   /**
    * Check slug uniqueness
    */
-  private async checkSlugUniqueness(
-    slug: string,
-    excludeId?: string,
-  ): Promise<void> {
+  private async checkSlugUniqueness(slug: string, excludeId?: string): Promise<void> {
     const existingCategory = await this.prisma.category.findUnique({
       where: { slug },
     });
 
     if (existingCategory && existingCategory.id !== excludeId) {
-      throw new BadRequestException(
-        `Category with slug "${slug}" already exists`,
-      );
+      throw new BadRequestException(`Category with slug "${slug}" already exists`);
     }
   }
 

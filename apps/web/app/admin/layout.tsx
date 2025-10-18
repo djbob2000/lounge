@@ -1,27 +1,23 @@
-import { UserButton } from "@clerk/nextjs";
-import Link from "next/link";
-import { redirect } from "next/navigation";
-import { auth, currentUser } from "@clerk/nextjs/server";
-import { UserRole } from "@lounge/types";
+import { UserButton } from '@clerk/nextjs';
+import { auth, currentUser } from '@clerk/nextjs/server';
+import { UserRole } from '@lounge/types';
+import Link from 'next/link';
+import { redirect } from 'next/navigation';
 
-export default async function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const { userId } = await auth();
   const user = await currentUser();
 
   // Authentication check (additional protection, main check in middleware)
   if (!userId || !user) {
-    return redirect("/sign-in");
+    return redirect('/sign-in');
   }
 
   // Role check (additional protection, main check in middleware)
   const userRole = user.privateMetadata.role;
 
   if (userRole !== UserRole.ADMIN) {
-    return redirect("/");
+    return redirect('/');
   }
 
   return (
@@ -52,10 +48,7 @@ export default async function AdminLayout({
               >
                 Фотографії
               </Link>
-              <Link
-                href="/"
-                className="text-gray-600 hover:text-gray-900 transition-colors"
-              >
+              <Link href="/" className="text-gray-600 hover:text-gray-900 transition-colors">
                 На сайт
               </Link>
             </nav>
@@ -67,9 +60,7 @@ export default async function AdminLayout({
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {children}
-      </main>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">{children}</main>
     </div>
   );
 }

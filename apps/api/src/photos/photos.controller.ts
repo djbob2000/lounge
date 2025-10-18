@@ -1,23 +1,22 @@
 import { Photo } from '@lounge/types';
 import {
-  Controller,
-  Get,
-  Post,
-  Patch,
-  Delete,
-  Param,
   Body,
-  UseGuards,
-  UploadedFile,
-  UseInterceptors,
+  Controller,
+  Delete,
+  Get,
+  Param,
   ParseUUIDPipe,
+  Patch,
+  Post,
   Query,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-
-import { UploadPhotoDto, UpdatePhotoDto, UpdatePhotosOrderDto } from './dto';
-import { PhotosService } from './photos.service';
 import { AuthGuard, Public } from '../auth/auth.guard';
+import { UpdatePhotoDto, UpdatePhotosOrderDto, UploadPhotoDto } from './dto';
+import { PhotosService } from './photos.service';
 
 @Controller('photos')
 @UseGuards(AuthGuard)
@@ -52,9 +51,7 @@ export class PhotosController {
 
   @Get('album/:albumId')
   @Public()
-  async findByAlbum(
-    @Param('albumId', ParseUUIDPipe) albumId: string,
-  ): Promise<Photo[]> {
+  async findByAlbum(@Param('albumId', ParseUUIDPipe) albumId: string): Promise<Photo[]> {
     return this.photosService.findByAlbum(albumId);
   }
 
@@ -81,9 +78,7 @@ export class PhotosController {
   }
 
   @Patch('order')
-  async updateOrder(
-    @Body() updatePhotosOrderDto: UpdatePhotosOrderDto,
-  ): Promise<Photo[]> {
+  async updateOrder(@Body() updatePhotosOrderDto: UpdatePhotosOrderDto): Promise<Photo[]> {
     return this.photosService.updateOrder(updatePhotosOrderDto);
   }
 

@@ -14,6 +14,6 @@ export class AppController {
 
   @Get('/message')
   getMessage(): Message {
-    return { text: 'Привіт від Nest.js!' };
+    return { text: 'Hello from Nest.js!' };
   }
 }

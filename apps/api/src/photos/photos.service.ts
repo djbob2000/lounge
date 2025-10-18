@@ -1,15 +1,10 @@
 import { Photo } from '@lounge/types';
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { Photo as PrismaPhoto } from '@prisma/client';
-
-import { UpdatePhotoDto, UpdatePhotosOrderDto } from './dto';
 import { AlbumsService } from '../albums/albums.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { StorageService } from '../storage/storage.service';
+import { UpdatePhotoDto, UpdatePhotosOrderDto } from './dto';
 
 @Injectable()
 export class PhotosService {
@@ -28,32 +23,55 @@ export class PhotosService {
     displayOrder?: number,
     isSliderImage = false,
   ): Promise<Photo> {
+    console.log('Starting photo upload for albumId:', albumId, 'file:', file.originalname);
     // Check if album exists
-    await this.albumsService.findOne(albumId);
+    try {
+      await this.albumsService.findOne(albumId);
+      console.log('Album check passed for ID:', albumId);
+    } catch (error) {
+      console.error('Album check failed:', error);
+      throw error;
+    }
 
     // Upload file to storage
-    const uploadResult = await this.storageService.uploadFile(file);
+    let uploadResult: { url: string; thumbnailUrl: string };
+    try {
+      console.log('Uploading file to storage...');
+      uploadResult = await this.storageService.uploadFile(file);
+      console.log('File uploaded to storage successfully:', uploadResult.filename);
+    } catch (error) {
+      console.error('Storage upload failed:', error);
+      throw error;
+    }
 
     // Determine display order if not provided
     const order =
-      displayOrder !== undefined
-        ? displayOrder
-        : await this.getNextDisplayOrder(albumId);
+      displayOrder !== undefined ? displayOrder : await this.getNextDisplayOrder(albumId);
 
     // Create photo record in database
-    const photo = await this.prisma.photo.create({
-      data: {
-        albumId,
-        filename: uploadResult.filename,
-        originalUrl: uploadResult.originalUrl,
-        thumbnailUrl: uploadResult.thumbnailUrl,
-        displayOrder: order,
-        isSliderImage,
-        width: uploadResult.width,
-        height: uploadResult.height,
-      },
-    });
+    let photo: { id: string; title: string; url: string; thumbnailUrl: string };
+    try {
+      console.log('Creating photo record in database...');
+      photo = await this.prisma.photo.create({
+        data: {
+          albumId,
+          filename: uploadResult.filename,
+          originalUrl: uploadResult.originalUrl,
+          thumbnailUrl: uploadResult.thumbnailUrl,
+          displayOrder: Number(order),
+          isSliderImage,
+          width: uploadResult.width,
+          height: uploadResult.height,
+        },
+      });
+      console.log('Photo record created successfully:', photo.id);
+    } catch (error) {
+      console.error('Database create failed:', error);
+      // Optionally rollback storage upload if needed
+      throw error;
+    }
 
+    console.log('Photo upload completed successfully');
     return this.mapPrismaPhotoToPhoto(photo);
   }
 
@@ -143,9 +161,7 @@ export class PhotosService {
     });
 
     // Get file ID from URL
-    const fileId = this.extractFileIdFromUrl(
-      photo.originalUrl || photo.thumbnailUrl,
-    );
+    const fileId = this.extractFileIdFromUrl(photo.originalUrl || photo.thumbnailUrl);
 
     // Delete files from cloud storage
     await this.storageService.deleteFile(fileId);
@@ -156,9 +172,7 @@ export class PhotosService {
   /**
    * Update photo order
    */
-  async updateOrder(
-    updatePhotosOrderDto: UpdatePhotosOrderDto,
-  ): Promise<Photo[]> {
+  async updateOrder(updatePhotosOrderDto: UpdatePhotosOrderDto): Promise<Photo[]> {
     const { photos } = updatePhotosOrderDto;
 
     // Check if all photos exist

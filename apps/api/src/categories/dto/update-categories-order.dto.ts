@@ -10,18 +10,18 @@ import {
 } from 'class-validator';
 
 class CategoryOrderItem {
-  @IsNotEmpty({ message: 'ID категорії не може бути порожнім' })
-  @IsString({ message: 'ID категорії повинен бути рядком' })
+  @IsNotEmpty({ message: 'Category ID cannot be empty' })
+  @IsString({ message: 'Category ID must be a string' })
   id: string;
 
-  @IsNotEmpty({ message: 'Порядок відображення не може бути порожнім' })
-  @IsNumber({}, { message: 'Порядок відображення повинен бути числом' })
+  @IsNotEmpty({ message: 'Display order cannot be empty' })
+  @IsNumber({}, { message: 'Display order must be a number' })
   displayOrder: number;
 }
 
 export class UpdateCategoriesOrderDto implements UpdateCategoriesOrderRequest {
-  @IsArray({ message: 'Категорії повинні бути масивом' })
-  @ArrayMinSize(1, { message: 'Має бути вказана принаймні одна категорія' })
+  @IsArray({ message: 'Categories must be an array' })
+  @ArrayMinSize(1, { message: 'At least one category must be specified' })
   @ValidateNested({ each: true })
   @Type(() => CategoryOrderItem)
   categories: CategoryOrderItem[];

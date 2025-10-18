@@ -11,14 +11,9 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-
-import { CategoriesService } from './categories.service';
-import {
-  CreateCategoryDto,
-  UpdateCategoryDto,
-  UpdateCategoriesOrderDto,
-} from './dto';
 import { AuthGuard, Public } from '../auth/auth.guard';
+import { CategoriesService } from './categories.service';
+import { CreateCategoryDto, UpdateCategoriesOrderDto, UpdateCategoryDto } from './dto';
 
 @Controller('categories')
 @UseGuards(AuthGuard)
@@ -58,6 +53,7 @@ export class CategoriesController {
   @Get('slug/:slug')
   @Public()
   findBySlug(@Param('slug') slug: string): Promise<Category> {
+    console.log('Controller received slug:', slug);
     return this.categoriesService.findBySlug(slug);
   }
 
@@ -65,9 +61,7 @@ export class CategoriesController {
    * Update categories display order
    */
   @Patch('order/update')
-  updateOrder(
-    @Body() updateCategoriesOrderDto: UpdateCategoriesOrderDto,
-  ): Promise<Category[]> {
+  updateOrder(@Body() updateCategoriesOrderDto: UpdateCategoriesOrderDto): Promise<Category[]> {
     return this.categoriesService.updateOrder(updateCategoriesOrderDto);
   }
 
@@ -75,10 +69,7 @@ export class CategoriesController {
    * Update category
    */
   @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateCategoryDto: UpdateCategoryDto,
-  ): Promise<Category> {
+  update(@Param('id') id: string, @Body() updateCategoryDto: UpdateCategoryDto): Promise<Category> {
     return this.categoriesService.update(id, updateCategoryDto);
   }
 

@@ -1,19 +1,17 @@
 // Select Components
-export { default as SelectCombobox } from '../ui/select-combobox';
+
 export type { SelectOption } from '../ui/select-combobox';
-
-export { default as CategorySelect } from './CategorySelect';
-export { default as AlbumSelect } from './AlbumSelect';
-export { default as StatusSelect } from './StatusSelect';
-export { default as PrioritySelect } from './PrioritySelect';
-
+export { default as SelectCombobox } from '../ui/select-combobox';
 // Other Admin Components
-export { default as AlbumForm } from './AlbumForm';
-export { default as PhotoForm } from './PhotoForm';
-export { default as CategoryForm } from './CategoryForm';
-export { default as PhotoGrid } from './PhotoGrid';
-export { default as PhotoUploadForm } from './PhotoUploadForm';
-export { default as DraggableList } from './DraggableList';
-
+export { default as AlbumForm } from './album-form';
+export { default as AlbumSelect } from './album-select';
+export { default as CategoryForm } from './category-form';
+export { default as CategorySelect } from './category-select';
+export { default as DraggableList } from './draggable-list';
+export { default as PhotoForm } from './photo-form';
+export { default as PhotoGrid } from './photo-grid';
+export { default as PhotoUploadForm } from './photo-upload-form';
+export { default as PrioritySelect } from './priority-select';
 // Examples
-export { default as SelectExamples } from './SelectExamples';
+export { default as SelectExamples } from './select-examples';
+export { default as StatusSelect } from './status-select';

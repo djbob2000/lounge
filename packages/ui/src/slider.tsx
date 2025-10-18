@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import React, { useState, useCallback, useEffect } from "react";
-
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import useEmblaCarousel, { EmblaOptionsType } from "embla-carousel-react";
+import type { EmblaOptionsType } from 'embla-carousel';
+import useEmblaCarousel from 'embla-carousel-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
 
 /**
  * Props for ImageSlider component
@@ -52,10 +52,7 @@ interface ImageSliderProps {
   /**
    * Callback when slide is clicked
    */
-  onSlideClick?: (
-    index: number,
-    slide: { id?: string; src: string; alt: string }
-  ) => void;
+  onSlideClick?: (index: number, slide: { id?: string; src: string; alt: string }) => void;
 }
 
 /**
@@ -68,8 +65,8 @@ export function ImageSlider({
   autoplayInterval = 5000,
   showDots = true,
   showArrows = true,
-  className = "",
-  slideClassName = "",
+  className = '',
+  slideClassName = '',
   onSlideChange,
   onSlideClick,
 }: ImageSliderProps) {
@@ -88,16 +85,19 @@ export function ImageSlider({
     (index: number) => {
       if (emblaApi) emblaApi.scrollTo(index);
     },
-    [emblaApi]
+    [emblaApi],
   );
 
   const handleSlideClick = useCallback(
     (index: number) => {
       if (onSlideClick && index >= 0 && index < slides.length) {
-        onSlideClick(index, slides[index]);
+        const slide = slides[index];
+        if (slide) {
+          onSlideClick(index, slide);
+        }
       }
     },
-    [onSlideClick, slides]
+    [onSlideClick, slides],
   );
 
   const onSelect = useCallback(() => {
@@ -111,9 +111,9 @@ export function ImageSlider({
 
   useEffect(() => {
     if (!emblaApi) return;
-    emblaApi.on("select", onSelect);
+    emblaApi.on('select', onSelect);
     return () => {
-      emblaApi.off("select", onSelect);
+      emblaApi.off('select', onSelect);
     };
   }, [emblaApi, onSelect]);
 
@@ -141,12 +141,16 @@ export function ImageSlider({
               key={slide.id || index}
               className={`relative flex-none w-full ${slideClassName}`}
               onClick={() => handleSlideClick(index)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  handleSlideClick(index);
+                }
+              }}
+              role="button"
+              tabIndex={0}
             >
-              <img
-                src={slide.src}
-                alt={slide.alt}
-                className="w-full h-full object-cover"
-              />
+              <img src={slide.src} alt={slide.alt} className="w-full h-full object-cover" />
             </div>
           ))}
         </div>
@@ -155,6 +159,7 @@ export function ImageSlider({
       {showArrows && slides.length > 1 && (
         <>
           <button
+            type="button"
             onClick={scrollPrev}
             className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/40 text-white rounded-full p-2 z-10 hover:bg-black/60 transition"
             aria-label="Previous slide"
@@ -162,6 +167,7 @@ export function ImageSlider({
             <ChevronLeft size={24} />
           </button>
           <button
+            type="button"
             onClick={scrollNext}
             className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/40 text-white rounded-full p-2 z-10 hover:bg-black/60 transition"
             aria-label="Next slide"
@@ -175,13 +181,12 @@ export function ImageSlider({
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10">
           {slides.map((_, index) => (
             <button
-              key={index}
+              key={`slide-${index}`}
+              type="button"
               onClick={() => scrollTo(index)}
               aria-label={`Go to slide ${index + 1}`}
               className={`w-2.5 h-2.5 rounded-full transition ${
-                index === selectedIndex
-                  ? "bg-white scale-110"
-                  : "bg-white/50 hover:bg-white/80"
+                index === selectedIndex ? 'bg-white scale-110' : 'bg-white/50 hover:bg-white/80'
               }`}
             />
           ))}

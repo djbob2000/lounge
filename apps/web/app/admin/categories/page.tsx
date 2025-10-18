@@ -1,24 +1,24 @@
-import Link from "next/link";
-import { Category } from "@lounge/types";
-import CategoryClientPage from "./CategoryClientPage";
+import type { Category } from '@lounge/types';
+import Link from 'next/link';
+import CategoryClientPage from './category-client-page';
 
 // Function to fetch categories from the API
 async function getCategories(): Promise<Category[]> {
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/categories`,
+      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/categories`,
       {
-        cache: "no-store",
-      }
+        cache: 'no-store',
+      },
     );
 
     if (!response.ok) {
-      throw new Error("Помилка отримання категорій");
+      throw new Error('Помилка отримання категорій');
     }
 
     return response.json();
   } catch (error) {
-    console.error("Помилка отримання категорій:", error);
+    console.error('Помилка отримання категорій:', error);
     return [];
   }
 }

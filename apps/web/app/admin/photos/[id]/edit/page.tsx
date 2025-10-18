@@ -1,27 +1,27 @@
-import { Album, Photo } from "@lounge/types";
-import PhotoForm from "../../../../../components/admin/PhotoForm";
-import { notFound } from "next/navigation";
+import type { Album, Photo } from '@lounge/types';
+import { notFound } from 'next/navigation';
+import PhotoForm from '../../../../../components/admin/photo-form';
 
 // Function to fetch a specific photo
 async function getPhoto(id: string): Promise<Photo | null> {
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/photos/${id}`,
+      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/photos/${id}`,
       {
-        cache: "no-store",
-      }
+        cache: 'no-store',
+      },
     );
 
     if (!response.ok) {
       if (response.status === 404) {
         return null;
       }
-      throw new Error("Failed to fetch photo");
+      throw new Error('Failed to fetch photo');
     }
 
     return response.json();
   } catch (error) {
-    console.error("Error fetching photo:", error);
+    console.error('Error fetching photo:', error);
     return null;
   }
 }
@@ -30,19 +30,19 @@ async function getPhoto(id: string): Promise<Photo | null> {
 async function getAlbums(): Promise<Album[]> {
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/albums`,
+      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/albums`,
       {
-        cache: "no-store",
-      }
+        cache: 'no-store',
+      },
     );
 
     if (!response.ok) {
-      throw new Error("Failed to fetch albums");
+      throw new Error('Failed to fetch albums');
     }
 
     return response.json();
   } catch (error) {
-    console.error("Error fetching albums:", error);
+    console.error('Error fetching albums:', error);
     return [];
   }
 }

@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
-import { Category } from "@lounge/types";
+import type { Category } from '@lounge/types';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 interface HeaderProps {
   initialCategories?: Category[];
@@ -18,14 +18,14 @@ export const Header = ({ initialCategories = [] }: HeaderProps) => {
     const fetchCategories = async () => {
       try {
         if (initialCategories.length === 0) {
-          const response = await fetch("/api/categories");
+          const response = await fetch('/api/categories');
           if (response.ok) {
             const data = await response.json();
             setCategories(data);
           }
         }
       } catch (error) {
-        console.error("Failed to fetch categories:", error);
+        console.error('Failed to fetch categories:', error);
       }
     };
 
@@ -42,11 +42,7 @@ export const Header = ({ initialCategories = [] }: HeaderProps) => {
         </Link>
 
         {/* Mobile menu button */}
-        <button
-          className="md:hidden p-2"
-          onClick={toggleMenu}
-          aria-label="Toggle menu"
-        >
+        <button className="md:hidden p-2" onClick={toggleMenu} aria-label="Toggle menu">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
@@ -58,9 +54,7 @@ export const Header = ({ initialCategories = [] }: HeaderProps) => {
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeWidth={2}
-              d={
-                isMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"
-              }
+              d={isMenuOpen ? 'M6 18L18 6M6 6l12 12' : 'M4 6h16M4 12h16M4 18h16'}
             />
           </svg>
         </button>
@@ -74,7 +68,7 @@ export const Header = ({ initialCategories = [] }: HeaderProps) => {
               <Link
                 key={category.id}
                 href={`/${category.slug}`}
-                className={`text-base ${pathname === `/${category.slug}` ? "font-semibold" : "font-normal"} hover:text-primary transition-colors`}
+                className={`text-base ${pathname === `/${category.slug}` ? 'font-semibold' : 'font-normal'} hover:text-primary transition-colors`}
               >
                 {category.name}
               </Link>
@@ -92,7 +86,7 @@ export const Header = ({ initialCategories = [] }: HeaderProps) => {
                   <Link
                     key={category.id}
                     href={`/${category.slug}`}
-                    className={`text-base ${pathname === `/${category.slug}` ? "font-semibold" : "font-normal"} hover:text-primary transition-colors`}
+                    className={`text-base ${pathname === `/${category.slug}` ? 'font-semibold' : 'font-normal'} hover:text-primary transition-colors`}
                     onClick={() => setIsMenuOpen(false)}
                   >
                     {category.name}

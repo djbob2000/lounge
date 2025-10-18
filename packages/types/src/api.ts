@@ -2,7 +2,7 @@
  * API request and response interfaces
  */
 
-import { Album, Category, Photo } from "./models";
+import type { Album, Category, Photo } from './models';
 
 /**
  * Category requests
@@ -83,7 +83,7 @@ export interface UpdatePhotosOrderRequest {
  * API responses
  */
 export interface ApiResponse<T> {
-  status: "success" | "error";
+  status: 'success' | 'error';
   data?: T;
   error?: {
     code: string;
@@ -101,9 +101,7 @@ export interface PaginatedResponse<T> {
 
 export type CategoriesResponse = ApiResponse<Category[]>;
 export type CategoryResponse = ApiResponse<Category>;
-export type PaginatedCategoriesResponse = ApiResponse<
-  PaginatedResponse<Category>
->;
+export type PaginatedCategoriesResponse = ApiResponse<PaginatedResponse<Category>>;
 
 export type AlbumsResponse = ApiResponse<Album[]>;
 export type AlbumResponse = ApiResponse<Album>;

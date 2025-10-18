@@ -1,24 +1,24 @@
-import Link from "next/link";
-import { Album, Category } from "@lounge/types";
-import AlbumClientPage from "./AlbumClientPage";
+import type { Album, Category } from '@lounge/types';
+import Link from 'next/link';
+import AlbumClientPage from './album-client-page';
 
 // Function to fetch categories from the API
 async function getCategories(): Promise<Category[]> {
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/categories`,
+      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/categories`,
       {
-        cache: "no-store",
-      }
+        cache: 'no-store',
+      },
     );
 
     if (!response.ok) {
-      throw new Error("Error fetching categories");
+      throw new Error('Error fetching categories');
     }
 
     return response.json();
   } catch (error) {
-    console.error("Error fetching categories:", error);
+    console.error('Error fetching categories:', error);
     return [];
   }
 }
@@ -27,23 +27,42 @@ async function getCategories(): Promise<Category[]> {
 async function getAlbumsByCategory(categoryId: string): Promise<Album[]> {
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/albums/category/${categoryId}`,
+      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/albums/category/${categoryId}`,
       {
-        cache: "no-store",
-      }
+        cache: 'no-store',
+      },
     );
 
     if (!response.ok) {
-      throw new Error("Error fetching albums");
+      throw new Error('Error fetching albums');
     }
 
     return response.json();
   } catch (error) {
-    console.error("Error fetching albums:", error);
+    console.error('Error fetching albums:', error);
     return [];
   }
 }
 
+export async function getAlbums(): Promise<Album[]> {
+  try {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/albums`,
+      {
+        cache: 'no-store',
+      },
+    );
+
+    if (!response.ok) {
+      throw new Error('Error fetching albums');
+    }
+
+    return response.json();
+  } catch (error) {
+    console.error('Error fetching albums:', error);
+    return [];
+  }
+}
 export default async function AlbumsPage() {
   const categories = await getCategories();
 
@@ -52,7 +71,7 @@ export default async function AlbumsPage() {
     categories.map(async (category) => ({
       ...category,
       albums: await getAlbumsByCategory(category.id),
-    }))
+    })),
   );
 
   return (
@@ -80,15 +99,10 @@ export default async function AlbumsPage() {
       ) : (
         <div className="space-y-6">
           {categoriesWithAlbums.map((category) => (
-            <div
-              key={category.id}
-              className="bg-white rounded-lg shadow overflow-hidden"
-            >
+            <div key={category.id} className="bg-white rounded-lg shadow overflow-hidden">
               <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-medium text-gray-900">
-                    {category.name}
-                  </h2>
+                  <h2 className="text-lg font-medium text-gray-900">{category.name}</h2>
                   <Link
                     href={`/admin/albums/new?categoryId=${category.id}`}
                     className="text-sm bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded transition-colors"

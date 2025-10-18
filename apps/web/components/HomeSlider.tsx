@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useCallback } from "react";
-import Image from "next/image";
-import { Photo } from "@lounge/types";
+import type { Photo } from '@lounge/types';
+import Image from 'next/image';
+import { useCallback, useEffect, useState } from 'react';
 
 interface HomeSliderProps {
   photos: Photo[];
@@ -54,7 +54,7 @@ const HomeSlider = ({ photos }: HomeSliderProps) => {
   return (
     <div className="relative w-full h-[60vh] overflow-hidden">
       <div
-        className={`w-full h-full transition-opacity duration-500 ${isTransitioning ? "opacity-30" : "opacity-100"}`}
+        className={`w-full h-full transition-opacity duration-500 ${isTransitioning ? 'opacity-30' : 'opacity-100'}`}
       >
         <Image
           src={currentPhoto.originalUrl}
@@ -77,9 +77,7 @@ const HomeSlider = ({ photos }: HomeSliderProps) => {
               }, 500);
             }}
             className={`w-3 h-3 rounded-full transition-all ${
-              index === safeIndex
-                ? "bg-white scale-110"
-                : "bg-white/50 hover:bg-white/80"
+              index === safeIndex ? 'bg-white scale-110' : 'bg-white/50 hover:bg-white/80'
             }`}
             aria-label={`Go to slide ${index + 1}`}
           />
@@ -94,8 +92,7 @@ const HomeSlider = ({ photos }: HomeSliderProps) => {
             setIsTransitioning(true);
             setTimeout(() => {
               setCurrentIndex(
-                (prevIndex) =>
-                  (prevIndex - 1 + safePhotos.length) % safePhotos.length
+                (prevIndex) => (prevIndex - 1 + safePhotos.length) % safePhotos.length,
               );
               setIsTransitioning(false);
             }, 500);
@@ -131,12 +128,7 @@ const HomeSlider = ({ photos }: HomeSliderProps) => {
             stroke="currentColor"
             className="w-6 h-6"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 5l7 7-7 7"
-            />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
         </button>
       </div>

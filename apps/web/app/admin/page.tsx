@@ -1,12 +1,12 @@
-import { currentUser } from "@clerk/nextjs/server";
-import Link from "next/link";
+import { currentUser } from '@clerk/nextjs/server';
+import Link from 'next/link';
 
 // Function to fetch stats from the API
 async function getStats() {
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
     const response = await fetch(`${apiUrl}/stats`, {
-      cache: "no-store",
+      cache: 'no-store',
     });
 
     if (!response.ok) {
@@ -20,7 +20,7 @@ async function getStats() {
 
     return response.json();
   } catch (error) {
-    console.error("Помилка отримання статистики:", error);
+    console.error('Помилка отримання статистики:', error);
     return {
       totalCategories: 0,
       totalAlbums: 0,
@@ -36,28 +36,28 @@ export default async function AdminPage() {
 
   const statCards = [
     {
-      title: "Категорії",
+      title: 'Категорії',
       value: stats.totalCategories,
-      link: "/admin/categories",
-      color: "bg-blue-500",
+      link: '/admin/categories',
+      color: 'bg-blue-500',
     },
     {
-      title: "Альбоми",
+      title: 'Альбоми',
       value: stats.totalAlbums,
-      link: "/admin/albums",
-      color: "bg-green-500",
+      link: '/admin/albums',
+      color: 'bg-green-500',
     },
     {
-      title: "Фотографії",
+      title: 'Фотографії',
       value: stats.totalPhotos,
-      link: "/admin/photos",
-      color: "bg-purple-500",
+      link: '/admin/photos',
+      color: 'bg-purple-500',
     },
     {
-      title: "Слайдер",
+      title: 'Слайдер',
       value: stats.sliderPhotos,
-      link: "/admin/photos?slider=true",
-      color: "bg-pink-500",
+      link: '/admin/photos?slider=true',
+      color: 'bg-pink-500',
     },
   ];
 
@@ -66,12 +66,9 @@ export default async function AdminPage() {
       <h1 className="text-2xl font-bold mb-6">Адміністративна панель</h1>
 
       <div className="mb-8">
-        <h2 className="text-lg font-semibold mb-3">
-          Ласкаво просимо, {user?.firstName}!
-        </h2>
+        <h2 className="text-lg font-semibold mb-3">Ласкаво просимо, {user?.firstName}!</h2>
         <p className="text-gray-600">
-          Керуйте контентом вашого фотосайту через зручну адміністративну
-          панель.
+          Керуйте контентом вашого фотосайту через зручну адміністративну панель.
         </p>
       </div>
 
@@ -92,22 +89,13 @@ export default async function AdminPage() {
         <div className="bg-white rounded-lg shadow-md p-6">
           <h3 className="text-lg font-semibold mb-4">Швидкі дії</h3>
           <div className="flex flex-col space-y-3">
-            <Link
-              href="/admin/categories/new"
-              className="text-blue-600 hover:text-blue-800"
-            >
+            <Link href="/admin/categories/new" className="text-blue-600 hover:text-blue-800">
               Створити нову категорію
             </Link>
-            <Link
-              href="/admin/albums/new"
-              className="text-blue-600 hover:text-blue-800"
-            >
+            <Link href="/admin/albums/new" className="text-blue-600 hover:text-blue-800">
               Створити новий альбом
             </Link>
-            <Link
-              href="/admin/photos/upload"
-              className="text-blue-600 hover:text-blue-800"
-            >
+            <Link href="/admin/photos/upload" className="text-blue-600 hover:text-blue-800">
               Завантажити фотографії
             </Link>
           </div>

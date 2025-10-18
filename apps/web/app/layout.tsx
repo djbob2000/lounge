@@ -1,12 +1,13 @@
 import './globals.css';
+import { ukUA } from '@clerk/localizations';
+import { ClerkProvider } from '@clerk/nextjs';
+import type { Category } from '@lounge/types';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
-import Header from '../components/layout/Header';
-import Footer from '../components/layout/Footer';
+import { Toaster } from 'sonner';
 import ClientLayout from '../components/layout/ClientLayout';
-import { Category } from '@lounge/types';
-import { ClerkProvider } from '@clerk/nextjs';
-import { ukUA } from '@clerk/localizations';
+import Footer from '../components/layout/Footer';
+import Header from '../components/layout/Header';
 
 const inter = Inter({ subsets: ['latin', 'cyrillic'] });
 
@@ -26,9 +27,7 @@ async function getCategories(): Promise<Category[]> {
     });
 
     if (!response.ok) {
-      throw new Error(
-        `Failed to fetch categories: ${response.status} ${response.statusText}`
-      );
+      throw new Error(`Failed to fetch categories: ${response.status} ${response.statusText}`);
     }
 
     return response.json();
@@ -39,24 +38,19 @@ async function getCategories(): Promise<Category[]> {
   }
 }
 
-export default async function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const categories = await getCategories();
 
   return (
     <ClerkProvider localization={ukUA as any}>
       <html lang="uk">
         <body suppressHydrationWarning={true}>
-          <ClientLayout
-            className={`${inter.className} min-h-screen flex flex-col`}
-          >
+          <ClientLayout className={`${inter.className} min-h-screen flex flex-col`}>
             <Header initialCategories={categories} />
             <main className="flex-1">{children}</main>
             <Footer />
           </ClientLayout>
+          <Toaster />
         </body>
       </html>
     </ClerkProvider>

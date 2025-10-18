@@ -20,8 +20,7 @@ export class AuthService {
   constructor(configService: ConfigService) {
     const secretKey = configService.get<string>('CLERK_SECRET_KEY');
     if (!secretKey) {
-      const errorMsg =
-        'CLERK_SECRET_KEY is not set. Cannot initialize Clerk backend client.';
+      const errorMsg = 'CLERK_SECRET_KEY is not set. Cannot initialize Clerk backend client.';
       this.logger.error(errorMsg);
       throw new Error(errorMsg);
     }
@@ -45,18 +44,13 @@ export class AuthService {
 
       return {
         userId: user.id,
-        email: user.emailAddresses.find(
-          (e) => e.id === user.primaryEmailAddressId,
-        )?.emailAddress,
+        email: user.emailAddresses.find((e) => e.id === user.primaryEmailAddressId)?.emailAddress,
         firstName: user.firstName,
         lastName: user.lastName,
         privateMetadata: user.privateMetadata as Record<string, unknown>, // Cast if necessary, ensure type safety
       };
     } catch (error) {
-      this.logger.error(
-        `Error fetching user ${userId}: ${error.message}`,
-        error.stack,
-      );
+      this.logger.error(`Error fetching user ${userId}: ${error.message}`, error.stack);
       if (error instanceof NotFoundException) {
         throw error;
       }

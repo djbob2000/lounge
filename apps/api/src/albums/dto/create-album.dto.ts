@@ -2,6 +2,7 @@ import { CreateAlbumRequest } from '@lounge/types';
 import {
   IsBoolean,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
   IsUUID,
@@ -11,38 +12,39 @@ import {
 } from 'class-validator';
 
 export class CreateAlbumDto implements CreateAlbumRequest {
-  @IsNotEmpty({ message: 'Назва альбому не може бути порожньою' })
-  @IsString({ message: 'Назва альбому повинна бути рядком' })
+  @IsNotEmpty({ message: 'Album name cannot be empty' })
+  @IsString({ message: 'Album name must be a string' })
   @MinLength(2, {
-    message: 'Назва альбому повинна містити мінімум 2 символи',
+    message: 'Album name must contain at least 2 characters',
   })
   @MaxLength(100, {
-    message: 'Назва альбому не може перевищувати 100 символів',
+    message: 'Album name cannot exceed 100 characters',
   })
   name: string;
 
   @IsOptional()
-  @IsString({ message: 'Slug повинен бути рядком' })
+  @IsString({ message: 'Slug must be a string' })
   @Matches(/^[a-z0-9-]+$/, {
-    message: 'Slug може містити лише малі літери латиниці, цифри та дефіс',
+    message: 'Slug can only contain lowercase Latin letters, numbers, and hyphens',
   })
-  @MinLength(2, { message: 'Slug повинен містити мінімум 2 символи' })
-  @MaxLength(100, { message: 'Slug не може перевищувати 100 символів' })
+  @MinLength(2, { message: 'Slug must contain at least 2 characters' })
+  @MaxLength(100, { message: 'Slug cannot exceed 100 characters' })
   slug?: string;
 
   @IsOptional()
-  @IsString({ message: 'Опис повинен бути рядком' })
-  @MaxLength(1000, { message: 'Опис не може перевищувати 1000 символів' })
+  @IsString({ message: 'Description must be a string' })
+  @MaxLength(1000, { message: 'Description cannot exceed 1000 characters' })
   description?: string;
 
-  @IsNotEmpty({ message: "ID категорії є обов'язковим" })
-  @IsUUID(4, { message: 'ID категорії повинен бути валідним UUID' })
+  @IsNotEmpty({ message: 'Category ID is required' })
+  @IsUUID(4, { message: 'Category ID must be a valid UUID' })
   categoryId: string;
 
-  @IsOptional()
-  displayOrder?: number;
+  @IsNotEmpty({ message: 'Display order is required' })
+  @IsNumber({}, { message: 'Display order must be a number' })
+  displayOrder: number;
 
   @IsOptional()
-  @IsBoolean({ message: 'isHidden повинен бути булевим значенням' })
+  @IsBoolean({ message: 'isHidden must be a boolean value' })
   isHidden?: boolean;
 }
