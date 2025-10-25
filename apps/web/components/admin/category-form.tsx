@@ -27,15 +27,14 @@ export default function CategoryForm({ category }: CategoryFormProps) {
 
     try {
       const token = await getToken();
-      console.log('Получен токен:', token);
-      console.log('Длина токена:', token?.length);
+      console.log('Отримано токен:', !!token);
 
       const url = category
         ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/categories/${category.id}`
         : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/categories`;
 
-      console.log('URL запроса:', url);
-      console.log('Authorization header:', `Bearer ${token}`);
+      console.log('URL запиту:', url);
+      console.log('Дані форми:', formData);
 
       const method = category ? 'PATCH' : 'POST';
 
@@ -48,8 +47,12 @@ export default function CategoryForm({ category }: CategoryFormProps) {
         body: JSON.stringify(formData),
       });
 
+      console.log('Статус відповіді:', response.status, response.statusText);
+
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorData = await response
+          .json()
+          .catch(() => ({ message: 'Помилка збереження категорії' }));
         console.error('Error response:', errorData);
         if (errorData.message && Array.isArray(errorData.message)) {
           const fieldErrors: Record<string, string> = {};
@@ -68,8 +71,12 @@ export default function CategoryForm({ category }: CategoryFormProps) {
             general: errorData.message || 'Помилка збереження категорії',
           });
         }
+        setIsLoading(false);
         return;
       }
+
+      const result = await response.json();
+      console.log('Category saved successfully:', result);
 
       router.push('/admin/categories');
       router.refresh();
@@ -112,7 +119,7 @@ export default function CategoryForm({ category }: CategoryFormProps) {
           name="name"
           value={formData.name}
           onChange={handleInputChange}
-          className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+          className={`w-full px-3 py-2 border rounded-md shadow-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
             errors.name ? 'border-red-300' : 'border-gray-300'
           }`}
           placeholder="Введіть назву категорії"
@@ -131,7 +138,7 @@ export default function CategoryForm({ category }: CategoryFormProps) {
           name="slug"
           value={formData.slug}
           onChange={handleInputChange}
-          className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+          className={`w-full px-3 py-2 border rounded-md shadow-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
             errors.slug ? 'border-red-300' : 'border-gray-300'
           }`}
           placeholder="Залиште порожнім для автоматичної генерації"

@@ -118,7 +118,7 @@ export default function PhotoForm({ photo, albums, onSubmit, onCancel }: PhotoFo
 
   return (
     <div className="bg-white rounded-lg shadow p-6">
-      <h2 className="text-xl font-semibold mb-6">{photo ? 'Edit Photo' : 'Upload New Photo'}</h2>
+      <h2 className="text-xl font-semibold text-foreground mb-6">{photo ? 'Edit Photo' : 'Upload New Photo'}</h2>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* File Upload */}

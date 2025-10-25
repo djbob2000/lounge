@@ -68,7 +68,7 @@ export default async function EditAlbumPage({ params }: EditAlbumPageProps) {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold">Редагувати альбом</h1>
+        <h1 className="text-2xl font-bold text-foreground">Редагувати альбом</h1>
         <p className="text-gray-600 mt-2">Редагування альбому &quot;{album.name}&quot;</p>
       </div>
 

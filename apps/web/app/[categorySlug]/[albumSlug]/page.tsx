@@ -129,7 +129,7 @@ export default function Page({ params }: PageProps) {
           </Link>
         </div>
 
-        <h1 className="text-3xl md:text-4xl font-semibold">{album.name}</h1>
+        <h1 className="text-3xl md:text-4xl font-semibold text-foreground">{album.name}</h1>
 
         {album.description && (
           <p className="mt-2 text-muted-foreground max-w-3xl">{album.description}</p>

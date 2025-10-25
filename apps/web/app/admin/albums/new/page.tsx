@@ -41,7 +41,7 @@ export default async function NewAlbumPage({ searchParams }: NewAlbumPageProps) 
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold">Додати альбом</h1>
+        <h1 className="text-2xl font-bold text-foreground">Додати альбом</h1>
         <p className="text-gray-600 mt-2">Створіть новий альбом для організації фотографій</p>
       </div>
 

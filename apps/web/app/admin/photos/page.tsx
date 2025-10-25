@@ -146,7 +146,7 @@ export default async function PhotosPage({
     <div>
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-2xl font-bold">{title}</h1>
+          <h1 className="text-2xl font-bold text-foreground">{title}</h1>
           <p className="text-gray-600 mt-1">
             {showGrouped
               ? `${photos.length} photos across ${groupedPhotos?.length || 0} albums`
@@ -197,7 +197,7 @@ export default async function PhotosPage({
               <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
                 <div className="flex justify-between items-center">
                   <div>
-                    <h3 className="text-lg font-medium text-gray-900">{album.name}</h3>
+                    <h3 className="text-lg font-medium text-foreground">{album.name}</h3>
                     <p className="text-sm text-gray-500">{albumPhotos.length} photos</p>
                   </div>
                   <Link

@@ -86,12 +86,12 @@ export default function DemoPage() {
   return (
     <div className="min-h-screen bg-gray-50 py-12">
       <div className="max-w-2xl mx-auto px-4">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">CategorySelect Component Demo</h1>
+        <h1 className="text-3xl font-bold text-foreground mb-8">CategorySelect Component Demo</h1>
 
         <div className="space-y-8">
           {/* Regular select */}
           <div className="bg-white p-6 rounded-lg shadow">
-            <h2 className="text-xl font-semibold mb-4">Regular CategorySelect</h2>
+            <h2 className="text-xl font-semibold text-foreground mb-4">Regular CategorySelect</h2>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Select category
@@ -112,7 +112,9 @@ export default function DemoPage() {
 
           {/* Select with error */}
           <div className="bg-white p-6 rounded-lg shadow">
-            <h2 className="text-xl font-semibold mb-4">CategorySelect with error</h2>
+            <h2 className="text-xl font-semibold text-foreground mb-4">
+              CategorySelect with error
+            </h2>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Category with error *
@@ -129,7 +131,9 @@ export default function DemoPage() {
 
           {/* Comparison with standard select */}
           <div className="bg-white p-6 rounded-lg shadow">
-            <h2 className="text-xl font-semibold mb-4">Comparison with standard select</h2>
+            <h2 className="text-xl font-semibold text-foreground mb-4">
+              Comparison with standard select
+            </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">

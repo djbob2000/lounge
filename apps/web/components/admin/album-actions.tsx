@@ -109,7 +109,7 @@ export default function AlbumActions({ initialPhotos, albums }: AlbumActionsProp
       <PhotoUploadForm onUploadComplete={handleUploadComplete} albums={albums} />
 
       <div>
-        <h3 className="text-xl font-semibold mb-3 text-gray-700">Photos in Album</h3>
+        <h3 className="text-xl font-semibold mb-3 text-foreground">Photos in Album</h3>
         {initialPhotos.length === 0 ? (
           <p className="text-gray-600">No photos in this album yet. Upload the first ones!</p>
         ) : (

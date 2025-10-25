@@ -105,7 +105,18 @@ export class CategoriesService {
     // Check if category exists
     await this.findOne(id);
 
-    // Delete the category (note that albums will be deleted cascadingly via onDelete: Cascade relationship)
+    // Check if category has any albums
+    const albumCount = await this.prisma.album.count({
+      where: { categoryId: id },
+    });
+
+    if (albumCount > 0) {
+      throw new BadRequestException(
+        `Cannot delete category. It contains ${albumCount} album(s). Please delete or move the albums first.`,
+      );
+    }
+
+    // Delete the category
     const deletedCategory = await this.prisma.category.delete({
       where: { id },
     });

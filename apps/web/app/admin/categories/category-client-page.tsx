@@ -17,11 +17,11 @@ export default function CategoryClientPage({ initialCategories }: CategoryClient
   return (
     <>
       {categories.length === 0 ? (
-        <div className="bg-white rounded-lg shadow p-6 text-center">
-          <p className="text-gray-500 mb-4">Категорії відсутні</p>
+        <div className="bg-white rounded-lg shadow p-8 text-center">
+          <p className="text-gray-700 mb-4 text-lg">Категорії відсутні</p>
           <Link
             href="/admin/categories/new"
-            className="text-blue-500 hover:text-blue-700 underline"
+            className="text-blue-600 hover:text-blue-800 underline font-medium"
           >
             Створити першу категорію
           </Link>

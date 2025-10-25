@@ -202,7 +202,7 @@ export default function PhotoUploadForm({
         onSubmit={form.handleSubmit(onSubmit)}
         className="mb-6 p-4 border border-gray-200 rounded-lg bg-white shadow-sm"
       >
-        <h3 className="text-xl font-semibold mb-3 text-gray-700">Upload New Photos</h3>
+        <h3 className="text-xl font-semibold mb-3 text-foreground">Upload New Photos</h3>
         <FormField
           control={form.control}
           name="photo"

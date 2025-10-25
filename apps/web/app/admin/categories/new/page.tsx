@@ -10,7 +10,7 @@ export default function NewCategoryPage() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold">Додати категорію</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Додати категорію</h1>
         <p className="text-gray-600 mt-2">Створіть нову категорію для організації фотоальбомів</p>
       </div>
 

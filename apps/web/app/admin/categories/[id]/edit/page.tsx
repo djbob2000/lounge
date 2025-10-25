@@ -46,7 +46,7 @@ export default async function EditCategoryPage({ params }: EditCategoryPageProps
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold">Редагувати категорію</h1>
+        <h1 className="text-2xl font-bold text-foreground">Редагувати категорію</h1>
         <p className="text-gray-600 mt-2">Редагування категорії "{category.name}"</p>
       </div>
 

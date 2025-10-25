@@ -55,6 +55,7 @@ export default function CategoryDeleteButton({
 
   return (
     <button
+      type="button"
       onClick={handleDelete}
       disabled={isDeleting}
       className="text-red-500 hover:text-red-700 disabled:opacity-50 disabled:cursor-not-allowed"

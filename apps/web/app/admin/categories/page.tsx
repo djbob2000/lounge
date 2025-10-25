@@ -29,10 +29,10 @@ export default async function CategoriesPage() {
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Категорії</h1>
+        <h1 className="text-3xl font-bold text-gray-900">Категорії</h1>
         <Link
           href="/admin/categories/new"
-          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors"
+          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-md transition-colors font-medium shadow-sm"
         >
           Додати категорію
         </Link>

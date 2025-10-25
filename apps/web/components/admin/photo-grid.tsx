@@ -63,7 +63,7 @@ export default function PhotoGrid({ photos, onSelectionChange }: PhotoGridProps)
   return (
     <div>
       <div className="mb-6 flex justify-between items-center">
-        <label className="flex items-center space-x-3 cursor-pointer p-2 hover:bg-gray-50 rounded-md">
+        <label className="flex items-center space-x-3 cursor-pointer p-2 hover:bg-gray-50 rounded-md text-foreground">
           <input
             type="checkbox"
             className="form-checkbox h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"

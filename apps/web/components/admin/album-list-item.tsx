@@ -27,7 +27,7 @@ export default function AlbumListItem({ item, index }: AlbumListItemProps) {
         <div className="flex-grow min-w-0">
           {' '}
           {/* Added min-w-0 for proper truncation if needed */}
-          <h3 className="font-medium text-sm md:text-base truncate">{item.name}</h3>{' '}
+          <h3 className="font-medium text-sm md:text-base text-foreground truncate">{item.name}</h3>{' '}
           {/* Added truncate */}
           <p className="text-xs text-gray-500 md:text-sm truncate">/{item.slug}</p>{' '}
           {/* Added truncate */}

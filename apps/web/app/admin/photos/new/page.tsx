@@ -24,7 +24,7 @@ export default async function NewPhotoPage({
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold">Upload New Photo</h1>
+        <h1 className="text-2xl font-bold text-foreground">Upload New Photo</h1>
         <p className="text-gray-600 mt-2">Upload a new photo to one of your albums</p>
       </div>
 

@@ -74,7 +74,10 @@ export default function PhotoListItem({ item }: PhotoListItemProps) {
           />
         </div>
         <div className="flex-1 min-w-0">
-          <h4 className="font-medium text-sm md:text-base truncate" title={item.filename}>
+          <h4
+            className="font-medium text-sm md:text-base text-foreground truncate"
+            title={item.filename}
+          >
             {item.filename}
           </h4>
           {item.description && (

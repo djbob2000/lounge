@@ -77,7 +77,7 @@ export default async function AlbumsPage() {
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Albums</h1>
+        <h1 className="text-2xl font-bold text-foreground">Albums</h1>
         <Link
           href="/admin/albums/new"
           className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors"
@@ -102,7 +102,7 @@ export default async function AlbumsPage() {
             <div key={category.id} className="bg-white rounded-lg shadow overflow-hidden">
               <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-medium text-gray-900">{category.name}</h2>
+                  <h2 className="text-lg font-medium text-foreground">{category.name}</h2>
                   <Link
                     href={`/admin/albums/new?categoryId=${category.id}`}
                     className="text-sm bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded transition-colors"

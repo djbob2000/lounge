@@ -63,10 +63,12 @@ export default async function AdminPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">Адміністративна панель</h1>
+      <h1 className="text-2xl font-bold text-foreground mb-6">Адміністративна панель</h1>
 
       <div className="mb-8">
-        <h2 className="text-lg font-semibold mb-3">Ласкаво просимо, {user?.firstName}!</h2>
+        <h2 className="text-lg font-semibold text-foreground mb-3">
+          Ласкаво просимо, {user?.firstName}!
+        </h2>
         <p className="text-gray-600">
           Керуйте контентом вашого фотосайту через зручну адміністративну панель.
         </p>
@@ -87,7 +89,7 @@ export default async function AdminPage() {
 
       <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-white rounded-lg shadow-md p-6">
-          <h3 className="text-lg font-semibold mb-4">Швидкі дії</h3>
+          <h3 className="text-lg font-semibold text-foreground mb-4">Швидкі дії</h3>
           <div className="flex flex-col space-y-3">
             <Link href="/admin/categories/new" className="text-blue-600 hover:text-blue-800">
               Створити нову категорію
@@ -102,7 +104,7 @@ export default async function AdminPage() {
         </div>
 
         <div className="bg-white rounded-lg shadow-md p-6">
-          <h3 className="text-lg font-semibold mb-4">Підказки</h3>
+          <h3 className="text-lg font-semibold text-foreground mb-4">Підказки</h3>
           <ul className="list-disc list-inside text-gray-600 space-y-2">
             <li>Використовуйте drag-n-drop для зміни порядку елементів</li>
             <li>Створіть категорії перед додаванням альбомів</li>

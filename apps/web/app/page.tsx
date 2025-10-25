@@ -29,7 +29,7 @@ export default async function Home() {
       <HomeSlider photos={sliderPhotos} />
 
       <div className="py-12 px-6 text-center">
-        <h1 className="text-4xl md:text-5xl font-semibold mb-4">Squares</h1>
+        <h1 className="text-4xl md:text-5xl font-semibold text-foreground mb-4">Squares</h1>
         <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto">
           Вітаємо у світі професійної фотографії. Перегляньте наші альбоми та насолоджуйтесь
           якісними знімками.

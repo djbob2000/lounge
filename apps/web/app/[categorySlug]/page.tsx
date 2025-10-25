@@ -34,7 +34,7 @@ async function getCategory(slug: string): Promise<Category | null> {
 async function getCategoryAlbums(categoryId: string): Promise<Album[]> {
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/albums?categoryId=${categoryId}`,
+      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/albums/category/${categoryId}`,
       { cache: 'no-store' },
     );
 
@@ -64,7 +64,7 @@ export default async function CategoryPage({ params }: CategoryPageParams) {
   return (
     <div className="py-8 px-6">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl md:text-4xl font-semibold mb-6">{category.name}</h1>
+        <h1 className="text-3xl md:text-4xl font-semibold text-foreground mb-6">{category.name}</h1>
 
         {albums.length === 0 ? (
           <p className="text-muted-foreground">There are no albums in this category yet.</p>
@@ -88,7 +88,7 @@ export default async function CategoryPage({ params }: CategoryPageParams) {
                       </div>
                     )}
                   </div>
-                  <h2 className="mt-2 text-lg font-medium group-hover:text-primary transition-colors">
+                  <h2 className="mt-2 text-lg font-medium text-foreground group-hover:text-primary transition-colors">
                     {album.name}
                   </h2>
                   {album.description && (
