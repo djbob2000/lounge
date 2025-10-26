@@ -82,26 +82,47 @@ This project is a monorepo managed with pnpm and TurboRepo. It consists of appli
 - **useEffectEvent:** Extract non-reactive logic from Effects into reusable Effect Event functions.
 - **Activity:** Render "background activity" by hiding UI with `display: none` while maintaining state and cleaning up Effects.
 
-#### Example 1
+#### Example 1: Streaming data with use() hook (React 19 + Next.js)
 
 ```tsx
-import { Suspense, use } from 'react';
+// Server Component (app/page.tsx)
+import { Suspense } from 'react';
+import UserProfile from '@/components/UserProfile';
 
-const userPromise = fetch('/api/user').then(res => res.json());
-
-function UserProfile() {
-  const user = use(userPromise);
-  return <div>{user.name}</div>;
-}
-
-export default function Page() {
+export default async function Page() {
+  // Don't await the data fetching function - pass Promise as prop
+  const userPromise = getUser();
+  
   return (
     <Suspense fallback={<p>Loading user profile...</p>}>
-      <UserProfile />
+      <UserProfile userPromise={userPromise} />
     </Suspense>
   );
 }
 ```
+
+```tsx
+// Client Component (@/components/UserProfile.tsx)
+'use client';
+import { use } from 'react';
+
+export default function UserProfile({
+  userPromise
+}: {
+  userPromise: Promise<{ id: string; name: string }>;
+}) {
+  // Use the use() hook to read the promise
+  const user = use(userPromise);
+  
+  return <div>{user.name}</div>;
+}
+```
+
+**Key Points:**
+- Promise is created in Server Component and passed as prop
+- Client Component uses `use(promise)` to read data
+- `<Suspense>` enables streaming for better UX
+
 
 #### Example 2
 
@@ -260,7 +281,10 @@ function UpdateProfile({ currentName, onUpdate }) {
 - **App Router:** Use Server Components by default. Use `'use client'` only for interactivity, hooks, and browser APIs.
 - **Data Fetching:**
   - **Server Components:** Fetch data directly using `async/await`. Use `fetch` options for caching (`cache: 'no-store'` or `next: { revalidate: 60 }`).
-  - **Client Components:** Use `use()` for client-side async logic.
+  - **Client Components with use() hook:** 
+    - **Recommended Pattern:** Pass Promise as prop from Server Component to Client Component, then use `use(promise)` in Client Component.
+    - **Suspense Required:** Always wrap components using `use()` in `<Suspense>` with meaningful fallback.
+    - **Streaming:** This approach enables streaming UI for better perceived performance.
 - **Authentication:** Use Clerk SDK (`auth()` in Server Components, `useAuth()` in Client Components). Configure middleware in `proxy.ts`.
 - **Forms:** Use React Hook Form with Zod for schema validation via `@hookform/resolvers/zod`.
 

@@ -1,4 +1,5 @@
 import type { Photo } from '@lounge/types';
+import { Suspense } from 'react';
 import HomeSlider from '../components/HomeSlider';
 
 async function getSliderPhotos(): Promise<Photo[]> {
@@ -22,11 +23,21 @@ async function getSliderPhotos(): Promise<Photo[]> {
 }
 
 export default async function Home() {
-  const sliderPhotos = await getSliderPhotos();
+  // НЕ await! Просто створюємо Promise
+  const photosPromise = getSliderPhotos();
 
   return (
     <div className="min-h-screen flex flex-col">
-      <HomeSlider photos={sliderPhotos} />
+      {/* Використовуємо Suspense для streaming */}
+      <Suspense
+        fallback={
+          <div className="w-full h-[60vh] flex items-center justify-center bg-muted">
+            <p className="text-muted-foreground">Завантаження слайдера...</p>
+          </div>
+        }
+      >
+        <HomeSlider photosPromise={photosPromise} />
+      </Suspense>
 
       <div className="py-12 px-6 text-center">
         <h1 className="text-4xl md:text-5xl font-semibold text-foreground mb-4">Squares</h1>

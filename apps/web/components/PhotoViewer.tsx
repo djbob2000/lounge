@@ -39,13 +39,13 @@ export const PhotoViewer = ({ photos, initialIndex = 0, onClose }: PhotoViewerPr
       document.removeEventListener('keydown', handleKeyDownEvent);
       document.body.style.overflow = 'auto';
     };
-  }, [handleKeyDown]);
+  }, []);
 
   // Ефект для управління loading станом
   useEffect(() => {
     // Скидаємо loading стан при зміні фото
     setIsLoading(true);
-  }, [currentIndex]);
+  }, []);
 
   const safePhotos = Array.isArray(photos) ? photos : [];
 

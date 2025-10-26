@@ -9,15 +9,21 @@ import {
   CarouselPrevious,
 } from '@lounge/ui';
 import Image from 'next/image';
-import { useEffect, useEffectEvent, useRef, useState } from 'react';
+import { use, useEffect, useEffectEvent, useRef, useState } from 'react';
 
 interface HomeSliderProps {
-  photos: Photo[];
+  photosPromise: Promise<Photo[]>;
   autoPlay?: boolean;
   autoPlayInterval?: number;
 }
 
-const HomeSlider = ({ photos, autoPlay = true, autoPlayInterval = 5000 }: HomeSliderProps) => {
+const HomeSlider = ({
+  photosPromise,
+  autoPlay = true,
+  autoPlayInterval = 5000,
+}: HomeSliderProps) => {
+  const photos: Photo[] = use(photosPromise);
+
   const safePhotos = Array.isArray(photos) ? photos : [];
   const [currentIndex, setCurrentIndex] = useState(0);
   const autoPlayTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -58,7 +64,7 @@ const HomeSlider = ({ photos, autoPlay = true, autoPlayInterval = 5000 }: HomeSl
     if (autoPlay && safePhotos.length > 1) {
       startAutoPlay();
     }
-  }, [currentIndex, autoPlay]);
+  }, [autoPlay, safePhotos.length]);
 
   const goToNext = useEffectEvent(() => {
     setCurrentIndex((prevIndex) => (prevIndex === safePhotos.length - 1 ? 0 : prevIndex + 1));
@@ -77,7 +83,7 @@ const HomeSlider = ({ photos, autoPlay = true, autoPlayInterval = 5000 }: HomeSl
   if (safePhotos.length === 0) {
     return (
       <div className="w-full h-[60vh] flex items-center justify-center bg-muted">
-        <p className="text-muted-foreground">Loading photos...</p>
+        <p className="text-muted-foreground">Завантаження фотографій...</p>
       </div>
     );
   }
@@ -120,9 +126,10 @@ const HomeSlider = ({ photos, autoPlay = true, autoPlayInterval = 5000 }: HomeSl
               {/* Slide indicator dots */}
               {safePhotos.length > 1 && (
                 <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
-                  {safePhotos.map((_, dotIndex) => (
+                  {safePhotos.map((photo, dotIndex) => (
                     <button
-                      key={dotIndex}
+                      key={photo.id || `dot-${dotIndex}`}
+                      type="button"
                       onClick={() => goToSlide(dotIndex)}
                       className={`w-2 h-2 rounded-full transition-colors ${
                         dotIndex === currentIndex ? 'bg-white' : 'bg-white/50 hover:bg-white/75'

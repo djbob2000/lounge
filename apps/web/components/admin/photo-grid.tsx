@@ -81,7 +81,7 @@ export default function PhotoGrid({ photos, onSelectionChange }: PhotoGridProps)
               alt={`Photo ${photo.id} (${photo.filename})`}
               width={300} // Adjust as per your design needs
               height={200} // Adjust as per your design needs
-              className="w-full h-auto object-cover aspect-[3/2] transition-transform duration-200 ease-in-out group-hover:scale-105"
+              className="w-full h-auto object-cover aspect-3/2 transition-transform duration-200 ease-in-out group-hover:scale-105"
               onError={(e) => {
                 e.currentTarget.src = '/placeholder-image.svg';
               }}

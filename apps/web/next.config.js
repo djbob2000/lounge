@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  cacheComponents: true,
   transpilePackages: ['@lounge/types'],
   experimental: {
     esmExternals: true,
@@ -7,7 +8,6 @@ const nextConfig = {
     globalNotFound: true,
     clientSegmentCache: true,
     // turbopackPersistentCaching: true,
-    // cacheComponents: true,
   },
   images: {
     remotePatterns: [

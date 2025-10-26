@@ -2,12 +2,11 @@
 
 import { useAuth } from '@clerk/nextjs';
 import type { Album } from '@lounge/types';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@lounge/ui';
+import { FormControl, FormItem, FormLabel, FormMessage } from '@lounge/ui';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { Suspense, use, useActionState, useEffect, useId, useOptimistic, useState } from 'react';
+import { useActionState, useEffect, useId, useOptimistic, useState } from 'react';
 import { useFormStatus } from 'react-dom';
-import { z } from 'zod';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -33,16 +32,16 @@ interface FormState {
 }
 
 // Submit Button component using useFormStatus
-function SubmitButton({ children, fileCount }: { children: React.ReactNode; fileCount: number }) {
+function SubmitButton({ _fileCount }: { _fileCount: number }) {
   const { pending } = useFormStatus();
 
   return (
     <button
       type="submit"
-      disabled={pending || fileCount === 0}
+      disabled={pending || _fileCount === 0}
       className="w-full sm:w-auto px-6 py-2.5 bg-blue-600 text-white font-medium text-sm rounded-lg hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-150 ease-in-out"
     >
-      {pending ? 'Uploading...' : `Upload ${fileCount} photo(s)`}
+      {pending ? 'Uploading...' : `Upload ${_fileCount} photo(s)`}
     </button>
   );
 }
@@ -83,104 +82,216 @@ export default function PhotoUploadForm({
     setFormData(optimisticFormData);
   }, [optimisticFormData]);
 
-  // Upload action function
-  const uploadAction = async (prevState: FormState, formDataObj: FormData): Promise<FormState> => {
-    try {
-      const files = formDataObj.get('photo');
-      if (!files || !(files instanceof FileList) || files.length === 0) {
-        return {
-          success: false,
-          error: 'Please select files to upload',
-          progress: [],
-          message: 'Please select files to upload',
-        };
-      }
-
-      const albumId = (formDataObj.get('albumId') as string) || '';
-      const description = (formDataObj.get('description') as string) || '';
-      const displayOrder = parseInt((formDataObj.get('displayOrder') as string) || '0', 10);
-      const isSlider = formDataObj.get('isSlider') === 'on';
-
-      const progress: string[] = [];
-      let successfulUploads = 0;
-
-      const token = await getToken();
-      if (!token) {
-        return {
-          success: false,
-          error: 'Authentication token not found. Please try logging in again.',
-          progress: [],
-          message: 'Authentication error. Please try logging in again.',
-        };
-      }
-
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-
-      // Process each file
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        if (!file || !file.type.startsWith('image/')) {
-          progress[i] = `❌ ${file?.name || 'Unknown file'} - Not an image file`;
-          continue;
-        }
-
-        progress[i] = `Uploading ${file.name}...`;
-
-        const uploadFormData = new FormData();
-        uploadFormData.append('file', file);
-        uploadFormData.append('albumId', albumId);
-        uploadFormData.append('description', description);
-        uploadFormData.append('isSliderImage', String(isSlider));
-        uploadFormData.append('displayOrder', String(displayOrder + i));
-
-        try {
-          const response = await fetch(`${apiUrl}/photos/upload`, {
-            method: 'POST',
-            headers: { Authorization: `Bearer ${token}` },
-            body: uploadFormData,
-          });
-
-          if (response.ok) {
-            progress[i] = `✅ ${file.name} - Uploaded successfully.`;
-            successfulUploads++;
-          } else {
-            const errorData = await response
-              .json()
-              .catch(() => ({ message: 'Unknown server error' }));
-            progress[i] = `❌ ${file.name} - Error: ${errorData.message || response.statusText}`;
-          }
-        } catch (error: unknown) {
-          progress[i] =
-            `❌ ${file.name} - Network error: ${error instanceof Error ? error.message : 'Check connection'}`;
-        }
-      }
-
-      // Clear files after successful upload
-      if (successfulUploads > 0) {
-        setOptimisticFiles([]);
-        setTimeout(() => {
-          if (onUploadComplete) {
-            onUploadComplete();
-          } else {
-            router.push('/admin/photos');
-          }
-        }, 3500);
-      }
-
+  // Helper function to validate form data and extract values
+  const validateAndExtractFormData = (formDataObj: FormData) => {
+    const files = formDataObj.get('photo');
+    if (!files || !(files instanceof FileList) || files.length === 0) {
       return {
-        success: successfulUploads > 0,
-        error: successfulUploads === 0 ? 'No files uploaded successfully' : null,
-        progress,
-        message: `Upload complete. Successful: ${successfulUploads}/${files.length}.`,
-      };
-    } catch (error: unknown) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Upload failed',
-        progress: [],
-        message: 'Upload failed. Please try again.',
+        isValid: false,
+        error: 'Please select files to upload',
       };
     }
+
+    return {
+      isValid: true,
+      files,
+      albumId: (formDataObj.get('albumId') as string) || '',
+      description: (formDataObj.get('description') as string) || '',
+      displayOrder: parseInt((formDataObj.get('displayOrder') as string) || '0', 10),
+      isSlider: formDataObj.get('isSlider') === 'on',
+    };
+  };
+
+  // Helper function to get authentication token
+  const getAuthToken = async () => {
+    const token = await getToken();
+    if (!token) {
+      return {
+        isValid: false,
+        error: 'Authentication token not found. Please try logging in again.',
+      };
+    }
+    return { isValid: true, token };
+  };
+
+  // Helper function to upload a single file
+  const uploadSingleFile = async (
+    file: File | undefined,
+    index: number,
+    albumId: string,
+    description: string,
+    isSlider: boolean,
+    displayOrder: number,
+    token: string,
+    apiUrl: string,
+    progress: string[],
+  ) => {
+    if (!file) {
+      progress[index] = `❌ Unknown file - File is undefined`;
+      return false;
+    }
+    
+    if (!file.type.startsWith('image/')) {
+      progress[index] = `❌ ${file.name} - Not an image file`;
+      return false;
+    }
+
+    progress[index] = `Uploading ${file.name}...`;
+
+    const uploadFormData = new FormData();
+    uploadFormData.append('file', file);
+    uploadFormData.append('albumId', albumId);
+    uploadFormData.append('description', description);
+    uploadFormData.append('isSliderImage', String(isSlider));
+    uploadFormData.append('displayOrder', String(displayOrder + index));
+
+    try {
+      const response = await fetch(`${apiUrl}/photos/upload`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: uploadFormData,
+      });
+
+      if (response.ok) {
+        progress[index] = `✅ ${file.name} - Uploaded successfully.`;
+        return true;
+      } else {
+        const errorData = await response.json().catch(() => ({ message: 'Unknown server error' }));
+        progress[index] = `❌ ${file.name} - Error: ${errorData.message || response.statusText}`;
+        return false;
+      }
+    } catch (error: unknown) {
+      progress[index] =
+        `❌ ${file.name} - Network error: ${error instanceof Error ? error.message : 'Check connection'}`;
+      return false;
+    }
+  };
+
+  // Helper function to handle successful uploads
+  const handleSuccessfulUploads = () => {
+    setOptimisticFiles([]);
+    setTimeout(() => {
+      if (onUploadComplete) {
+        onUploadComplete();
+      } else {
+        router.push('/admin/photos');
+      }
+    }, 3500);
+  };
+
+  // Helper function to process all files
+  const processFiles = async (
+    files: FileList | undefined,
+    albumId: string,
+    description: string,
+    isSlider: boolean,
+    displayOrder: number,
+    token: string,
+    apiUrl: string,
+    progress: string[],
+  ) => {
+    let successfulUploads = 0;
+
+    if (!files) {
+      return successfulUploads;
+    }
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const uploadSuccess = await uploadSingleFile(
+        file,
+        i,
+        albumId,
+        description,
+        isSlider,
+        displayOrder,
+        token,
+        apiUrl,
+        progress,
+      );
+      if (uploadSuccess) {
+        successfulUploads++;
+      }
+    }
+
+    return successfulUploads;
+  };
+
+  // Helper function to create error response
+  const createErrorResponse = (error: string, message: string): FormState => ({
+    success: false,
+    error,
+    progress: [],
+    message,
+  });
+
+  // Helper function to create success response
+  const createSuccessResponse = (
+    successfulUploads: number,
+    totalFiles: number,
+    progress: string[],
+  ): FormState => ({
+    success: successfulUploads > 0,
+    error: successfulUploads === 0 ? 'No files uploaded successfully' : null,
+    progress,
+    message: `Upload complete. Successful: ${successfulUploads}/${totalFiles}.`,
+  });
+
+  // Main upload orchestration function
+  const performUpload = async (
+    formValidation: ReturnType<typeof validateAndExtractFormData>,
+    authValidation: Awaited<ReturnType<typeof getAuthToken>>,
+  ): Promise<FormState> => {
+    const { files, albumId, description, isSlider, displayOrder } = formValidation;
+    const progress: string[] = [];
+    const { token } = authValidation;
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+
+    try {
+      const successfulUploads = await processFiles(
+        files,
+        albumId || '',
+        description || '',
+        isSlider ?? false,
+        displayOrder ?? 0,
+        token || '',
+        apiUrl,
+        progress,
+      );
+
+      if (successfulUploads > 0) {
+        handleSuccessfulUploads();
+      }
+
+      const totalFiles = files?.length || 0;
+      return createSuccessResponse(successfulUploads, totalFiles, progress);
+    } catch (error: unknown) {
+      return createErrorResponse(
+        error instanceof Error ? error.message : 'Upload failed',
+        'Upload failed. Please try again.',
+      );
+    }
+  };
+
+  // Upload action function
+  const uploadAction = async (_prevState: FormState, formDataObj: FormData): Promise<FormState> => {
+    const formValidation = validateAndExtractFormData(formDataObj);
+    if (!formValidation.isValid) {
+      return createErrorResponse(
+        formValidation.error || 'Form validation failed',
+        formValidation.error || 'Form validation failed',
+      );
+    }
+
+    const authValidation = await getAuthToken();
+    if (!authValidation.isValid) {
+      return createErrorResponse(
+        authValidation.error || 'Authentication failed',
+        'Authentication error. Please try logging in again.',
+      );
+    }
+
+    return performUpload(formValidation, authValidation);
   };
 
   const [state, action] = useActionState(uploadAction, {
@@ -230,7 +341,7 @@ export default function PhotoUploadForm({
   }, [files]);
 
   // Update form data optimistically
-  const updateFormField = (field: keyof typeof formData, value: any) => {
+  const updateFormField = (field: keyof typeof formData, value: string | number | boolean) => {
     setOptimisticFormData((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -358,7 +469,7 @@ export default function PhotoUploadForm({
       )}
 
       {/* Submit Button using useFormStatus */}
-      <SubmitButton fileCount={optimisticFiles.length}>Upload</SubmitButton>
+      <SubmitButton _fileCount={optimisticFiles.length} />
 
       {/* Upload Progress */}
       {state.progress.length > 0 && (
