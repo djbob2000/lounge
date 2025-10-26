@@ -18,7 +18,6 @@ This project is a monorepo managed with pnpm and TurboRepo. It consists of appli
 - **Image Processing:** Sharp
 - **Form Management:** React Hook Form + Zod validation
 - **Code Quality:** Biome (linting + formatting)
-- **Testing:** Jest (API), React Testing Library (web)
 
 ## Project Architecture
 
@@ -50,7 +49,7 @@ This project is a monorepo managed with pnpm and TurboRepo. It consists of appli
 #### `apps/web/` - Next.js Frontend
 - **Framework:** Next.js 16 with App Router (Turbopack enabled)
 - **React Version:** 19.2.0
-- **Authentication:** Clerk Next.js SDK with Ukrainian localization
+- **Authentication:** Clerk Next.js SDK
 - **UI Components:** Shadcn UI + Radix UI primitives
 - **Styling:** Tailwind CSS v4
 - **Structure:**
@@ -64,7 +63,7 @@ This project is a monorepo managed with pnpm and TurboRepo. It consists of appli
     - `layout/` - Layout components (Header, Footer, ClientLayout)
     - `ui/` - Shadcn UI components
   - `lib/` - Utility functions
-  - `middleware.ts` - Clerk authentication middleware
+  - `proxy.ts` - Clerk authentication middleware
 - **Key Features:**
   - Server-side rendering (SSR)
   - Dynamic routing with slugs
@@ -425,8 +424,6 @@ The project uses Biome for linting and formatting (not ESLint/Prettier):
   - Composition over inheritance
   - Controlled components for forms
   - Lift state up when needed
-  - Use `React.memo()` for expensive renders
-  - Use `useMemo()` and `useCallback()` judiciously
 
 #### Clerk (Authentication)
 - **Backend:** `@clerk/express` middleware

@@ -13,4 +13,4 @@ export {
 } from './form';
 export { PhotoGallery } from './gallery';
 export { Label } from './label';
-export { ImageSlider } from './slider';
+export { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from './slider';
