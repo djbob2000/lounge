@@ -35,72 +35,102 @@ export default function AlbumActions({ initialPhotos, albums }: AlbumActionsProp
     setDeleteMessage(''); // Clear delete message when selection changes
   };
 
-  const handleDeleteSelectedPhotos = async () => {
+  const validateSelection = () => {
     if (selectedPhotoIds.length === 0) {
       setDeleteMessage('Please select photos to delete.');
-      return;
+      return false;
     }
     if (
       !confirm(
         `Are you sure you want to delete ${selectedPhotoIds.length} photo(s)? This action cannot be undone.`,
       )
     ) {
-      return;
+      return false;
     }
+    return true;
+  };
 
-    setIsDeleting(true);
-    setDeleteMessage(`Deleting ${selectedPhotoIds.length} photo(s)...`);
-    let successfulDeletes = 0;
-    const failedDeletes: string[] = [];
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-
+  const getAuthToken = async () => {
     const token = await getToken();
     if (!token) {
       setDeleteMessage('Authentication token not found. Please try logging in again.');
-      setIsDeleting(false);
       console.error('AlbumActions: Halting delete due to missing token.');
-      return;
+      return null;
     }
+    return token;
+  };
 
-    for (const photoId of selectedPhotoIds) {
-      try {
-        const response = await fetch(`${apiUrl}/photos/${photoId}`, {
-          method: 'DELETE',
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        });
-        if (response.ok) {
-          successfulDeletes++;
-        } else {
-          const errorData = await response
-            .json()
-            .catch(() => ({ message: 'Failed to get error details' }));
-          console.error(`Failed to delete photo ${photoId}: ${errorData.message}`);
-          failedDeletes.push(photoId);
-        }
-      } catch (error: unknown) {
-        console.error(`Network error deleting photo ${photoId}:`, error);
-        failedDeletes.push(photoId);
-      }
+  const deletePhoto = async (photoId: string, token: string) => {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+    const response = await fetch(`${apiUrl}/photos/${photoId}`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (response.ok) {
+      return { success: true };
+    } else {
+      const errorData = await response
+        .json()
+        .catch(() => ({ message: 'Failed to get error details' }));
+      console.error(`Failed to delete photo ${photoId}: ${errorData.message}`);
+      return { success: false, photoId };
     }
+  };
 
-    setIsDeleting(false);
+  const deletePhotos = async (token: string) => {
+    const results = await Promise.all(
+      selectedPhotoIds.map((photoId) =>
+        deletePhoto(photoId, token).catch(() => ({ success: false, photoId })),
+      ),
+    );
+
+    const successfulDeletes = results.filter((r) => r.success).length;
+    const failedDeletes = results
+      .filter((r) => !r.success)
+      .map((r) => r.photoId)
+      .filter((id): id is string => id !== undefined);
+
+    return { successfulDeletes, failedDeletes };
+  };
+
+  const processResults = (successfulDeletes: number, failedDeletes: string[]) => {
     let message = `Deletion complete. Successfully deleted: ${successfulDeletes}/${selectedPhotoIds.length}.`;
     if (failedDeletes.length > 0) {
       message += ` Failed to delete: ${failedDeletes.length} photo(s).`;
     }
     setDeleteMessage(message);
 
-    // Optimistic UI update: filter out deleted photos from currentPhotos
-    // setCurrentPhotos(currentPhotos.filter(p => !selectedPhotoIds.includes(p.id) || failedDeletes.includes(p.id)));
-
     setSelectedPhotoIds([]);
 
     if (successfulDeletes > 0) {
-      // Refresh after a short delay to allow user to read the message
       setTimeout(() => router.refresh(), failedDeletes.length > 0 ? 3000 : 1500);
+    }
+  };
+
+  const handleDeleteSelectedPhotos = async () => {
+    if (!validateSelection()) return;
+
+    setIsDeleting(true);
+    setDeleteMessage(`Deleting ${selectedPhotoIds.length} photo(s)...`);
+
+    const token = await getAuthToken();
+    if (!token) {
+      setIsDeleting(false);
+      return;
+    }
+
+    try {
+      const { successfulDeletes, failedDeletes } = await deletePhotos(token);
+      processResults(successfulDeletes, failedDeletes);
+    } catch (error) {
+      console.error('Error during photo deletion:', error);
+      setDeleteMessage('An error occurred during deletion. Please try again.');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -121,6 +151,7 @@ export default function AlbumActions({ initialPhotos, albums }: AlbumActionsProp
                   Manage selected photos:
                 </h4>
                 <button
+                  type="button"
                   onClick={handleDeleteSelectedPhotos}
                   disabled={isDeleting || selectedPhotoIds.length === 0}
                   className="px-5 py-2.5 bg-red-600 text-white font-medium text-sm rounded-lg hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-150 ease-in-out"

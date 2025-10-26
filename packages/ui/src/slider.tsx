@@ -137,21 +137,15 @@ export function ImageSlider({
       <div ref={emblaRef} className="overflow-hidden">
         <div className="flex">
           {slides.map((slide, index) => (
-            <div
-              key={slide.id || index}
+            <button
+              key={slide.id || `slide-${slide.src}-${index}`}
+              type="button"
               className={`relative flex-none w-full ${slideClassName}`}
               onClick={() => handleSlideClick(index)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  handleSlideClick(index);
-                }
-              }}
-              role="button"
-              tabIndex={0}
+              aria-label={`View slide ${index + 1}: ${slide.alt}`}
             >
               <img src={slide.src} alt={slide.alt} className="w-full h-full object-cover" />
-            </div>
+            </button>
           ))}
         </div>
       </div>
@@ -179,9 +173,9 @@ export function ImageSlider({
 
       {showDots && slides.length > 1 && (
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10">
-          {slides.map((_, index) => (
+          {slides.map((slide, index) => (
             <button
-              key={`slide-${index}`}
+              key={slide.id || `dot-${slide.src}-${index}`}
               type="button"
               onClick={() => scrollTo(index)}
               aria-label={`Go to slide ${index + 1}`}

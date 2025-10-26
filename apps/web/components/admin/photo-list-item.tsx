@@ -7,6 +7,7 @@ import {
   StarIcon as StarIconSolid,
   Trash2Icon,
 } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -64,13 +65,12 @@ export default function PhotoListItem({ item }: PhotoListItemProps) {
     <div className="flex items-center justify-between p-3 md:p-4 border-b border-gray-20 last:border-b-0">
       <div className="flex items-center space-x-3 md:space-x-4 flex-1 min-w-0">
         <div className="w-16 h-16 md:w-20 md:h-20 rounded overflow-hidden flex-shrink-0 bg-gray-10">
-          <img
+          <Image
             src={item.thumbnailUrl}
             alt={item.description || `Фото ${item.filename}`}
-            className="w-full h-full object-cover"
             width={80}
             height={80}
-            loading="lazy"
+            className="w-full h-full object-cover"
           />
         </div>
         <div className="flex-1 min-w-0">

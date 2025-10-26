@@ -1,4 +1,5 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+import type { NextFetchEvent, NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
 // Define public routes
@@ -13,8 +14,8 @@ const isPublicRoute = createRouteMatcher([
   '/api/debug-user',
 ]);
 
-// Expose middleware for use in Next.js
-export default clerkMiddleware(async (auth, req) => {
+// Create configured middleware
+const middleware = clerkMiddleware(async (auth, req) => {
   // Bypass public routes
   if (isPublicRoute(req)) {
     return NextResponse.next();
@@ -30,9 +31,14 @@ export default clerkMiddleware(async (auth, req) => {
   }
 
   return NextResponse.next();
-});
+}, {});
 
-// Configure Next.js middleware
+// Expose proxy for use in Next.js
+export function proxy(request: NextRequest, event: NextFetchEvent) {
+  return middleware(request, event);
+}
+
+// Configure Next.js proxy
 export const config = {
   matcher: ['/((?!.+\\.[\\w]+$|_next).*)', '/', '/(api|trpc)(.*)'],
 };

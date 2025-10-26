@@ -6,10 +6,9 @@ import CategoryDeleteButton from './CategoryDeleteButton';
 
 interface CategoryListItemProps {
   item: Category;
-  index: number;
 }
 
-export default function CategoryListItem({ item: category, index }: CategoryListItemProps) {
+export default function CategoryListItem({ item: category }: CategoryListItemProps) {
   return (
     <div className="flex items-center justify-between p-4 border-b border-gray-200 last:border-0 hover:bg-gray-50 transition-colors">
       <div className="flex-1">

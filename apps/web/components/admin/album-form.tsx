@@ -4,7 +4,7 @@ import { useAuth } from '@clerk/nextjs';
 import type { Album, Category } from '@lounge/types';
 import { AlertCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -28,6 +28,7 @@ interface AlbumFormProps {
 export default function AlbumForm({ album, categories, categoryId }: AlbumFormProps) {
   const router = useRouter();
   const { getToken } = useAuth();
+  const id = useId();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: album?.name || '',
@@ -38,68 +39,102 @@ export default function AlbumForm({ album, categories, categoryId }: AlbumFormPr
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  const validateForm = () => {
+    if (!formData.name.trim()) {
+      setErrors({ name: "Назва альбому обов'язкова" });
+      return false;
+    }
+
+    if (!formData.categoryId) {
+      setErrors({ categoryId: "Категорія обов'язкова" });
+      return false;
+    }
+
+    return true;
+  };
+
+  const detectFieldFromMessage = (
+    msg: string,
+  ): 'name' | 'slug' | 'categoryId' | 'description' | 'general' => {
+    const lower = msg.toLowerCase();
+    if (lower.includes('назва') || lower.includes('name')) return 'name';
+    if (lower.includes('slug')) return 'slug';
+    if (lower.includes('categoryid') || lower.includes('category id') || lower.includes('category'))
+      return 'categoryId';
+    if (lower.includes('description') || lower.includes('опис')) return 'description';
+    return 'general';
+  };
+
+  const processErrorResponse = (errorData: { message?: string | string[] }) => {
+    console.log('[AlbumForm] api:errorData', errorData);
+    const message = errorData.message;
+    if (Array.isArray(message)) {
+      const fieldErrors = message.reduce<Record<string, string>>((acc, msg) => {
+        const key = detectFieldFromMessage(msg);
+        if (key !== 'general') acc[key] = msg;
+        return acc;
+      }, {});
+      if (Object.keys(fieldErrors).length === 0) {
+        setErrors({ general: message.join('\\n') });
+      } else {
+        setErrors(fieldErrors);
+      }
+    } else {
+      setErrors({ general: message || 'Помилка збереження альбому' });
+    }
+  };
+
+  const submitData = async () => {
+    const token = await getToken();
+    console.log('[AlbumForm] api:token', token ? `len:${token.length}` : 'null');
+
+    const url = album
+      ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/albums/${album.id}`
+      : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/albums`;
+
+    const method = album ? 'PATCH' : 'POST';
+
+    if (!token) {
+      console.error('[AlbumForm] api:no-token');
+      setErrors({ general: 'Authentication token not found. Please try logging in again.' });
+      return;
+    }
+
+    console.log('[AlbumForm] api:request', { url, method, payload: formData });
+
+    const response = await fetch(url, {
+      method,
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(formData),
+    });
+
+    console.log('[AlbumForm] api:response', { ok: response.ok, status: response.status });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      processErrorResponse(errorData);
+      return;
+    }
+
+    router.push('/admin/albums');
+    router.refresh();
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setErrors({});
 
-    // Validate required fields
-    if (!formData.name.trim()) {
-      setErrors({ name: "Назва альбому обов'язкова" });
-      setIsLoading(false);
-      return;
-    }
-
-    if (!formData.categoryId) {
-      setErrors({ categoryId: "Категорія обов'язкова" });
+    if (!validateForm()) {
       setIsLoading(false);
       return;
     }
 
     try {
-      const token = await getToken();
-
-      const url = album
-        ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/albums/${album.id}`
-        : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/albums`;
-
-      const method = album ? 'PATCH' : 'POST';
-
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        if (errorData.message && Array.isArray(errorData.message)) {
-          const fieldErrors: Record<string, string> = {};
-          errorData.message.forEach((msg: string) => {
-            if (msg.includes('назва') || msg.includes('name')) {
-              fieldErrors.name = msg;
-            } else if (msg.includes('slug')) {
-              fieldErrors.slug = msg;
-            } else if (msg.includes('categoryId')) {
-              fieldErrors.categoryId = msg;
-            } else if (msg.includes('description')) {
-              fieldErrors.description = msg;
-            }
-          });
-          setErrors(fieldErrors);
-        } else {
-          setErrors({
-            general: errorData.message || 'Помилка збереження альбому',
-          });
-        }
-        return;
-      }
-
-      router.push('/admin/albums');
-      router.refresh();
+      await submitData();
     } catch (error) {
       console.error('Error saving album:', error);
       setErrors({ general: 'Помилка збереження альбому' });
@@ -135,12 +170,12 @@ export default function AlbumForm({ album, categories, categoryId }: AlbumFormPr
       )}
 
       <FormItem>
-        <FormLabel htmlFor="name">
+        <FormLabel htmlFor={`${id}-name`}>
           Назва альбому <span className="text-destructive">*</span>
         </FormLabel>
         <FormControl>
           <Input
-            id="name"
+            id={`${id}-name`}
             name="name"
             value={formData.name}
             onChange={handleInputChange}
@@ -152,11 +187,12 @@ export default function AlbumForm({ album, categories, categoryId }: AlbumFormPr
       </FormItem>
 
       <FormItem>
-        <FormLabel>
+        <FormLabel htmlFor={`${id}-categoryId`}>
           Категорія <span className="text-destructive">*</span>
         </FormLabel>
         <FormControl>
           <CategorySelect
+            id={`${id}-categoryId`}
             categories={categories}
             value={formData.categoryId}
             onChange={(categoryId) => {
@@ -175,10 +211,10 @@ export default function AlbumForm({ album, categories, categoryId }: AlbumFormPr
       </FormItem>
 
       <FormItem>
-        <FormLabel htmlFor="slug">Slug (URL)</FormLabel>
+        <FormLabel htmlFor={`${id}-slug`}>Slug (URL)</FormLabel>
         <FormControl>
           <Input
-            id="slug"
+            id={`${id}-slug`}
             name="slug"
             value={formData.slug}
             onChange={handleInputChange}
@@ -193,10 +229,10 @@ export default function AlbumForm({ album, categories, categoryId }: AlbumFormPr
       </FormItem>
 
       <FormItem>
-        <FormLabel htmlFor="description">Опис</FormLabel>
+        <FormLabel htmlFor={`${id}-description`}>Опис</FormLabel>
         <FormControl>
           <Textarea
-            id="description"
+            id={`${id}-description`}
             name="description"
             value={formData.description}
             onChange={handleInputChange}
@@ -214,14 +250,14 @@ export default function AlbumForm({ album, categories, categoryId }: AlbumFormPr
         <div className="flex items-center space-x-2">
           <FormControl>
             <Checkbox
-              id="isHidden"
+              id={`${id}-isHidden`}
               checked={formData.isHidden}
               onCheckedChange={(checked) => {
                 setFormData((prev) => ({ ...prev, isHidden: !!checked }));
               }}
             />
           </FormControl>
-          <FormLabel htmlFor="isHidden" className="text-sm font-normal">
+          <FormLabel htmlFor={`${id}-isHidden`} className="text-sm font-normal">
             Приховати альбом
           </FormLabel>
         </div>

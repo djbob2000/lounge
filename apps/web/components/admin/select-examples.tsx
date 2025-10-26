@@ -1,7 +1,7 @@
 'use client';
 
 import type { Album, Category } from '@lounge/types';
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import SelectCombobox, { type SelectOption } from '../ui/select-combobox';
 import AlbumSelect from './album-select';
 import CategorySelect from './category-select';
@@ -19,6 +19,13 @@ export default function SelectExamples({ categories, albums }: SelectExamplesPro
   const [selectedStatus, setSelectedStatus] = useState('');
   const [selectedPriority, setSelectedPriority] = useState('');
   const [selectedLanguage, setSelectedLanguage] = useState('');
+
+  const baseId = useId();
+  const categoryLabelId = `${baseId}-category-label`;
+  const albumLabelId = `${baseId}-album-label`;
+  const statusLabelId = `${baseId}-status-label`;
+  const priorityLabelId = `${baseId}-priority-label`;
+  const languageLabelId = `${baseId}-language-label`;
 
   // Example of custom language options
   const languageOptions: SelectOption[] = [
@@ -38,8 +45,11 @@ export default function SelectExamples({ categories, albums }: SelectExamplesPro
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
+          <label htmlFor={categoryLabelId} className="block text-sm font-medium text-gray-700 mb-2">
+            Category
+          </label>
           <CategorySelect
+            id={categoryLabelId}
             categories={categories}
             value={selectedCategory}
             onChange={setSelectedCategory}
@@ -48,8 +58,11 @@ export default function SelectExamples({ categories, albums }: SelectExamplesPro
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Album</label>
+          <label htmlFor={albumLabelId} className="block text-sm font-medium text-gray-700 mb-2">
+            Album
+          </label>
           <AlbumSelect
+            id={albumLabelId}
             albums={albums}
             value={selectedAlbum}
             onChange={setSelectedAlbum}
@@ -58,8 +71,11 @@ export default function SelectExamples({ categories, albums }: SelectExamplesPro
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
+          <label htmlFor={statusLabelId} className="block text-sm font-medium text-gray-700 mb-2">
+            Status
+          </label>
           <StatusSelect
+            id={statusLabelId}
             value={selectedStatus}
             onChange={setSelectedStatus}
             placeholder="Select status"
@@ -67,8 +83,11 @@ export default function SelectExamples({ categories, albums }: SelectExamplesPro
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Priority</label>
+          <label htmlFor={priorityLabelId} className="block text-sm font-medium text-gray-700 mb-2">
+            Priority
+          </label>
           <PrioritySelect
+            id={priorityLabelId}
             value={selectedPriority}
             onChange={setSelectedPriority}
             placeholder="Select priority"
@@ -76,10 +95,11 @@ export default function SelectExamples({ categories, albums }: SelectExamplesPro
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor={languageLabelId} className="block text-sm font-medium text-gray-700 mb-2">
             Language (Custom Select)
           </label>
           <SelectCombobox
+            id={languageLabelId}
             options={languageOptions}
             value={selectedLanguage}
             onChange={setSelectedLanguage}

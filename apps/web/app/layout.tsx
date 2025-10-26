@@ -42,7 +42,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const categories = await getCategories();
 
   return (
-    <ClerkProvider localization={ukUA as any}>
+    <ClerkProvider localization={ukUA as typeof ukUA}>
       <html lang="uk">
         <body suppressHydrationWarning={true}>
           <ClientLayout className={`${inter.className} min-h-screen flex flex-col`}>

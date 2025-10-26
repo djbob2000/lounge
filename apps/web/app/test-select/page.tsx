@@ -27,7 +27,7 @@ export default function TestSelectPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Мова</label>
+          <span className="block text-sm font-medium text-gray-700 mb-2">Мова</span>
           <SelectCombobox
             options={languageOptions}
             value={selectedLanguage}
@@ -39,7 +39,7 @@ export default function TestSelectPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Статус</label>
+          <span className="block text-sm font-medium text-gray-700 mb-2">Статус</span>
           <SelectCombobox
             options={statusOptions}
             value={selectedStatus}
@@ -51,7 +51,7 @@ export default function TestSelectPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">З помилкою</label>
+          <span className="block text-sm font-medium text-gray-700 mb-2">З помилкою</span>
           <SelectCombobox
             options={statusOptions}
             value=""
@@ -62,7 +62,7 @@ export default function TestSelectPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Відключений</label>
+          <span className="block text-sm font-medium text-gray-700 mb-2">Відключений</span>
           <SelectCombobox
             options={statusOptions}
             value=""

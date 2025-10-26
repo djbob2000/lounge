@@ -109,37 +109,55 @@ function groupPhotosByAlbum(photos: Photo[], albums: Album[]) {
   return Array.from(grouped.values()).sort((a, b) => a.album.displayOrder - b.album.displayOrder);
 }
 
+async function fetchPhotosData(albumId?: string, isSlider?: boolean) {
+  if (isSlider) {
+    const photos = await getSliderPhotos();
+    return {
+      photos,
+      allAlbums: [],
+      currentAlbum: undefined,
+      title: 'Slider Photos',
+      showGrouped: false,
+    };
+  }
+
+  if (albumId) {
+    const allAlbums = await getAlbums();
+    const currentAlbum = allAlbums.find((a) => a.id === albumId);
+    if (!currentAlbum) {
+      return {
+        photos: [],
+        allAlbums,
+        currentAlbum: undefined,
+        title: 'Album Not Found',
+        showGrouped: false,
+      };
+    }
+    const photos = await getPhotosByAlbum(albumId);
+    return {
+      photos,
+      allAlbums,
+      currentAlbum,
+      title: `Photos in "${currentAlbum.name}"`,
+      showGrouped: false,
+    };
+  }
+
+  const [photos, allAlbums] = await Promise.all([getPhotos(), getAlbums()]);
+  return { photos, allAlbums, currentAlbum: undefined, title: 'All Photos', showGrouped: true };
+}
+
 export default async function PhotosPage({
   searchParams,
 }: {
   searchParams: Promise<{ albumId?: string; slider?: string }>;
 }) {
   const { albumId, slider } = await searchParams;
-  let photos: Photo[] = [];
-  let allAlbums: Album[] = [];
-  let currentAlbum: Album | undefined;
-  let title = 'All Photos';
-  let showGrouped = false;
   const isSliderPage = slider === 'true';
-
-  if (isSliderPage) {
-    photos = await getSliderPhotos();
-    title = 'Slider Photos';
-  } else if (albumId) {
-    allAlbums = await getAlbums();
-    currentAlbum = allAlbums.find((a) => a.id === albumId);
-    if (currentAlbum) {
-      photos = await getPhotosByAlbum(albumId);
-      title = `Photos in "${currentAlbum.name}"`;
-    } else {
-      photos = [];
-      title = 'Album Not Found';
-    }
-  } else {
-    [photos, allAlbums] = await Promise.all([getPhotos(), getAlbums()]);
-    showGrouped = true;
-  }
-
+  const { photos, allAlbums, currentAlbum, title, showGrouped } = await fetchPhotosData(
+    albumId,
+    isSliderPage,
+  );
   const groupedPhotos = showGrouped ? groupPhotosByAlbum(photos, allAlbums) : null;
 
   return (

@@ -81,8 +81,9 @@ export default function PhotoGrid({ photos, onSelectionChange }: PhotoGridProps)
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
         {photos.map((photo) => (
-          <div
+          <button
             key={photo.id}
+            type="button"
             className={`relative border rounded-lg overflow-hidden group cursor-pointer shadow-sm hover:shadow-md transition-shadow duration-200 ease-in-out ${
               selectedPhotoIds.includes(photo.id)
                 ? 'ring-2 ring-blue-500 border-transparent'
@@ -115,7 +116,7 @@ export default function PhotoGrid({ photos, onSelectionChange }: PhotoGridProps)
             <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-1.5 text-xs truncate">
               {photo.filename || photo.id}
             </div>
-          </div>
+          </button>
         ))}
       </div>
       {/* For debugging selection (optional): */}

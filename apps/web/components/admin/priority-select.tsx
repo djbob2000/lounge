@@ -5,6 +5,7 @@ import SelectCombobox, { type SelectOption } from '../ui/select-combobox';
 export type Priority = 'low' | 'medium' | 'high' | 'urgent';
 
 interface PrioritySelectProps {
+  id?: string;
   value: Priority | string;
   onChange: (priority: Priority | string) => void;
   error?: string;
@@ -25,6 +26,7 @@ export default function PrioritySelect({
   error,
   placeholder = 'Оберіть пріоритет',
   priorities = defaultPriorities,
+  id,
 }: PrioritySelectProps) {
   const options: SelectOption[] = priorities.map((priority) => ({
     value: priority.value,
@@ -33,6 +35,7 @@ export default function PrioritySelect({
 
   return (
     <SelectCombobox
+      id={id}
       options={options}
       value={value}
       onChange={onChange}

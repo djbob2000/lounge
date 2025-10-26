@@ -111,11 +111,7 @@ export default async function AlbumsPage() {
                   </Link>
                 </div>
               </div>
-              <AlbumClientPage
-                initialAlbums={category.albums}
-                categorySlug={category.slug}
-                categoryId={category.id}
-              />
+              <AlbumClientPage initialAlbums={category.albums} categoryId={category.id} />
             </div>
           ))}
         </div>

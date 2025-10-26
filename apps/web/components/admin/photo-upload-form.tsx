@@ -4,8 +4,9 @@ import { useAuth } from '@clerk/nextjs';
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { Album } from '@lounge/types';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@lounge/ui';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
@@ -55,10 +56,13 @@ export default function PhotoUploadForm({
       isSlider: false,
     },
   });
+  const baseId = useId();
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     // Revoke old preview URLs
-    fileItems.forEach((item) => URL.revokeObjectURL(item.previewUrl));
+    fileItems.forEach((item) => {
+      URL.revokeObjectURL(item.previewUrl);
+    });
 
     const selectedFiles = event.target.files;
     setOverallMessage('');
@@ -89,7 +93,9 @@ export default function PhotoUploadForm({
   // Effect for cleaning up preview URLs
   useEffect(() => {
     return () => {
-      fileItems.forEach((item) => URL.revokeObjectURL(item.previewUrl));
+      fileItems.forEach((item) => {
+        URL.revokeObjectURL(item.previewUrl);
+      });
     };
   }, [fileItems]);
 
@@ -100,92 +106,75 @@ export default function PhotoUploadForm({
     }
   }, [albumId, form]);
 
-  const onSubmit = async (data: UploadFormData) => {
+  const validateUpload = (_data: UploadFormData) => {
     if (fileItems.length === 0) {
       setOverallMessage('Please select files to upload.');
-      return;
+      return false;
     }
+    return true;
+  };
 
-    setIsUploading(true);
-    setOverallMessage(`Uploading ${fileItems.length} photo(s)...`);
-    const newProgress: string[] = [];
-
-    let successfulUploads = 0;
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-
+  const getAuthToken = async () => {
     const token = await getToken();
-    console.log(
-      'Clerk token fetched in PhotoUploadForm:',
-      token ? `Token length: ${token.length}` : 'Token is null/undefined',
-    );
-
     if (!token) {
-      console.error('PhotoUploadForm: Halting upload due to missing token.');
       setOverallMessage('Authentication token not found. Please try logging in again.');
       setIsUploading(false);
-      return;
+      return null;
     }
+    return token;
+  };
 
-    for (let i = 0; i < fileItems.length; i++) {
-      const fileItem = fileItems[i];
-      if (!fileItem) continue;
-      const { file } = fileItem;
-      newProgress.push(`Uploading ${file.name}...`);
-      setUploadProgress([...newProgress]);
+  const uploadSingleFile = async (
+    fileItem: { file: File },
+    index: number,
+    token: string,
+    data: UploadFormData,
+    apiUrl: string,
+    newProgress: string[],
+  ) => {
+    const { file } = fileItem;
+    newProgress[index] = `Uploading ${file.name}...`;
+    setUploadProgress([...newProgress]);
 
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('albumId', data.albumId || '');
-      formData.append('description', data.description || '');
-      formData.append('isSliderImage', String(data.isSlider));
-      formData.append('displayOrder', String(data.displayOrder + i));
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('albumId', data.albumId || '');
+    formData.append('description', data.description || '');
+    formData.append('isSliderImage', String(data.isSlider));
+    formData.append('displayOrder', String(data.displayOrder + index));
 
-      try {
-        const headers = {
-          Authorization: `Bearer ${token}`,
-        };
-        console.log(
-          `PhotoUploadForm: Uploading ${file.name} with headers:`,
-          JSON.stringify(headers),
-        );
+    try {
+      const response = await fetch(`${apiUrl}/photos/upload`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
 
-        const response = await fetch(`${apiUrl}/photos/upload`, {
-          // Ensure this matches your API endpoint
-          method: 'POST',
-          headers: headers,
-          body: formData,
-        });
-
-        if (response.ok) {
-          successfulUploads++;
-          newProgress[i] = `✅ ${file.name} - Uploaded successfully.`;
-        } else {
-          const errorData = await response
-            .json()
-            .catch(() => ({ message: 'Unknown server error' }));
-          newProgress[i] = `❌ ${file.name} - Error: ${errorData.message || response.statusText}`;
-          console.error(`Error uploading ${file.name}:`, errorData.message || response.statusText);
-        }
-      } catch (error: unknown) {
-        newProgress[i] =
-          `❌ ${file.name} - Network error: ${error instanceof Error ? error.message : 'Check connection'}`;
-        console.error(`Network error during upload of ${file.name}:`, error);
+      if (response.ok) {
+        newProgress[index] = `✅ ${file.name} - Uploaded successfully.`;
+        return true;
+      } else {
+        const errorData = await response.json().catch(() => ({ message: 'Unknown server error' }));
+        newProgress[index] = `❌ ${file.name} - Error: ${errorData.message || response.statusText}`;
+        return false;
       }
-      setUploadProgress([...newProgress]);
+    } catch (error: unknown) {
+      newProgress[index] =
+        `❌ ${file.name} - Network error: ${error instanceof Error ? error.message : 'Check connection'}`;
+      return false;
     }
+  };
 
+  const handleUploadComplete = (successfulUploads: number) => {
     setIsUploading(false);
     setOverallMessage(`Upload complete. Successful: ${successfulUploads}/${fileItems.length}.`);
 
-    // Reset file input and fileItems state after a short delay
     setTimeout(() => {
       form.reset();
-      // URLs are revoked by useEffect when fileItems changes to []
       setFileItems([]);
     }, 3000);
 
     if (successfulUploads > 0) {
-      // Call callback after another delay to ensure messages are read
       setTimeout(() => {
         if (onUploadComplete) {
           onUploadComplete();
@@ -194,6 +183,30 @@ export default function PhotoUploadForm({
         }
       }, 3500);
     }
+  };
+
+  const onSubmit = async (data: UploadFormData) => {
+    if (!validateUpload(data)) return;
+
+    setIsUploading(true);
+    setOverallMessage(`Uploading ${fileItems.length} photo(s)...`);
+    const newProgress: string[] = [];
+
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+    const token = await getAuthToken();
+    if (!token) return;
+
+    let successfulUploads = 0;
+    for (let i = 0; i < fileItems.length; i++) {
+      const fileItem = fileItems[i];
+      if (!fileItem) continue;
+
+      const success = await uploadSingleFile(fileItem, i, token, data, apiUrl, newProgress);
+      if (success) successfulUploads++;
+      setUploadProgress([...newProgress]);
+    }
+
+    handleUploadComplete(successfulUploads);
   };
 
   return (
@@ -208,9 +221,10 @@ export default function PhotoUploadForm({
           name="photo"
           render={({ field: { onChange } }) => (
             <FormItem>
-              <FormLabel>Photo File *</FormLabel>
+              <FormLabel htmlFor={`${baseId}-photo`}>Photo File *</FormLabel>
               <FormControl>
                 <Input
+                  id={`${baseId}-photo`}
                   type="file"
                   multiple
                   accept="image/*"
@@ -234,9 +248,10 @@ export default function PhotoUploadForm({
           name="albumId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Album *</FormLabel>
+              <FormLabel htmlFor={`${baseId}-albumId`}>Album *</FormLabel>
               <FormControl>
                 <AlbumSelect
+                  id={`${baseId}-albumId`}
                   albums={albums}
                   value={field.value || ''}
                   onChange={field.onChange}
@@ -254,9 +269,13 @@ export default function PhotoUploadForm({
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Description</FormLabel>
+              <FormLabel htmlFor={`${baseId}-description`}>Description</FormLabel>
               <FormControl>
-                <Textarea placeholder="Optional description for the photos" {...field} />
+                <Textarea
+                  id={`${baseId}-description`}
+                  placeholder="Optional description for the photos"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -269,9 +288,10 @@ export default function PhotoUploadForm({
           name="displayOrder"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Display Order</FormLabel>
+              <FormLabel htmlFor={`${baseId}-displayOrder`}>Display Order</FormLabel>
               <FormControl>
                 <Input
+                  id={`${baseId}-displayOrder`}
                   type="number"
                   min="0"
                   {...field}
@@ -291,9 +311,15 @@ export default function PhotoUploadForm({
             <FormItem>
               <div className="flex items-center space-x-2">
                 <FormControl>
-                  <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                  <Checkbox
+                    id={`${baseId}-isSlider`}
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
                 </FormControl>
-                <FormLabel className="text-sm font-normal">Use as slider image</FormLabel>
+                <FormLabel htmlFor={`${baseId}-isSlider`} className="text-sm font-normal">
+                  Use as slider image
+                </FormLabel>
               </div>
               <FormMessage />
             </FormItem>
@@ -314,9 +340,11 @@ export default function PhotoUploadForm({
             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3">
               {fileItems.map((item) => (
                 <div key={item.id} className="relative group">
-                  <img
+                  <Image
                     src={item.previewUrl}
                     alt={`Preview of ${item.file.name}`}
+                    width={200}
+                    height={128}
                     className="h-24 w-full object-cover rounded-md border border-gray-300 shadow-sm"
                     onError={(e) => {
                       (e.target as HTMLImageElement).style.display = 'none';
@@ -347,9 +375,9 @@ export default function PhotoUploadForm({
 
         {uploadProgress.length > 0 && (
           <div className="mt-4 space-y-1">
-            {uploadProgress.map((msg, index) => (
+            {uploadProgress.map((msg, _index) => (
               <p
-                key={index}
+                key={msg}
                 className={`text-xs ${msg.startsWith('❌') ? 'text-red-600' : 'text-green-600'}`}
               >
                 {msg}

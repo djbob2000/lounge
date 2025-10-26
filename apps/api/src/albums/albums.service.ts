@@ -1,6 +1,6 @@
 import { Album } from '@lounge/types';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { Album as PrismaAlbum } from '@prisma/client';
+import type { Album as PrismaAlbum } from '@prisma/client';
 import slugify from 'slugify';
 import { CategoriesService } from '../categories/categories.service';
 import { PrismaService } from '../prisma/prisma.service';

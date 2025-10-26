@@ -97,10 +97,12 @@ export function PhotoGallery({
     <>
       <div className={`grid grid-cols-1 md:grid-cols-${columns} gap-${gap} ${className}`}>
         {images.map((image, index) => (
-          <div
+          <button
             key={image.id || index}
+            type="button"
             className="aspect-square overflow-hidden cursor-pointer transition-transform duration-200 hover:scale-[1.02]"
             onClick={() => openFullscreen(index)}
+            aria-label={`View ${image.alt}`}
           >
             <img
               src={image.thumbnailSrc || image.src}
@@ -110,7 +112,7 @@ export function PhotoGallery({
               height={image.height}
               loading="lazy"
             />
-          </div>
+          </button>
         ))}
       </div>
 
@@ -118,6 +120,7 @@ export function PhotoGallery({
       {isFullscreenOpen && (
         <div className="fixed inset-0 bg-black z-50 flex items-center justify-center">
           <button
+            type="button"
             onClick={closeFullscreen}
             className="absolute top-4 right-4 text-white bg-black/20 p-2 rounded-full z-10 hover:bg-black/40 transition"
             aria-label="Close fullscreen viewer"

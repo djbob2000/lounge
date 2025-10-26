@@ -2,8 +2,9 @@
 
 import { useAuth } from '@clerk/nextjs';
 import type { Album, Photo } from '@lounge/types';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { toast } from 'sonner';
 import AlbumSelect from './album-select';
 
@@ -17,6 +18,7 @@ interface PhotoFormProps {
 export default function PhotoForm({ photo, albums, onSubmit, onCancel }: PhotoFormProps) {
   const router = useRouter();
   const { getToken } = useAuth();
+  const id = useId();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(photo?.thumbnailUrl || null);
@@ -31,80 +33,90 @@ export default function PhotoForm({ photo, albums, onSubmit, onCancel }: PhotoFo
     }
   };
 
+  const buildPatchPayload = (formData: FormData) => {
+    const description = (formData.get('description') as string) || photo?.description || '';
+    const displayOrderStr = formData.get('displayOrder') as string;
+    const displayOrder = displayOrderStr ? parseInt(displayOrderStr, 10) : photo?.displayOrder || 0;
+    const isSliderImage = formData.has('isSliderImage') ? true : photo?.isSliderImage || false;
+
+    const values = { description, displayOrder, isSliderImage };
+    return { body: JSON.stringify(values), headers: { 'Content-Type': 'application/json' } };
+  };
+
+  const defaultSubmit = async (formData: FormData) => {
+    const endpoint = photo ? `/api/photos/${photo.id}` : '/api/photos/upload';
+    const method = photo ? 'PATCH' : 'POST';
+
+    const token = await getToken();
+    console.log('[PhotoForm] api:token', token ? `len:${token.length}` : 'null');
+
+    if (!token) {
+      console.error('[PhotoForm] api:no-token');
+      toast.error('Authentication token not found. Please try logging in again.');
+      return;
+    }
+
+    let body: string | FormData = formData;
+    const headers: Record<string, string> = { Authorization: `Bearer ${token}` };
+
+    if (method === 'PATCH') {
+      const patch = buildPatchPayload(formData);
+      body = patch.body;
+      Object.assign(headers, patch.headers);
+      console.log('[PhotoForm] api:patch:payload', patch);
+    }
+
+    console.log('[PhotoForm] api:request', {
+      endpoint,
+      method,
+      headers: { hasAuth: !!headers.Authorization, contentType: headers['Content-Type'] },
+    });
+
+    const response = await fetch(endpoint, { method, headers, body });
+    console.log('[PhotoForm] api:response', { ok: response.ok, status: response.status });
+
+    if (!response.ok) {
+      const text = await response.text().catch(() => '');
+      console.error('[PhotoForm] api:error-response', { status: response.status, text });
+      throw new Error('Failed to save photo');
+    }
+
+    router.push('/admin/photos');
+    router.refresh();
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    console.log('[PhotoForm] submit:start');
     setIsSubmitting(true);
 
     try {
       const formData = new FormData(e.currentTarget);
 
       if (selectedFile) {
-        formData.append('file', selectedFile);
+        formData.set('file', selectedFile);
       }
+
+      console.log('[PhotoForm] submit:data', {
+        hasFile: !!selectedFile,
+        albumId: formData.get('albumId'),
+        description: formData.get('description'),
+        displayOrder: formData.get('displayOrder'),
+        isSliderImage: formData.get('isSliderImage'),
+      });
 
       if (onSubmit) {
         await onSubmit(formData);
+        console.log('[PhotoForm] submit:onSubmit:done');
       } else {
-        // Default submission logic
-        const endpoint = photo ? `/api/photos/${photo.id}` : '/api/photos/upload';
-
-        const method = photo ? 'PATCH' : 'POST';
-
-        const token = await getToken();
-        console.log(
-          'PhotoForm: Fetched token for submission:',
-          token ? `Token length: ${token.length}` : 'Token is null/undefined',
-        );
-
-        if (!token) {
-          console.error('PhotoForm: Authentication token not found. Halting submission.');
-          toast.error('Authentication token not found. Please try logging in again.');
-          setIsSubmitting(false);
-          return;
-        }
-
-        let body: string | FormData = formData;
-        const headers: Record<string, string> = {
-          Authorization: `Bearer ${token}`,
-        };
-
-        if (method === 'PATCH') {
-          const description = (formData.get('description') as string) || photo?.description || '';
-          const displayOrderStr = formData.get('displayOrder') as string;
-          const displayOrder = displayOrderStr
-            ? parseInt(displayOrderStr, 10)
-            : photo?.displayOrder || 0;
-          const isSliderImage = formData.has('isSliderImage')
-            ? true
-            : photo?.isSliderImage || false;
-
-          const values = {
-            description,
-            displayOrder,
-            isSliderImage,
-          };
-          body = JSON.stringify(values);
-          headers['Content-Type'] = 'application/json';
-        }
-
-        const response = await fetch(endpoint, {
-          method,
-          headers,
-          body,
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to save photo');
-        }
-
-        router.push('/admin/photos');
-        router.refresh();
+        await defaultSubmit(formData);
       }
     } catch (error) {
-      console.error('Error saving photo:', error);
+      console.error('[PhotoForm] submit:error', error);
       toast.error('Error saving photo. Please try again.');
     } finally {
       setIsSubmitting(false);
+      console.log('[PhotoForm] submit:end');
     }
   };
 
@@ -118,18 +130,20 @@ export default function PhotoForm({ photo, albums, onSubmit, onCancel }: PhotoFo
 
   return (
     <div className="bg-white rounded-lg shadow p-6">
-      <h2 className="text-xl font-semibold text-foreground mb-6">{photo ? 'Edit Photo' : 'Upload New Photo'}</h2>
+      <h2 className="text-xl font-semibold text-foreground mb-6">
+        {photo ? 'Edit Photo' : 'Upload New Photo'}
+      </h2>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* File Upload */}
         {!photo && (
           <div>
-            <label htmlFor="file" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor={`${id}-file`} className="block text-sm font-medium text-gray-700 mb-2">
               Photo File *
             </label>
             <input
               type="file"
-              id="file"
+              id={`${id}-file`}
               name="file"
               accept="image/*"
               required={!photo}
@@ -142,17 +156,26 @@ export default function PhotoForm({ photo, albums, onSubmit, onCancel }: PhotoFo
         {/* Preview */}
         {previewUrl && (
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Preview</label>
+            <span className="block text-sm font-medium text-gray-700 mb-2">Preview</span>
             <div className="w-48 h-48 border border-gray-300 rounded-lg overflow-hidden">
-              <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
+              <Image
+                src={previewUrl}
+                alt="Preview"
+                width={192}
+                height={192}
+                className="w-full h-full object-cover"
+              />
             </div>
           </div>
         )}
 
         {/* Album Selection */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Album *</label>
+          <label htmlFor={`${id}-albumId`} className="block text-sm font-medium text-gray-700 mb-2">
+            Album *
+          </label>
           <AlbumSelect
+            id={`${id}-albumId`}
             albums={albums}
             value={selectedAlbumId}
             onChange={setSelectedAlbumId}
@@ -163,11 +186,14 @@ export default function PhotoForm({ photo, albums, onSubmit, onCancel }: PhotoFo
 
         {/* Description */}
         <div>
-          <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
+          <label
+            htmlFor={`${id}-description`}
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
             Description
           </label>
           <textarea
-            id="description"
+            id={`${id}-description`}
             name="description"
             rows={3}
             defaultValue={photo?.description || ''}
@@ -178,12 +204,15 @@ export default function PhotoForm({ photo, albums, onSubmit, onCancel }: PhotoFo
 
         {/* Display Order */}
         <div>
-          <label htmlFor="displayOrder" className="block text-sm font-medium text-gray-700 mb-2">
+          <label
+            htmlFor={`${id}-displayOrder`}
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
             Display Order
           </label>
           <input
             type="number"
-            id="displayOrder"
+            id={`${id}-displayOrder`}
             name="displayOrder"
             min="0"
             defaultValue={photo?.displayOrder || 0}
@@ -195,12 +224,12 @@ export default function PhotoForm({ photo, albums, onSubmit, onCancel }: PhotoFo
         <div className="flex items-center">
           <input
             type="checkbox"
-            id="isSliderImage"
+            id={`${id}-isSliderImage`}
             name="isSliderImage"
             defaultChecked={photo?.isSliderImage || false}
             className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
           />
-          <label htmlFor="isSliderImage" className="ml-2 block text-sm text-gray-700">
+          <label htmlFor={`${id}-isSliderImage`} className="ml-2 block text-sm text-gray-700">
             Use as slider image
           </label>
         </div>

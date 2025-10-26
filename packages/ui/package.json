@@ -16,7 +16,7 @@
   "devDependencies": {
     "@lounge/typescript-config": "workspace:*",
     "@turbo/gen": "^2.5.8",
-    "@types/node": "^24.8.1",
+    "@types/node": "^24.9.1",
     "@types/react": "19.2.2",
     "@types/react-dom": "19.2.2",
     "typescript": "5.9.3"
@@ -29,7 +29,7 @@
     "clsx": "^2.1.1",
     "embla-carousel": "^8.6.0",
     "embla-carousel-react": "^8.6.0",
-    "lucide-react": "^0.546.0",
+    "lucide-react": "^0.548.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-hook-form": "^7.65.0",

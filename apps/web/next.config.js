@@ -1,17 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   transpilePackages: ['@lounge/types'],
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   experimental: {
     esmExternals: true,
     browserDebugInfoInTerminal: true,
-    devtoolSegmentExplorer: true,
     globalNotFound: true,
     clientSegmentCache: true,
     // turbopackPersistentCaching: true,
-    // cacheComponents: true, // This option is not recognized in Next.js 15
+    // cacheComponents: true,
   },
   images: {
     remotePatterns: [

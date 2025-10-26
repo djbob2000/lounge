@@ -1,6 +1,6 @@
 import { Photo } from '@lounge/types';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { Photo as PrismaPhoto } from '@prisma/client';
+import type { Photo as PrismaPhoto } from '@prisma/client';
 import { AlbumsService } from '../albums/albums.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { StorageService } from '../storage/storage.service';

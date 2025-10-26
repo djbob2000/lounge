@@ -45,7 +45,7 @@ export function SortableItem({
       } ${isUpdating ? 'opacity-75' : ''}`}
     >
       <div className="flex items-center">
-        <div
+        <button
           {...attributes}
           {...listeners}
           className={`flex-shrink-0 p-2 rounded mr-2 transition-colors duration-200 ${
@@ -53,8 +53,7 @@ export function SortableItem({
           }`}
           title="Drag to reorder"
           aria-label={`Drag to reorder ${itemType}`}
-          role="button"
-          tabIndex={0}
+          type="button"
         >
           <svg
             className={`w-4 h-4 transition-colors duration-200 ${
@@ -66,7 +65,7 @@ export function SortableItem({
           >
             <path d="M7 2a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM7 8a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM7 14a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM17 2a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM17 8a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM17 14a2 2 0 1 1-4 0 2 2 0 0 1 4 0z" />
           </svg>
-        </div>
+        </button>
         <div className="flex-1">
           {renderItem
             ? renderItem(item, index)

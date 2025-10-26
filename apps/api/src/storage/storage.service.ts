@@ -171,7 +171,7 @@ export class StorageService {
   private async uploadToB2(buffer: Buffer, fileName: string, contentType: string): Promise<string> {
     const MAX_RETRIES = 3;
     const RETRY_DELAY_MS = 1000;
-    let lastError: any = null;
+    let lastError: Error | null = null;
 
     for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
       try {

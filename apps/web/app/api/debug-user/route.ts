@@ -35,14 +35,20 @@ export async function GET() {
 }
 
 // Helper function to check for admin role (copied from middleware)
-const hasAdminRole = (user: any): boolean => {
+const hasAdminRole = (user: unknown): boolean => {
   if (
     user &&
-    typeof user.privateMetadata === 'object' &&
-    user.privateMetadata !== null &&
-    'role' in user.privateMetadata
+    typeof user === 'object' &&
+    user !== null &&
+    'privateMetadata' in user &&
+    typeof (user as { privateMetadata?: unknown }).privateMetadata === 'object' &&
+    (user as { privateMetadata?: unknown }).privateMetadata !== null &&
+    'role' in ((user as { privateMetadata?: unknown }).privateMetadata as object)
   ) {
-    return (user.privateMetadata as { role?: unknown }).role === 'admin';
+    return (
+      ((user as { privateMetadata?: unknown }).privateMetadata as { role?: unknown }).role ===
+      'admin'
+    );
   }
   return false;
 };

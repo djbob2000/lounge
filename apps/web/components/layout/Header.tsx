@@ -42,13 +42,19 @@ export const Header = ({ initialCategories = [] }: HeaderProps) => {
         </Link>
 
         {/* Mobile menu button */}
-        <button className="md:hidden p-2" onClick={toggleMenu} aria-label="Toggle menu">
+        <button
+          type="button"
+          className="md:hidden p-2"
+          onClick={toggleMenu}
+          aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
             className="w-6 h-6"
+            aria-hidden="true"
           >
             <path
               strokeLinecap="round"

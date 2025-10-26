@@ -67,76 +67,86 @@ export default function DraggableList({
     setActiveId(event.active.id as string);
   };
 
-  const handleDragEnd = async (event: DragEndEvent) => {
+  const validateDrag = (event: DragEndEvent) => {
     const { active, over } = event;
-    setActiveId(null);
-
-    if (!over || active.id === over.id) {
-      return;
-    }
+    if (!over || active.id === over.id) return null;
 
     const oldIndex = listItems.findIndex((item) => item.id === active.id);
     const newIndex = listItems.findIndex((item) => item.id === over.id);
 
-    if (oldIndex === -1 || newIndex === -1) {
+    if (oldIndex === -1 || newIndex === -1) return null;
+
+    return { oldIndex, newIndex };
+  };
+
+  const prepareUpdateData = (updatedItems: typeof listItems) => {
+    return updatedItems.map((item, index) => ({
+      id: item.id,
+      displayOrder: index,
+    }));
+  };
+
+  const getApiUrl = () => {
+    const baseUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}`;
+    switch (itemType) {
+      case 'category':
+        return `${baseUrl}/categories/order/update`;
+      case 'album':
+        return `${baseUrl}/albums/order/update`;
+      case 'photo':
+        return `${baseUrl}/photos/order/update`;
+      default:
+        throw new Error(`Unknown item type: ${itemType}`);
+    }
+  };
+
+  const sendUpdateRequest = async (
+    url: string,
+    updateData: { id: string; displayOrder: number }[],
+  ) => {
+    const token = await getToken();
+
+    const response = await fetch(url, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        [itemType === 'category' ? 'categories' : itemType === 'album' ? 'albums' : 'photos']:
+          updateData,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Error updating order: ${response.statusText} - ${errorText}`);
+    }
+
+    return response;
+  };
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const dragResult = validateDrag(event);
+    if (!dragResult) {
+      setActiveId(null);
       return;
     }
 
-    // Create a new array of items with the new order
+    const { oldIndex, newIndex } = dragResult;
     const updatedItems = arrayMove(listItems, oldIndex, newIndex);
 
     // Optimistically update the UI
     setListItems(updatedItems);
     setError(null);
     setIsUpdating(true);
+    setActiveId(null);
 
-    // Prepare data for the API
-    const updateData = updatedItems.map((item, index) => ({
-      id: item.id,
-      displayOrder: index,
-    }));
+    const updateData = prepareUpdateData(updatedItems);
 
     try {
-      const token = await getToken();
-
-      // Determine API URL based on item type
-      let url = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}`;
-
-      switch (itemType) {
-        case 'category':
-          url += '/categories/order/update';
-          break;
-        case 'album':
-          url += '/albums/order/update';
-          break;
-        case 'photo':
-          url += '/photos/order/update';
-          break;
-      }
-
-      // Send request to the API
-      const response = await fetch(url, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          [itemType === 'category' ? 'categories' : itemType === 'album' ? 'albums' : 'photos']:
-            updateData,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.log('API Error Response:', {
-          status: response.status,
-          statusText: response.statusText,
-          body: errorText,
-          requestData: updateData,
-        });
-        throw new Error(`Error updating order: ${response.statusText} - ${errorText}`);
-      }
+      const url = getApiUrl();
+      await sendUpdateRequest(url, updateData);
 
       // Call the optional callback
       if (onOrderUpdate) {
@@ -172,7 +182,13 @@ export default function DraggableList({
       {error && (
         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
           <div className="flex items-center">
-            <svg className="w-4 h-4 text-red-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+            <svg
+              className="w-4 h-4 text-red-500 mr-2"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+              role="img"
+              aria-label="Error"
+            >
               <path
                 fillRule="evenodd"
                 d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
@@ -181,11 +197,18 @@ export default function DraggableList({
             </svg>
             <span className="text-sm text-red-700">{error}</span>
             <button
+              type="button"
               onClick={() => setError(null)}
               className="ml-auto text-red-500 hover:text-red-700"
               aria-label="Dismiss error"
             >
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <svg
+                className="w-4 h-4"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+                role="img"
+                aria-label="Close"
+              >
                 <path
                   fillRule="evenodd"
                   d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
@@ -229,6 +252,8 @@ export default function DraggableList({
                   className="w-8 h-8 mx-auto mb-2 text-gray-300"
                   fill="currentColor"
                   viewBox="0 0 20 20"
+                  role="img"
+                  aria-label="Empty list"
                 >
                   <path
                     fillRule="evenodd"

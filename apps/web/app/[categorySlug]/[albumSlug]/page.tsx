@@ -141,18 +141,11 @@ export default function Page({ params }: PageProps) {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {photos.map((photo, index) => (
-                <div
+                <button
                   key={photo.id}
+                  type="button"
                   className="aspect-square relative overflow-hidden rounded-md border bg-muted cursor-pointer"
                   onClick={() => setSelectedPhotoIndex(index)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      setSelectedPhotoIndex(index);
-                    }
-                  }}
-                  role="button"
-                  tabIndex={0}
                   aria-label={`View photo ${index + 1}`}
                 >
                   <Image
@@ -162,7 +155,7 @@ export default function Page({ params }: PageProps) {
                     className="object-cover hover:scale-105 transition-transform"
                     sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
                   />
-                </div>
+                </button>
               ))}
             </div>
           )}

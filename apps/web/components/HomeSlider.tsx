@@ -66,9 +66,10 @@ const HomeSlider = ({ photos }: HomeSliderProps) => {
       </div>
 
       <div className="absolute bottom-6 left-0 right-0 flex justify-center space-x-2">
-        {safePhotos.map((_, index) => (
+        {safePhotos.map((photo, index) => (
           <button
-            key={index}
+            key={photo.id || `dot-${index}`}
+            type="button"
             onClick={() => {
               setIsTransitioning(true);
               setTimeout(() => {
@@ -86,6 +87,7 @@ const HomeSlider = ({ photos }: HomeSliderProps) => {
 
       <div className="absolute inset-0 flex items-center justify-between px-4">
         <button
+          type="button"
           onClick={() => {
             if (safePhotos.length <= 1) return;
 
@@ -106,6 +108,8 @@ const HomeSlider = ({ photos }: HomeSliderProps) => {
             viewBox="0 0 24 24"
             stroke="currentColor"
             className="w-6 h-6"
+            role="img"
+            aria-hidden="true"
           >
             <path
               strokeLinecap="round"
@@ -117,6 +121,7 @@ const HomeSlider = ({ photos }: HomeSliderProps) => {
         </button>
 
         <button
+          type="button"
           onClick={goToNextSlide}
           className="w-10 h-10 rounded-full bg-black/20 text-white flex items-center justify-center hover:bg-black/40 transition-colors"
           aria-label="Next slide"
@@ -127,6 +132,8 @@ const HomeSlider = ({ photos }: HomeSliderProps) => {
             viewBox="0 0 24 24"
             stroke="currentColor"
             className="w-6 h-6"
+            role="img"
+            aria-hidden="true"
           >
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>

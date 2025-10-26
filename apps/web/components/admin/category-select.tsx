@@ -4,6 +4,7 @@ import type { Category } from '@lounge/types';
 import SelectCombobox, { type SelectOption } from '../ui/select-combobox';
 
 interface CategorySelectProps {
+  id?: string;
   categories: Category[];
   value: string;
   onChange: (categoryId: string) => void;
@@ -19,6 +20,7 @@ export default function CategorySelect({
   error,
   placeholder = 'Оберіть категорію',
   disabled = false,
+  id,
 }: CategorySelectProps) {
   const options: SelectOption[] = categories.map((category) => ({
     value: category.id,
@@ -27,6 +29,7 @@ export default function CategorySelect({
 
   return (
     <SelectCombobox
+      id={id}
       options={options}
       value={value}
       onChange={onChange}

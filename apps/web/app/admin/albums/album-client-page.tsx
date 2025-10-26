@@ -7,15 +7,10 @@ import DraggableList from '../../../components/admin/draggable-list';
 
 interface AlbumClientPageProps {
   initialAlbums: Album[];
-  categorySlug?: string; // Optional, if needed for links or other logic
   categoryId?: string; // Add categoryId prop
 }
 
-export default function AlbumClientPage({
-  initialAlbums,
-  categorySlug,
-  categoryId,
-}: AlbumClientPageProps) {
+export default function AlbumClientPage({ initialAlbums, categoryId }: AlbumClientPageProps) {
   const albums = initialAlbums;
 
   return (
@@ -35,7 +30,7 @@ export default function AlbumClientPage({
           <DraggableList
             items={albums}
             itemType="album"
-            renderItem={(item, index) => <AlbumListItem item={item as Album} index={index} />}
+            renderItem={(item) => <AlbumListItem item={item as Album} />}
           />
         </div>
       )}

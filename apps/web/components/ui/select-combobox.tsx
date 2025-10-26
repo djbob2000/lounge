@@ -20,6 +20,7 @@ export interface SelectOption {
 }
 
 interface SelectComboboxProps {
+  id?: string;
   options: SelectOption[];
   value: string;
   onChange: (value: string) => void;
@@ -32,6 +33,7 @@ interface SelectComboboxProps {
 }
 
 export default function SelectCombobox({
+  id,
   options,
   value,
   onChange,
@@ -51,6 +53,7 @@ export default function SelectCombobox({
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
+            id={id}
             variant="outline"
             role="combobox"
             aria-expanded={open}

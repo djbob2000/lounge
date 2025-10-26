@@ -4,7 +4,7 @@ A modern photo gallery with an admin panel, built on Next.js, NestJS, and Supaba
 
 ## Tech Stack
 
-- **Frontend**: Next.js 15, React 19, TypeScript, Tailwind CSS
+- **Frontend**: Next.js 16, React 19, TypeScript, Tailwind CSS
 - **Backend**: NestJS, TypeScript
 - **Database**: PostgreSQL (Supabase)
 - **File Storage**: Backblaze B2

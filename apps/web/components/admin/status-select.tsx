@@ -5,6 +5,7 @@ import SelectCombobox, { type SelectOption } from '../ui/select-combobox';
 export type Status = 'active' | 'inactive' | 'draft' | 'published' | 'archived';
 
 interface StatusSelectProps {
+  id?: string;
   value: Status | string;
   onChange: (status: Status | string) => void;
   error?: string;
@@ -26,6 +27,7 @@ export default function StatusSelect({
   error,
   placeholder = 'Оберіть статус',
   statuses = defaultStatuses,
+  id,
 }: StatusSelectProps) {
   const options: SelectOption[] = statuses.map((status) => ({
     value: status.value,
@@ -34,6 +36,7 @@ export default function StatusSelect({
 
   return (
     <SelectCombobox
+      id={id}
       options={options}
       value={value}
       onChange={onChange}

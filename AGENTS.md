@@ -11,7 +11,7 @@ This project is a monorepo managed with pnpm and TurboRepo. It consists of appli
 
 - **Monorepo Management:** pnpm workspaces + TurboRepo
 - **Backend:** NestJS, Prisma ORM, PostgreSQL
-- **Frontend:** Next.js 15 (App Router), React 19, TypeScript
+- **Frontend:** Next.js 16 (App Router), React 19, TypeScript
 - **Authentication:** Clerk (with Ukrainian localization)
 - **UI Framework:** Shadcn UI, Radix UI, Tailwind CSS v4
 - **Storage:** Backblaze B2
@@ -48,7 +48,7 @@ This project is a monorepo managed with pnpm and TurboRepo. It consists of appli
   - Cascade deletion support
 
 #### `apps/web/` - Next.js Frontend
-- **Framework:** Next.js 15 with App Router (Turbopack enabled)
+- **Framework:** Next.js 16 with App Router (Turbopack enabled)
 - **React Version:** 19.2.0
 - **Authentication:** Clerk Next.js SDK with Ukrainian localization
 - **UI Components:** Shadcn UI + Radix UI primitives
@@ -262,7 +262,7 @@ The project uses Biome for linting and formatting (not ESLint/Prettier):
 ### Frontend (`apps/web/`) - Next.js Standards
 
 #### App Router Structure
-- Use Next.js 15 App Router (not Pages Router)
+- Use Next.js 16 App Router (not Pages Router)
 - Server Components by default
 - Client Components only when necessary (`'use client'`)
 - File-based routing in `app/` directory
@@ -500,7 +500,7 @@ Before adding a new library, consider:
 2. **Bundle Size:** Check impact on bundle size (use bundlephobia.com)
 3. **Maintenance:** Is it actively maintained?
 4. **TypeScript Support:** Does it have good TypeScript definitions?
-5. **Compatibility:** Does it work with Next.js 15 and React 19?
+5. **Compatibility:** Does it work with Next.js 16 and React 19?
 6. **Alternatives:** Are there better alternatives already in use?
 7. **Documentation:** Is it well-documented?
 
@@ -2994,53 +2994,6 @@ export class CreateAlbumDto {
 }
 ```
 
-#### Change Documentation
-
-**CHANGELOG.md:**
-```markdown
-# Changelog
-
-## [Unreleased]
-
-### Added
-- Photo reordering with drag-and-drop
-- Album cover image selection
-
-### Changed
-- Improved thumbnail generation performance
-- Updated to Next.js 15
-
-### Fixed
-- Fixed image loading on Safari
-- Fixed category menu overflow on mobile
-
-## [1.0.0] - 2024-01-01
-
-### Added
-- Initial release
-- Album and category management
-- Photo upload and display
-- Admin panel
-```
-
-**Migration Guides:**
-```markdown
-# Migration Guide: v1 to v2
-
-## Breaking Changes
-
-### Database Schema
-Run migration: `pnpm prisma:migrate`
-
-### Environment Variables
-Add new required variables:
-- `B2_BUCKET_NAME`
-- `B2_DOWNLOAD_URL`
-
-### API Changes
-- `/albums` endpoint now returns paginated results
-- `displayOrder` is now required when creating albums
-```
 
 ### Type Documentation
 

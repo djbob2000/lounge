@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import CategorySelect from '../../components/admin/category-select';
 
 // Mock data for demonstration
@@ -80,6 +80,7 @@ const mockCategories = [
 ];
 
 export default function DemoPage() {
+  const id = useId();
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedCategoryWithError, setSelectedCategoryWithError] = useState('');
 
@@ -93,9 +94,7 @@ export default function DemoPage() {
           <div className="bg-white p-6 rounded-lg shadow">
             <h2 className="text-xl font-semibold text-foreground mb-4">Regular CategorySelect</h2>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Select category
-              </label>
+              <span className="block text-sm font-medium text-gray-700 mb-2">Select category</span>
               <CategorySelect
                 categories={mockCategories}
                 value={selectedCategory}
@@ -116,9 +115,9 @@ export default function DemoPage() {
               CategorySelect with error
             </h2>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <span className="block text-sm font-medium text-gray-700 mb-2">
                 Category with error *
-              </label>
+              </span>
               <CategorySelect
                 categories={mockCategories}
                 value={selectedCategoryWithError}
@@ -136,10 +135,16 @@ export default function DemoPage() {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="standard-select"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   Standard HTML select (old)
                 </label>
-                <select className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <select
+                  id={`${id}-standard-select`}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
                   <option value="">Select category</option>
                   {mockCategories.map((category) => (
                     <option key={category.id} value={category.id}>
@@ -149,9 +154,9 @@ export default function DemoPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <span className="block text-sm font-medium text-gray-700 mb-2">
                   New CategorySelect (Shadcn)
-                </label>
+                </span>
                 <CategorySelect
                   categories={mockCategories}
                   value=""

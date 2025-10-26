@@ -1,15 +1,15 @@
 import type { Album } from '@lounge/types';
 import { EyeIcon, EyeOffIcon, PencilIcon, Trash2Icon } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 
 interface AlbumListItemProps {
   item: Album;
-  index: number;
   // Add any other props you might need, e.g., onDelete, onToggleVisibility
 }
 
-export default function AlbumListItem({ item, index }: AlbumListItemProps) {
+export default function AlbumListItem({ item }: AlbumListItemProps) {
   return (
     <div className="flex items-center justify-between p-4 border-b border-gray-200 last:border-b-0">
       <Link href={`/admin/albums/${item.id}`} className="flex items-center flex-grow min-w-0">
@@ -17,9 +17,11 @@ export default function AlbumListItem({ item, index }: AlbumListItemProps) {
         {/* Added Link and classes */}
         {item.coverImageUrl && (
           <div className="w-16 h-12 mr-4 rounded overflow-hidden flex-shrink-0">
-            <img
+            <Image
               src={item.coverImageUrl}
               alt={`Cover for ${item.name}`}
+              width={64}
+              height={48}
               className="w-full h-full object-cover"
             />
           </div>

@@ -3,7 +3,7 @@
 import { useAuth } from '@clerk/nextjs';
 import type { Category } from '@lounge/types';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useId, useState } from 'react';
 
 interface CategoryFormProps {
   category?: Category;
@@ -13,6 +13,7 @@ export default function CategoryForm({ category }: CategoryFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const { getToken } = useAuth();
+  const id = useId();
   const [formData, setFormData] = useState({
     name: category?.name || '',
     slug: category?.slug || '',
@@ -20,66 +21,63 @@ export default function CategoryForm({ category }: CategoryFormProps) {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  const processErrorResponse = (errorData: { message?: string | string[] }) => {
+    if (errorData.message && Array.isArray(errorData.message)) {
+      const fieldErrors: Record<string, string> = {};
+      errorData.message.forEach((msg: string) => {
+        if (msg.includes('назва') || msg.includes('name')) {
+          fieldErrors.name = msg;
+        } else if (msg.includes('slug')) {
+          fieldErrors.slug = msg;
+        } else if (msg.includes('showInMenu')) {
+          fieldErrors.showInMenu = msg;
+        }
+      });
+      setErrors(fieldErrors);
+    } else {
+      setErrors({
+        general: errorData.message || 'Помилка збереження категорії',
+      });
+    }
+  };
+
+  const submitData = async () => {
+    const token = await getToken();
+
+    const url = category
+      ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/categories/${category.id}`
+      : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/categories`;
+
+    const method = category ? 'PATCH' : 'POST';
+
+    const response = await fetch(url, {
+      method,
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(formData),
+    });
+
+    if (!response.ok) {
+      const errorData = await response
+        .json()
+        .catch(() => ({ message: 'Помилка збереження категорії' }));
+      processErrorResponse(errorData);
+      return;
+    }
+
+    router.push('/admin/categories');
+    router.refresh();
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setErrors({});
 
     try {
-      const token = await getToken();
-      console.log('Отримано токен:', !!token);
-
-      const url = category
-        ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/categories/${category.id}`
-        : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/categories`;
-
-      console.log('URL запиту:', url);
-      console.log('Дані форми:', formData);
-
-      const method = category ? 'PATCH' : 'POST';
-
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(formData),
-      });
-
-      console.log('Статус відповіді:', response.status, response.statusText);
-
-      if (!response.ok) {
-        const errorData = await response
-          .json()
-          .catch(() => ({ message: 'Помилка збереження категорії' }));
-        console.error('Error response:', errorData);
-        if (errorData.message && Array.isArray(errorData.message)) {
-          const fieldErrors: Record<string, string> = {};
-          errorData.message.forEach((msg: string) => {
-            if (msg.includes('назва') || msg.includes('name')) {
-              fieldErrors.name = msg;
-            } else if (msg.includes('slug')) {
-              fieldErrors.slug = msg;
-            } else if (msg.includes('showInMenu')) {
-              fieldErrors.showInMenu = msg;
-            }
-          });
-          setErrors(fieldErrors);
-        } else {
-          setErrors({
-            general: errorData.message || 'Помилка збереження категорії',
-          });
-        }
-        setIsLoading(false);
-        return;
-      }
-
-      const result = await response.json();
-      console.log('Category saved successfully:', result);
-
-      router.push('/admin/categories');
-      router.refresh();
+      await submitData();
     } catch (error) {
       console.error('Error saving category:', error);
       setErrors({ general: 'Помилка збереження категорії' });
@@ -110,12 +108,12 @@ export default function CategoryForm({ category }: CategoryFormProps) {
       )}
 
       <div>
-        <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+        <label htmlFor={`${id}-name`} className="block text-sm font-medium text-gray-700 mb-2">
           Назва категорії *
         </label>
         <input
           type="text"
-          id="name"
+          id={`${id}-name`}
           name="name"
           value={formData.name}
           onChange={handleInputChange}
@@ -129,12 +127,12 @@ export default function CategoryForm({ category }: CategoryFormProps) {
       </div>
 
       <div>
-        <label htmlFor="slug" className="block text-sm font-medium text-gray-700 mb-2">
+        <label htmlFor={`${id}-slug`} className="block text-sm font-medium text-gray-700 mb-2">
           Slug (URL)
         </label>
         <input
           type="text"
-          id="slug"
+          id={`${id}-slug`}
           name="slug"
           value={formData.slug}
           onChange={handleInputChange}
@@ -153,13 +151,13 @@ export default function CategoryForm({ category }: CategoryFormProps) {
         <div className="flex items-center">
           <input
             type="checkbox"
-            id="showInMenu"
+            id={`${id}-showInMenu`}
             name="showInMenu"
             checked={formData.showInMenu}
             onChange={handleInputChange}
             className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
           />
-          <label htmlFor="showInMenu" className="ml-2 block text-sm text-gray-700">
+          <label htmlFor={`${id}-showInMenu`} className="ml-2 block text-sm text-gray-700">
             Показувати в меню
           </label>
         </div>

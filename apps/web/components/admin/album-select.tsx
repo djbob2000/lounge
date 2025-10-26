@@ -4,6 +4,7 @@ import type { Album } from '@lounge/types';
 import SelectCombobox, { type SelectOption } from '../ui/select-combobox';
 
 interface AlbumSelectProps {
+  id?: string;
   albums: Album[];
   value: string;
   onChange: (albumId: string) => void;
@@ -19,6 +20,7 @@ export default function AlbumSelect({
   error,
   placeholder = 'Оберіть альбом',
   disabled = false,
+  id,
 }: AlbumSelectProps) {
   const options: SelectOption[] = albums.map((album) => ({
     value: album.id,
@@ -27,6 +29,7 @@ export default function AlbumSelect({
 
   return (
     <SelectCombobox
+      id={id}
       options={options}
       value={value}
       onChange={onChange}

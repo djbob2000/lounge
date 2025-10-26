@@ -31,7 +31,7 @@ export default function CategoryClientPage({ initialCategories }: CategoryClient
           <DraggableList
             items={categories}
             itemType="category"
-            renderItem={(item, index) => <CategoryListItem item={item as Category} index={index} />}
+            renderItem={(item) => <CategoryListItem item={item as Category} />}
           />
         </div>
       )}

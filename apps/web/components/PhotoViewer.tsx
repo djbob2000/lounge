@@ -56,6 +56,7 @@ export const PhotoViewer = ({ photos, initialIndex = 0, onClose }: PhotoViewerPr
   return (
     <div className="fixed inset-0 bg-black bg-opacity-90 z-50 flex justify-center items-center">
       <button
+        type="button"
         onClick={onClose}
         className="absolute top-4 right-4 text-white p-2 z-10"
         aria-label="Close"
@@ -66,6 +67,8 @@ export const PhotoViewer = ({ photos, initialIndex = 0, onClose }: PhotoViewerPr
           viewBox="0 0 24 24"
           stroke="currentColor"
           className="w-8 h-8"
+          role="img"
+          aria-hidden="true"
         >
           <path
             strokeLinecap="round"
@@ -77,6 +80,7 @@ export const PhotoViewer = ({ photos, initialIndex = 0, onClose }: PhotoViewerPr
       </button>
 
       <button
+        type="button"
         onClick={handlePrevious}
         className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white p-2"
         aria-label="Previous photo"
@@ -87,6 +91,8 @@ export const PhotoViewer = ({ photos, initialIndex = 0, onClose }: PhotoViewerPr
           viewBox="0 0 24 24"
           stroke="currentColor"
           className="w-8 h-8"
+          role="img"
+          aria-hidden="true"
         >
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
         </svg>
@@ -109,6 +115,7 @@ export const PhotoViewer = ({ photos, initialIndex = 0, onClose }: PhotoViewerPr
       </div>
 
       <button
+        type="button"
         onClick={handleNext}
         className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white p-2"
         aria-label="Next photo"
@@ -119,6 +126,8 @@ export const PhotoViewer = ({ photos, initialIndex = 0, onClose }: PhotoViewerPr
           viewBox="0 0 24 24"
           stroke="currentColor"
           className="w-8 h-8"
+          role="img"
+          aria-hidden="true"
         >
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
         </svg>
