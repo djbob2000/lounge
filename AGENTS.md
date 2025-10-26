@@ -80,7 +80,7 @@ This project is a monorepo managed with pnpm and TurboRepo. It consists of appli
 - **Metadata & resource hints:** components may render `<title>`, `<meta>`, `<link>` directly — React handles hoisting/deduplication. For resource preinitialization use `react-dom` static APIs: `preload`, `preinit`, `preconnect`, `prefetchDNS`.
 - **View Transitions:** Animate elements that update inside a Transition or navigation.
 - **useEffectEvent:** Extract non-reactive logic from Effects into reusable Effect Event functions.
-- **Activity:** Render "background activity" by hiding UI with `display: none` while maintaining state and cleaning up Effects.
+- **Activity:** Render "background activity" by hiding UI with `display: none` while maintaining state and cleaning up Effects. This allows pre-rendering and keeping state for hidden parts of the app without impacting performance.
 
 #### Example 1: Streaming data with use() hook (React 19 + Next.js)
 
@@ -182,7 +182,9 @@ export default function Component() {
         }}
       >{showItem ? 'Hide' : 'Show'}</button>
 
-      {showItem ? <Item /> : null}
+      <Activity mode={showItem ? 'visible' : 'hidden'}>
+        <Item />
+      </Activity>
     </>
   );
 }
@@ -235,38 +237,6 @@ export default function App() {
 }
 ```
 
-#### Example 2
-
-```tsx
-import { useActionState, useOptimistic } from 'react';
-
-function UpdateProfile({ currentName, onUpdate }) {
-  const [optimisticName, setOptimisticName] = useOptimistic(currentName);
-
-  const [error, submitAction, isPending] = useActionState(
-    async (prev, formData) => {
-      const newName = formData.get('name');
-      const res = await updateName(newName);
-      if (res.error) return res.error;
-      return null;
-    },
-    null
-  );
-
-  return (
-    <form action={submitAction}>
-      <p>Your name: {optimisticName}</p>
-      <input
-        name="name"
-        defaultValue={optimisticName}
-        onChange={(e) => setOptimisticName(e.target.value)}
-      />
-      <button type="submit" disabled={isPending}>Save</button>
-      {error && <p className="text-destructive">{error}</p>}
-    </form>
-  );
-}
-```
 
 
 ## Functionality Implementation Standards
