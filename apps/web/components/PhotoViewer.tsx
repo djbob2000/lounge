@@ -31,7 +31,7 @@ export const PhotoViewer = ({ photos, initialIndex = 0, onClose }: PhotoViewerPr
   // Ефект для управління document events та styles
   useEffect(() => {
     const handleKeyDownEvent = (event: KeyboardEvent) => handleKeyDown(event);
-    
+
     document.addEventListener('keydown', handleKeyDownEvent);
     document.body.style.overflow = 'hidden';
 

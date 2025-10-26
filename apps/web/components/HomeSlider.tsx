@@ -9,7 +9,7 @@ import {
   CarouselPrevious,
 } from '@lounge/ui';
 import Image from 'next/image';
-import { useEffect, useEffectEvent, useState, useRef } from 'react';
+import { useEffect, useEffectEvent, useRef, useState } from 'react';
 
 interface HomeSliderProps {
   photos: Photo[];
@@ -17,11 +17,7 @@ interface HomeSliderProps {
   autoPlayInterval?: number;
 }
 
-const HomeSlider = ({
-  photos,
-  autoPlay = true,
-  autoPlayInterval = 5000
-}: HomeSliderProps) => {
+const HomeSlider = ({ photos, autoPlay = true, autoPlayInterval = 5000 }: HomeSliderProps) => {
   const safePhotos = Array.isArray(photos) ? photos : [];
   const [currentIndex, setCurrentIndex] = useState(0);
   const autoPlayTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -31,9 +27,7 @@ const HomeSlider = ({
     if (!autoPlay || safePhotos.length <= 1) return;
 
     autoPlayTimeoutRef.current = setTimeout(() => {
-      setCurrentIndex((prevIndex) =>
-        prevIndex === safePhotos.length - 1 ? 0 : prevIndex + 1
-      );
+      setCurrentIndex((prevIndex) => (prevIndex === safePhotos.length - 1 ? 0 : prevIndex + 1));
     }, autoPlayInterval);
   });
 
@@ -57,25 +51,21 @@ const HomeSlider = ({
     return () => {
       stopAutoPlay();
     };
-  }, [autoPlay, autoPlayInterval, safePhotos.length]);
+  }, []);
 
   // React to index changes for auto-play
   useEffect(() => {
     if (autoPlay && safePhotos.length > 1) {
       startAutoPlay();
     }
-  }, [currentIndex, autoPlay, safePhotos.length]);
+  }, [currentIndex, autoPlay]);
 
   const goToNext = useEffectEvent(() => {
-    setCurrentIndex((prevIndex) =>
-      prevIndex === safePhotos.length - 1 ? 0 : prevIndex + 1
-    );
+    setCurrentIndex((prevIndex) => (prevIndex === safePhotos.length - 1 ? 0 : prevIndex + 1));
   });
 
   const goToPrevious = useEffectEvent(() => {
-    setCurrentIndex((prevIndex) =>
-      prevIndex === 0 ? safePhotos.length - 1 : prevIndex - 1
-    );
+    setCurrentIndex((prevIndex) => (prevIndex === 0 ? safePhotos.length - 1 : prevIndex - 1));
   });
 
   const goToSlide = useEffectEvent((index: number) => {
@@ -126,7 +116,7 @@ const HomeSlider = ({
                 priority={index === 0}
                 sizes="100vw"
               />
-              
+
               {/* Slide indicator dots */}
               {safePhotos.length > 1 && (
                 <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
@@ -135,9 +125,7 @@ const HomeSlider = ({
                       key={dotIndex}
                       onClick={() => goToSlide(dotIndex)}
                       className={`w-2 h-2 rounded-full transition-colors ${
-                        dotIndex === currentIndex
-                          ? 'bg-white'
-                          : 'bg-white/50 hover:bg-white/75'
+                        dotIndex === currentIndex ? 'bg-white' : 'bg-white/50 hover:bg-white/75'
                       }`}
                       aria-label={`Go to slide ${dotIndex + 1}`}
                     />
@@ -151,14 +139,8 @@ const HomeSlider = ({
 
       {safePhotos.length > 1 && (
         <>
-          <CarouselPrevious
-            className="left-4"
-            onClick={goToPrevious}
-          />
-          <CarouselNext
-            className="right-4"
-            onClick={goToNext}
-          />
+          <CarouselPrevious className="left-4" onClick={goToPrevious} />
+          <CarouselNext className="right-4" onClick={goToNext} />
         </>
       )}
     </Carousel>

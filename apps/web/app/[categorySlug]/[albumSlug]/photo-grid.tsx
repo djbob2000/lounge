@@ -2,7 +2,7 @@
 
 import type { Photo } from '@lounge/types';
 import Image from 'next/image';
-import { Suspense, useState } from 'react';
+import { useState } from 'react';
 import PhotoViewer from '../../../components/PhotoViewer';
 
 interface PhotoGridProps {

@@ -103,8 +103,17 @@ function CategoryLoadingSkeleton() {
         <div className="h-8 bg-muted rounded w-64 mb-6 animate-pulse" />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <div key={`category-skeleton-${i}`}>
+          {[
+            'skeleton-1',
+            'skeleton-2',
+            'skeleton-3',
+            'skeleton-4',
+            'skeleton-5',
+            'skeleton-6',
+            'skeleton-7',
+            'skeleton-8',
+          ].map((key) => (
+            <div key={key}>
               <div className="aspect-square bg-muted rounded-md animate-pulse mb-2" />
               <div className="h-4 bg-muted rounded w-32 animate-pulse" />
             </div>

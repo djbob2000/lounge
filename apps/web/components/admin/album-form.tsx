@@ -5,6 +5,7 @@ import type { Album, Category } from '@lounge/types';
 import { AlertCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useActionState, useOptimistic } from 'react';
+import { useFormStatus } from 'react-dom';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -18,7 +19,6 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import CategorySelect from './category-select';
-import { useFormStatus } from 'react-dom';
 
 interface AlbumFormData {
   name: string;
@@ -69,13 +69,13 @@ export default function AlbumForm({ album, categories, categoryId }: AlbumFormPr
   // Оптимістичні оновлення форми
   const [optimisticFormData, setOptimisticFormData] = useOptimistic(
     initialFormData,
-    (state, newData: Partial<AlbumFormData>) => ({ ...state, ...newData })
+    (state, newData: Partial<AlbumFormData>) => ({ ...state, ...newData }),
   );
 
   // Функція валідації
   const validateForm = (data: AlbumFormData): Record<string, string> => {
     const errors: Record<string, string> = {};
-    
+
     if (!data.name.trim()) {
       errors.name = "Назва альбому обов'язкова";
     }
@@ -103,7 +103,7 @@ export default function AlbumForm({ album, categories, categoryId }: AlbumFormPr
   // Action функція для обробки форми
   const submitAlbum = async (
     previousState: Record<string, string> | null,
-    formData: FormData
+    formData: FormData,
   ): Promise<Record<string, string>> => {
     // Витягуємо дані з formData
     const data: AlbumFormData = {
@@ -147,15 +147,16 @@ export default function AlbumForm({ album, categories, categoryId }: AlbumFormPr
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
+
         const message = errorData.message;
-        
+
         if (Array.isArray(message)) {
           const fieldErrors = message.reduce<Record<string, string>>((acc, msg) => {
             const key = detectFieldFromMessage(msg);
             if (key !== 'general') acc[key] = msg;
             return acc;
           }, {});
-          
+
           if (Object.keys(fieldErrors).length === 0) {
             return { general: message.join('\n') };
           } else {

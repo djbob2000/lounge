@@ -5,14 +5,12 @@ import type { Album } from '@lounge/types';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@lounge/ui';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { Suspense, use } from 'react';
-import { useActionState, useEffect, useId, useOptimistic, useState } from 'react';
+import { Suspense, use, useActionState, useEffect, useId, useOptimistic, useState } from 'react';
+import { useFormStatus } from 'react-dom';
 import { z } from 'zod';
-
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-
 import AlbumSelect from './album-select';
 
 interface PhotoUploadFormProps {
@@ -36,8 +34,8 @@ interface FormState {
 
 // Submit Button component using useFormStatus
 function SubmitButton({ children, fileCount }: { children: React.ReactNode; fileCount: number }) {
-  const { pending } = useActionState(() => {}, null);
-  
+  const { pending } = useFormStatus();
+
   return (
     <button
       type="submit"
@@ -57,7 +55,7 @@ export default function PhotoUploadForm({
   const router = useRouter();
   const { getToken } = useAuth();
   const baseId = useId();
-  
+
   // Optimistic state for immediate feedback
   const [optimisticFiles, setOptimisticFiles] = useOptimistic<FileItem[]>([]);
   const [optimisticFormData, setOptimisticFormData] = useOptimistic({
@@ -66,7 +64,7 @@ export default function PhotoUploadForm({
     displayOrder: 0,
     isSlider: false,
   });
-  
+
   // Regular state for server-side updates
   const [files, setFiles] = useState<FileItem[]>([]);
   const [formData, setFormData] = useState({
@@ -88,8 +86,8 @@ export default function PhotoUploadForm({
   // Upload action function
   const uploadAction = async (prevState: FormState, formDataObj: FormData): Promise<FormState> => {
     try {
-      const files = formDataObj.get('photo') as FileList;
-      if (!files || files.length === 0) {
+      const files = formDataObj.get('photo');
+      if (!files || !(files instanceof FileList) || files.length === 0) {
         return {
           success: false,
           error: 'Please select files to upload',
@@ -98,11 +96,11 @@ export default function PhotoUploadForm({
         };
       }
 
-      const albumId = formDataObj.get('albumId') as string || '';
-      const description = formDataObj.get('description') as string || '';
-      const displayOrder = parseInt(formDataObj.get('displayOrder') as string || '0', 10);
+      const albumId = (formDataObj.get('albumId') as string) || '';
+      const description = (formDataObj.get('description') as string) || '';
+      const displayOrder = parseInt((formDataObj.get('displayOrder') as string) || '0', 10);
       const isSlider = formDataObj.get('isSlider') === 'on';
-      
+
       const progress: string[] = [];
       let successfulUploads = 0;
 
@@ -121,13 +119,13 @@ export default function PhotoUploadForm({
       // Process each file
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
-        if (!file.type.startsWith('image/')) {
-          progress[i] = `❌ ${file.name} - Not an image file`;
+        if (!file || !file.type.startsWith('image/')) {
+          progress[i] = `❌ ${file?.name || 'Unknown file'} - Not an image file`;
           continue;
         }
 
         progress[i] = `Uploading ${file.name}...`;
-        
+
         const uploadFormData = new FormData();
         uploadFormData.append('file', file);
         uploadFormData.append('albumId', albumId);
@@ -146,11 +144,14 @@ export default function PhotoUploadForm({
             progress[i] = `✅ ${file.name} - Uploaded successfully.`;
             successfulUploads++;
           } else {
-            const errorData = await response.json().catch(() => ({ message: 'Unknown server error' }));
+            const errorData = await response
+              .json()
+              .catch(() => ({ message: 'Unknown server error' }));
             progress[i] = `❌ ${file.name} - Error: ${errorData.message || response.statusText}`;
           }
         } catch (error: unknown) {
-          progress[i] = `❌ ${file.name} - Network error: ${error instanceof Error ? error.message : 'Check connection'}`;
+          progress[i] =
+            `❌ ${file.name} - Network error: ${error instanceof Error ? error.message : 'Check connection'}`;
         }
       }
 
@@ -236,7 +237,7 @@ export default function PhotoUploadForm({
   return (
     <form action={action} className="mb-6 p-4 border border-gray-200 rounded-lg bg-white shadow-sm">
       <h3 className="text-xl font-semibold mb-3 text-foreground">Upload New Photos</h3>
-      
+
       {/* Photo File Input */}
       <FormItem>
         <FormLabel htmlFor={`${baseId}-photo`}>Photo File *</FormLabel>
@@ -261,7 +262,6 @@ export default function PhotoUploadForm({
         <FormControl>
           <AlbumSelect
             id={`${baseId}-albumId`}
-            name="albumId"
             albums={albums}
             value={optimisticFormData.albumId}
             onChange={(value) => updateFormField('albumId', value)}
@@ -358,9 +358,7 @@ export default function PhotoUploadForm({
       )}
 
       {/* Submit Button using useFormStatus */}
-      <SubmitButton fileCount={optimisticFiles.length}>
-        Upload
-      </SubmitButton>
+      <SubmitButton fileCount={optimisticFiles.length}>Upload</SubmitButton>
 
       {/* Upload Progress */}
       {state.progress.length > 0 && (
@@ -375,16 +373,12 @@ export default function PhotoUploadForm({
           ))}
         </div>
       )}
-      
+
       {/* Overall Message */}
-      {state.message && (
-        <p className="mt-3 text-sm font-medium text-gray-800">{state.message}</p>
-      )}
-      
+      {state.message && <p className="mt-3 text-sm font-medium text-gray-800">{state.message}</p>}
+
       {/* Error Display */}
-      {state.error && (
-        <p className="mt-3 text-sm font-medium text-red-600">{state.error}</p>
-      )}
+      {state.error && <p className="mt-3 text-sm font-medium text-red-600">{state.error}</p>}
     </form>
   );
 }
