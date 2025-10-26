@@ -1,7 +1,8 @@
 import type { Album, Category } from '@lounge/types';
 import Image from 'next/image';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+
+import { Suspense, use } from 'react';
 
 interface CategoryPageParams {
   params: Promise<{
@@ -9,57 +10,46 @@ interface CategoryPageParams {
   }>;
 }
 
-async function getCategory(slug: string): Promise<Category | null> {
-  try {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/categories/slug/${slug}`,
-      {
-        cache: 'no-store',
-      },
-    );
+// Data fetching functions using React 19 use() hook patterns
+async function getCategoryData(
+  categorySlug: string,
+): Promise<{ category: Category; albums: Album[] }> {
+  const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
-    if (!response.ok) {
-      return null;
-    }
+  // Fetch category
+  const categoryResponse = await fetch(`${apiBaseUrl}/categories/slug/${categorySlug}`, {
+    cache: 'no-store',
+  });
 
-    const categoryData = await response.json();
-    console.log('Fetched category:', categoryData);
-    return categoryData;
-  } catch (error) {
-    console.error('Error fetching category:', error);
-    return null;
+  if (!categoryResponse.ok) {
+    throw new Error('Category not found');
   }
+
+  const category = await categoryResponse.json();
+
+  // Fetch albums
+  const albumsResponse = await fetch(`${apiBaseUrl}/albums/category/${category.id}`, {
+    cache: 'no-store',
+  });
+
+  let albums: Album[] = [];
+  if (albumsResponse.ok) {
+    albums = await albumsResponse.json();
+  }
+
+  return { category, albums };
 }
 
-async function getCategoryAlbums(categoryId: string): Promise<Album[]> {
-  try {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/albums/category/${categoryId}`,
-      { cache: 'no-store' },
-    );
+// Server Component using React 19 use() hook
+function CategoryContent({ params }: CategoryPageParams) {
+  // Use React 19 use() hook for async parameter resolution
+  const resolvedParams = use(params);
 
-    if (!response.ok) {
-      return [];
-    }
+  // Create promise for data fetching
+  const categoryDataPromise = getCategoryData(resolvedParams.categorySlug);
 
-    const albumsData = await response.json();
-    console.log('Fetched albums for category', categoryId, ':', albumsData);
-    return albumsData;
-  } catch (error) {
-    console.error('Error fetching albums:', error);
-    return [];
-  }
-}
-
-export default async function CategoryPage({ params }: CategoryPageParams) {
-  const { categorySlug } = await params;
-  const category = await getCategory(categorySlug);
-
-  if (!category) {
-    notFound();
-  }
-
-  const albums = await getCategoryAlbums(category.id);
+  // Use the use() hook to declaratively fetch data
+  const { category, albums } = use(categoryDataPromise);
 
   return (
     <div className="py-8 px-6">
@@ -67,7 +57,7 @@ export default async function CategoryPage({ params }: CategoryPageParams) {
         <h1 className="text-3xl md:text-4xl font-semibold text-foreground mb-6">{category.name}</h1>
 
         {albums.length === 0 ? (
-          <p className="text-muted-foreground">There are no albums in this category yet.</p>
+          <p className="text-muted-foreground">В цій категорії поки немає альбомів.</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {albums
@@ -84,7 +74,7 @@ export default async function CategoryPage({ params }: CategoryPageParams) {
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                        No cover
+                        Без обкладинки
                       </div>
                     )}
                   </div>
@@ -102,5 +92,33 @@ export default async function CategoryPage({ params }: CategoryPageParams) {
         )}
       </div>
     </div>
+  );
+}
+
+// Loading skeleton component
+function CategoryLoadingSkeleton() {
+  return (
+    <div className="py-8 px-6">
+      <div className="max-w-7xl mx-auto">
+        <div className="h-8 bg-muted rounded w-64 mb-6 animate-pulse" />
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={`category-skeleton-${i}`}>
+              <div className="aspect-square bg-muted rounded-md animate-pulse mb-2" />
+              <div className="h-4 bg-muted rounded w-32 animate-pulse" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function CategoryPage({ params }: CategoryPageParams) {
+  return (
+    <Suspense fallback={<CategoryLoadingSkeleton />}>
+      <CategoryContent params={params} />
+    </Suspense>
   );
 }

@@ -9,7 +9,7 @@ import {
   CarouselPrevious,
 } from '@lounge/ui';
 import Image from 'next/image';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useEffectEvent, useState } from 'react';
 
 interface PhotoViewerProps {
   photos: Photo[];
@@ -21,24 +21,31 @@ export const PhotoViewer = ({ photos, initialIndex = 0, onClose }: PhotoViewerPr
   const [currentIndex, _setCurrentIndex] = useState(initialIndex);
   const [isLoading, setIsLoading] = useState(true);
 
-  const handleKeyDown = useCallback(
-    (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        onClose();
-      }
-    },
-    [onClose],
-  );
+  // Використовуємо useCallback для нереактивної логіки (обробники подій)
+  const handleKeyDown = useEffectEvent((event: KeyboardEvent) => {
+    if (event.key === 'Escape') {
+      onClose();
+    }
+  });
 
+  // Ефект для управління document events та styles
   useEffect(() => {
-    document.addEventListener('keydown', handleKeyDown);
+    const handleKeyDownEvent = (event: KeyboardEvent) => handleKeyDown(event);
+    
+    document.addEventListener('keydown', handleKeyDownEvent);
     document.body.style.overflow = 'hidden';
 
     return () => {
-      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('keydown', handleKeyDownEvent);
       document.body.style.overflow = 'auto';
     };
   }, [handleKeyDown]);
+
+  // Ефект для управління loading станом
+  useEffect(() => {
+    // Скидаємо loading стан при зміні фото
+    setIsLoading(true);
+  }, [currentIndex]);
 
   const safePhotos = Array.isArray(photos) ? photos : [];
 
@@ -99,7 +106,7 @@ export const PhotoViewer = ({ photos, initialIndex = 0, onClose }: PhotoViewerPr
               >
                 <div className="relative w-full h-full flex items-center justify-center">
                   {isLoading && (
-                    <div className="absolute inset-0 flex justify-center items-center">
+                    <div className="absolute inset-0 flex justify-center items-center z-10">
                       <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
                     </div>
                   )}
@@ -108,7 +115,7 @@ export const PhotoViewer = ({ photos, initialIndex = 0, onClose }: PhotoViewerPr
                     alt={photo.filename || `Photo ${index + 1}`}
                     fill
                     className="object-contain"
-                    priority={index === initialIndex}
+                    priority={index === currentIndex}
                     onLoad={() => setIsLoading(false)}
                     sizes="100vw"
                   />

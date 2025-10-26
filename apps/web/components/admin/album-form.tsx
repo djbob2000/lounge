@@ -4,7 +4,7 @@ import { useAuth } from '@clerk/nextjs';
 import type { Album, Category } from '@lounge/types';
 import { AlertCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useId, useState } from 'react';
+import { useActionState, useOptimistic } from 'react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -18,6 +18,15 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import CategorySelect from './category-select';
+import { useFormStatus } from 'react-dom';
+
+interface AlbumFormData {
+  name: string;
+  slug: string;
+  description: string;
+  categoryId: string;
+  isHidden: boolean;
+}
 
 interface AlbumFormProps {
   album?: Album;
@@ -25,34 +34,60 @@ interface AlbumFormProps {
   categoryId?: string;
 }
 
+// Компонент кнопки з автоматичним керуванням станом
+function SubmitButton() {
+  const { pending } = useFormStatus();
+  return (
+    <Button type="submit" disabled={pending}>
+      {pending ? 'Збереження...' : 'Створити'}
+    </Button>
+  );
+}
+
+// Компонент кнопки редагування з автоматичним керуванням станом
+function EditSubmitButton() {
+  const { pending } = useFormStatus();
+  return (
+    <Button type="submit" disabled={pending}>
+      {pending ? 'Оновлення...' : 'Оновити'}
+    </Button>
+  );
+}
+
 export default function AlbumForm({ album, categories, categoryId }: AlbumFormProps) {
   const router = useRouter();
   const { getToken } = useAuth();
-  const id = useId();
-  const [isLoading, setIsLoading] = useState(false);
-  const [formData, setFormData] = useState({
+
+  const initialFormData: AlbumFormData = {
     name: album?.name || '',
     slug: album?.slug || '',
     description: album?.description || '',
     categoryId: categoryId || album?.categoryId || '',
     isHidden: album?.isHidden || false,
-  });
-  const [errors, setErrors] = useState<Record<string, string>>({});
-
-  const validateForm = () => {
-    if (!formData.name.trim()) {
-      setErrors({ name: "Назва альбому обов'язкова" });
-      return false;
-    }
-
-    if (!formData.categoryId) {
-      setErrors({ categoryId: "Категорія обов'язкова" });
-      return false;
-    }
-
-    return true;
   };
 
+  // Оптимістичні оновлення форми
+  const [optimisticFormData, setOptimisticFormData] = useOptimistic(
+    initialFormData,
+    (state, newData: Partial<AlbumFormData>) => ({ ...state, ...newData })
+  );
+
+  // Функція валідації
+  const validateForm = (data: AlbumFormData): Record<string, string> => {
+    const errors: Record<string, string> = {};
+    
+    if (!data.name.trim()) {
+      errors.name = "Назва альбому обов'язкова";
+    }
+
+    if (!data.categoryId) {
+      errors.categoryId = "Категорія обов'язкова";
+    }
+
+    return errors;
+  };
+
+  // Визначення поля для помилки на основі повідомлення
   const detectFieldFromMessage = (
     msg: string,
   ): 'name' | 'slug' | 'categoryId' | 'description' | 'general' => {
@@ -65,28 +100,30 @@ export default function AlbumForm({ album, categories, categoryId }: AlbumFormPr
     return 'general';
   };
 
-  const processErrorResponse = (errorData: { message?: string | string[] }) => {
-    console.log('[AlbumForm] api:errorData', errorData);
-    const message = errorData.message;
-    if (Array.isArray(message)) {
-      const fieldErrors = message.reduce<Record<string, string>>((acc, msg) => {
-        const key = detectFieldFromMessage(msg);
-        if (key !== 'general') acc[key] = msg;
-        return acc;
-      }, {});
-      if (Object.keys(fieldErrors).length === 0) {
-        setErrors({ general: message.join('\\n') });
-      } else {
-        setErrors(fieldErrors);
-      }
-    } else {
-      setErrors({ general: message || 'Помилка збереження альбому' });
-    }
-  };
+  // Action функція для обробки форми
+  const submitAlbum = async (
+    previousState: Record<string, string> | null,
+    formData: FormData
+  ): Promise<Record<string, string>> => {
+    // Витягуємо дані з formData
+    const data: AlbumFormData = {
+      name: formData.get('name')?.toString() || '',
+      slug: formData.get('slug')?.toString() || '',
+      description: formData.get('description')?.toString() || '',
+      categoryId: formData.get('categoryId')?.toString() || '',
+      isHidden: formData.get('isHidden') === 'on',
+    };
 
-  const submitData = async () => {
+    // Валідація
+    const errors = validateForm(data);
+    if (Object.keys(errors).length > 0) {
+      return errors;
+    }
+
     const token = await getToken();
-    console.log('[AlbumForm] api:token', token ? `len:${token.length}` : 'null');
+    if (!token) {
+      return { general: 'Authentication token not found. Please try logging in again.' };
+    }
 
     const url = album
       ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/albums/${album.id}`
@@ -94,74 +131,71 @@ export default function AlbumForm({ album, categories, categoryId }: AlbumFormPr
 
     const method = album ? 'PATCH' : 'POST';
 
-    if (!token) {
-      console.error('[AlbumForm] api:no-token');
-      setErrors({ general: 'Authentication token not found. Please try logging in again.' });
-      return;
-    }
-
-    console.log('[AlbumForm] api:request', { url, method, payload: formData });
-
-    const response = await fetch(url, {
-      method,
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(formData),
-    });
-
-    console.log('[AlbumForm] api:response', { ok: response.ok, status: response.status });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      processErrorResponse(errorData);
-      return;
-    }
-
-    router.push('/admin/albums');
-    router.refresh();
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setErrors({});
-
-    if (!validateForm()) {
-      setIsLoading(false);
-      return;
-    }
-
     try {
-      await submitData();
+      console.log('[AlbumForm] api:request', { url, method, payload: data });
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(data),
+      });
+
+      console.log('[AlbumForm] api:response', { ok: response.ok, status: response.status });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        const message = errorData.message;
+        
+        if (Array.isArray(message)) {
+          const fieldErrors = message.reduce<Record<string, string>>((acc, msg) => {
+            const key = detectFieldFromMessage(msg);
+            if (key !== 'general') acc[key] = msg;
+            return acc;
+          }, {});
+          
+          if (Object.keys(fieldErrors).length === 0) {
+            return { general: message.join('\n') };
+          } else {
+            return fieldErrors;
+          }
+        } else {
+          return { general: message || 'Помилка збереження альбому' };
+        }
+      }
+
+      // Успішне збереження - перенаправлення буде здійснено після успішного стану
+      return {};
     } catch (error) {
       console.error('Error saving album:', error);
-      setErrors({ general: 'Помилка збереження альбому' });
-    } finally {
-      setIsLoading(false);
+      return { general: 'Помилка збереження альбому' };
     }
   };
 
+  const [errors, submitAction] = useActionState(submitAlbum, {});
+
+  // Обробка зміни полів з оптимістичними оновленнями
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
   ) => {
     const { name, value, type } = e.target;
     const checked = (e.target as HTMLInputElement).checked;
 
-    setFormData((prev) => ({
-      ...prev,
+    setOptimisticFormData({
       [name]: type === 'checkbox' ? checked : value,
-    }));
-
-    // Clear error when user starts typing
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: '' }));
-    }
+    });
   };
 
+  // Перенаправлення при успішному збереженні (коли немає помилок)
+  if (Object.keys(errors).length === 0 && album) {
+    router.push('/admin/albums');
+    router.refresh();
+  }
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form action={submitAction} className="space-y-6">
       {errors.general && (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
@@ -170,14 +204,14 @@ export default function AlbumForm({ album, categories, categoryId }: AlbumFormPr
       )}
 
       <FormItem>
-        <FormLabel htmlFor={`${id}-name`}>
+        <FormLabel htmlFor="name">
           Назва альбому <span className="text-destructive">*</span>
         </FormLabel>
         <FormControl>
           <Input
-            id={`${id}-name`}
+            id="name"
             name="name"
-            value={formData.name}
+            value={optimisticFormData.name}
             onChange={handleInputChange}
             placeholder="Введіть назву альбому"
             className={errors.name ? 'border-destructive focus-visible:ring-destructive' : ''}
@@ -187,20 +221,17 @@ export default function AlbumForm({ album, categories, categoryId }: AlbumFormPr
       </FormItem>
 
       <FormItem>
-        <FormLabel htmlFor={`${id}-categoryId`}>
+        <FormLabel htmlFor="categoryId">
           Категорія <span className="text-destructive">*</span>
         </FormLabel>
         <FormControl>
+          <input type="hidden" name="categoryId" value={optimisticFormData.categoryId} />
           <CategorySelect
-            id={`${id}-categoryId`}
+            id="categoryId"
             categories={categories}
-            value={formData.categoryId}
+            value={optimisticFormData.categoryId}
             onChange={(categoryId) => {
-              setFormData((prev) => ({ ...prev, categoryId }));
-              // Clear error when user selects a category
-              if (errors.categoryId) {
-                setErrors((prev) => ({ ...prev, categoryId: '' }));
-              }
+              setOptimisticFormData({ categoryId });
             }}
             error={errors.categoryId}
             placeholder="Оберіть категорію"
@@ -211,12 +242,12 @@ export default function AlbumForm({ album, categories, categoryId }: AlbumFormPr
       </FormItem>
 
       <FormItem>
-        <FormLabel htmlFor={`${id}-slug`}>Slug (URL)</FormLabel>
+        <FormLabel htmlFor="slug">Slug (URL)</FormLabel>
         <FormControl>
           <Input
-            id={`${id}-slug`}
+            id="slug"
             name="slug"
-            value={formData.slug}
+            value={optimisticFormData.slug}
             onChange={handleInputChange}
             placeholder="Залиште порожнім для автоматичної генерації"
             className={errors.slug ? 'border-destructive focus-visible:ring-destructive' : ''}
@@ -229,12 +260,12 @@ export default function AlbumForm({ album, categories, categoryId }: AlbumFormPr
       </FormItem>
 
       <FormItem>
-        <FormLabel htmlFor={`${id}-description`}>Опис</FormLabel>
+        <FormLabel htmlFor="description">Опис</FormLabel>
         <FormControl>
           <Textarea
-            id={`${id}-description`}
+            id="description"
             name="description"
-            value={formData.description}
+            value={optimisticFormData.description}
             onChange={handleInputChange}
             rows={3}
             placeholder="Введіть опис альбому (необов'язково)"
@@ -250,14 +281,15 @@ export default function AlbumForm({ album, categories, categoryId }: AlbumFormPr
         <div className="flex items-center space-x-2">
           <FormControl>
             <Checkbox
-              id={`${id}-isHidden`}
-              checked={formData.isHidden}
+              id="isHidden"
+              name="isHidden"
+              checked={optimisticFormData.isHidden}
               onCheckedChange={(checked) => {
-                setFormData((prev) => ({ ...prev, isHidden: !!checked }));
+                setOptimisticFormData({ isHidden: !!checked });
               }}
             />
           </FormControl>
-          <FormLabel htmlFor={`${id}-isHidden`} className="text-sm font-normal">
+          <FormLabel htmlFor="isHidden" className="text-sm font-normal">
             Приховати альбом
           </FormLabel>
         </div>
@@ -268,9 +300,7 @@ export default function AlbumForm({ album, categories, categoryId }: AlbumFormPr
         <Button type="button" variant="outline" onClick={() => router.back()}>
           Скасувати
         </Button>
-        <Button type="submit" disabled={isLoading}>
-          {isLoading ? 'Збереження...' : album ? 'Оновити' : 'Створити'}
-        </Button>
+        {album ? <EditSubmitButton /> : <SubmitButton />}
       </div>
     </form>
   );

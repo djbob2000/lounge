@@ -2,7 +2,7 @@
 
 import type { Photo } from '@lounge/types';
 import Image from 'next/image';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 interface PhotoGridProps {
   photos: Photo[];
@@ -11,11 +11,6 @@ interface PhotoGridProps {
 
 export default function PhotoGrid({ photos, onSelectionChange }: PhotoGridProps) {
   const [selectedPhotoIds, setSelectedPhotoIds] = useState<string[]>([]);
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true); // Ensure component is mounted before rendering client-only UI
-  }, []);
 
   const handleSelectPhoto = (photoId: string) => {
     const newSelectedIds = selectedPhotoIds.includes(photoId)
@@ -35,26 +30,6 @@ export default function PhotoGrid({ photos, onSelectionChange }: PhotoGridProps)
     setSelectedPhotoIds(newSelectedIds);
     onSelectionChange(newSelectedIds);
   };
-
-  // This useEffect can be used if we need to react to external changes to selectedPhotoIds,
-  // but for internal changes, calling onSelectionChange directly in handlers is more immediate.
-  useEffect(() => {
-    // If the parent component might change the selection, this effect helps keep them in sync.
-    // For now, selection is driven from within PhotoGrid.
-    // To avoid potential infinite loops if not careful with parent state,
-    // it's often better to have a single source of truth.
-    // If `selectedPhotoIds` were a prop, this would be different.
-  }, []); // Dependency array is important
-
-  if (!isMounted) {
-    // Render a simple loader or null to avoid hydration issues with state-dependent UI (checkboxes)
-    // For a better UX, a skeleton loader matching the grid item layout could be used.
-    return (
-      <div className="text-center p-4">
-        <p>Loading photos...</p>
-      </div>
-    );
-  }
 
   if (!photos || photos.length === 0) {
     return <p className="text-center text-gray-600 py-8">No photos in this album yet.</p>;
@@ -76,8 +51,6 @@ export default function PhotoGrid({ photos, onSelectionChange }: PhotoGridProps)
             {selectedPhotoIds.length} / {photos.length})
           </span>
         </label>
-        {/* Placeholder for future bulk actions e.g. delete selected */}
-        {/* The delete button was here as a placeholder, it will be managed by AlbumActions now */}
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
         {photos.map((photo) => (
@@ -119,10 +92,6 @@ export default function PhotoGrid({ photos, onSelectionChange }: PhotoGridProps)
           </button>
         ))}
       </div>
-      {/* For debugging selection (optional): */}
-      {/* <pre className="mt-6 p-3 bg-gray-100 rounded text-xs text-gray-700 overflow-x-auto">
-        Selected Photo IDs: {JSON.stringify(selectedPhotoIds, null, 2)}
-      </pre> */}
     </div>
   );
 }

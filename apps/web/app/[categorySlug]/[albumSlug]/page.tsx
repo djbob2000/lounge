@@ -1,17 +1,7 @@
-'use client';
-
-// export const runtime = 'edge';
-
 import type { Album, Category, Photo } from '@lounge/types';
-import Image from 'next/image';
-import Link from 'next/link';
-import { notFound } from 'next/navigation';
-import { useEffect, useState } from 'react';
-
-import PhotoViewer from '../../../components/PhotoViewer';
-
-// import { 照片元数据T } from "@/../api/src/photos/types";
-// import { 相册T } from "@/../api/src/albums/types";
+import { Suspense, use } from 'react';
+import LoadingSkeleton from './loading-skeleton';
+import PhotoGrid from './photo-grid';
 
 interface PageProps {
   params: Promise<{
@@ -20,92 +10,72 @@ interface PageProps {
   }>;
 }
 
-export default function Page({ params }: PageProps) {
-  const [category, setCategory] = useState<Category | null>(null);
-  const [album, setAlbum] = useState<Album | null>(null);
-  const [photos, setPhotos] = useState<Photo[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(null);
-  const [resolvedParams, setResolvedParams] = useState<{
-    categorySlug: string;
-    albumSlug: string;
-  } | null>(null);
+interface AlbumData {
+  category: Category;
+  album: Album;
+  photos: Photo[];
+}
 
-  useEffect(() => {
-    async function resolveParams() {
-      const resolved = await params;
-      setResolvedParams(resolved);
-    }
-    resolveParams();
-  }, [params]);
-
+// Data fetching function that can be used with React 19 use() hook
+async function fetchAlbumData(resolvedParams: {
+  categorySlug: string;
+  albumSlug: string;
+}): Promise<AlbumData> {
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
-  useEffect(() => {
-    if (!resolvedParams) return;
+  // Fetch category
+  const categoryResponse = await fetch(
+    `${apiBaseUrl}/categories/slug/${resolvedParams.categorySlug}`,
+    { cache: 'no-store' },
+  );
 
-    async function fetchData() {
-      try {
-        // Fetch category
-        const categoryResponse = await fetch(
-          `${apiBaseUrl}/categories/slug/${resolvedParams?.categorySlug}`,
-        );
-
-        if (!categoryResponse.ok) {
-          notFound();
-        }
-
-        const categoryData = await categoryResponse.json();
-        console.log('Category data after json:', categoryData);
-        setCategory(categoryData);
-
-        // Fetch album
-        const albumUrl = `${apiBaseUrl}/albums/slug/${resolvedParams?.albumSlug}`;
-        const albumResponse = await fetch(albumUrl);
-        if (!albumResponse.ok) {
-          notFound();
-        }
-
-        const albumData = await albumResponse.json();
-        console.log('Album data after json:', albumData);
-        setAlbum(albumData);
-
-        // Fetch photos
-        const photosResponse = await fetch(`${apiBaseUrl}/photos?albumId=${albumData.id}`);
-
-        if (photosResponse.ok) {
-          const photosData = await photosResponse.json();
-          setPhotos(photosData);
-        }
-
-        setIsLoading(false);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-        setIsLoading(false);
-      }
-    }
-
-    fetchData();
-  }, [resolvedParams, apiBaseUrl]);
-
-  if (isLoading) {
-    return (
-      <div className="py-8 px-6 flex justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-      </div>
-    );
+  if (!categoryResponse.ok) {
+    throw new Error('Category not found');
   }
 
-  if (!album || !category) {
-    return notFound();
+  const category = await categoryResponse.json();
+
+  // Fetch album
+  const albumResponse = await fetch(`${apiBaseUrl}/albums/slug/${resolvedParams.albumSlug}`, {
+    cache: 'no-store',
+  });
+
+  if (!albumResponse.ok) {
+    throw new Error('Album not found');
   }
+
+  const album = await albumResponse.json();
+
+  // Fetch photos
+  const photosResponse = await fetch(`${apiBaseUrl}/photos?albumId=${album.id}`, {
+    cache: 'no-store',
+  });
+
+  let photos: Photo[] = [];
+  if (photosResponse.ok) {
+    photos = await photosResponse.json();
+  }
+
+  return { category, album, photos };
+}
+
+// Server Component that uses React 19 use() hook for data fetching
+function AlbumContent({ params }: PageProps) {
+  // Use React 19 use() hook for async parameter resolution
+  const resolvedParams = use(params);
+
+  // Create promise for data fetching
+  const albumPromise = fetchAlbumData(resolvedParams);
+
+  // Use the use() hook to declaratively fetch data
+  const data = use(albumPromise);
 
   return (
     <div className="py-8 px-6">
       <div className="max-w-7xl mx-auto">
         <div className="mb-6">
-          <Link
-            href={`/${category.slug}`}
+          <a
+            href={`/${data.category.slug}`}
             className="text-muted-foreground hover:text-foreground transition-colors flex items-center"
           >
             <svg
@@ -125,50 +95,32 @@ export default function Page({ params }: PageProps) {
                 d="M15 19l-7-7 7-7"
               />
             </svg>
-            Back to {category.name}
-          </Link>
+            Back to {data.category.name}
+          </a>
         </div>
 
-        <h1 className="text-3xl md:text-4xl font-semibold text-foreground">{album.name}</h1>
+        <h1 className="text-3xl md:text-4xl font-semibold text-foreground">{data.album.name}</h1>
 
-        {album.description && (
-          <p className="mt-2 text-muted-foreground max-w-3xl">{album.description}</p>
+        {data.album.description && (
+          <p className="mt-2 text-muted-foreground max-w-3xl">{data.album.description}</p>
         )}
 
         <div className="mt-8">
-          {photos.length === 0 ? (
+          {data.photos.length === 0 ? (
             <p className="text-muted-foreground">В цьому альбомі поки немає фотографій.</p>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {photos.map((photo, index) => (
-                <button
-                  key={photo.id}
-                  type="button"
-                  className="aspect-square relative overflow-hidden rounded-md border bg-muted cursor-pointer"
-                  onClick={() => setSelectedPhotoIndex(index)}
-                  aria-label={`View photo ${index + 1}`}
-                >
-                  <Image
-                    src={photo.thumbnailUrl}
-                    alt={photo.filename}
-                    fill
-                    className="object-cover hover:scale-105 transition-transform"
-                    sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                  />
-                </button>
-              ))}
-            </div>
+            <PhotoGrid photos={data.photos} />
           )}
         </div>
       </div>
-
-      {selectedPhotoIndex !== null && (
-        <PhotoViewer
-          photos={photos}
-          initialIndex={selectedPhotoIndex}
-          onClose={() => setSelectedPhotoIndex(null)}
-        />
-      )}
     </div>
+  );
+}
+
+export default function Page({ params }: PageProps) {
+  return (
+    <Suspense fallback={<LoadingSkeleton />}>
+      <AlbumContent params={params} />
+    </Suspense>
   );
 }
