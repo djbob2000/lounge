@@ -1,7 +1,7 @@
 import Link from 'next/link';
 
 export const Footer = () => {
-  const currentYear = new Date().getFullYear();
+  const currentYear = 2027;
 
   return (
     <footer className="py-8 px-6 bg-background border-t mt-auto">

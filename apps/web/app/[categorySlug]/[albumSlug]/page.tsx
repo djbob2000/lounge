@@ -23,10 +23,15 @@ async function fetchAlbumData(resolvedParams: {
 }): Promise<AlbumData> {
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
-  // Fetch category
+  // Fetch category with caching
   const categoryResponse = await fetch(
-    `${apiBaseUrl}/categories/slug/${resolvedParams.categorySlug}`,
-    { cache: 'no-store' },
+    `${apiBaseUrl}/v1/categories/slug/${resolvedParams.categorySlug}`,
+    {
+      next: {
+        revalidate: 3600, // 1 hour
+        tags: [`category-${resolvedParams.categorySlug}`],
+      },
+    },
   );
 
   if (!categoryResponse.ok) {
@@ -35,9 +40,12 @@ async function fetchAlbumData(resolvedParams: {
 
   const category = await categoryResponse.json();
 
-  // Fetch album
-  const albumResponse = await fetch(`${apiBaseUrl}/albums/slug/${resolvedParams.albumSlug}`, {
-    cache: 'no-store',
+  // Fetch album with caching
+  const albumResponse = await fetch(`${apiBaseUrl}/v1/albums/slug/${resolvedParams.albumSlug}`, {
+    next: {
+      revalidate: 1800, // 30 minutes
+      tags: [`album-${resolvedParams.albumSlug}`],
+    },
   });
 
   if (!albumResponse.ok) {
@@ -46,9 +54,12 @@ async function fetchAlbumData(resolvedParams: {
 
   const album = await albumResponse.json();
 
-  // Fetch photos
-  const photosResponse = await fetch(`${apiBaseUrl}/photos?albumId=${album.id}`, {
-    cache: 'no-store',
+  // Fetch photos using correct endpoint with caching
+  const photosResponse = await fetch(`${apiBaseUrl}/v1/photos/album/${album.id}`, {
+    next: {
+      revalidate: 900, // 15 minutes - photos can change more frequently
+      tags: [`photos-album-${album.id}`],
+    },
   });
 
   let photos: Photo[] = [];
@@ -116,6 +127,10 @@ function AlbumContent({ params }: PageProps) {
     </div>
   );
 }
+
+// ISR configuration removed due to cacheComponents compatibility
+
+// Removed static params to avoid build-time external API dependency
 
 export default function Page({ params }: PageProps) {
   return (

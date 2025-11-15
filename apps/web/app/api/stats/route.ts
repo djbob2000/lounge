@@ -3,8 +3,8 @@ import { NextResponse } from 'next/server';
 export async function GET() {
   try {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-    const response = await fetch(`${apiUrl}/stats`, {
-      cache: 'no-store',
+    const response = await fetch(`${apiUrl}/v1/stats`, {
+      next: { revalidate: 300 },
     });
 
     if (!response.ok) {

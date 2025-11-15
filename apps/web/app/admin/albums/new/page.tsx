@@ -6,9 +6,9 @@ import AlbumForm from '../../../../components/admin/album-form';
 async function getCategories(): Promise<Category[]> {
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/categories`,
+      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/v1/categories`,
       {
-        cache: 'no-store',
+        next: { revalidate: 3600 },
       },
     );
 

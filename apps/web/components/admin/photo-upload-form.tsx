@@ -130,7 +130,7 @@ export default function PhotoUploadForm({
       progress[index] = `❌ Unknown file - File is undefined`;
       return false;
     }
-    
+
     if (!file.type.startsWith('image/')) {
       progress[index] = `❌ ${file.name} - Not an image file`;
       return false;

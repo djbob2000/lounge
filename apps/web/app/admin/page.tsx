@@ -1,11 +1,11 @@
 import { currentUser } from '@clerk/nextjs/server';
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 
 // Function to fetch stats from the API
 async function getStats() {
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-    const response = await fetch(`${apiUrl}/stats`, {
+    const response = await fetch(`/api/v1/stats`, {
       cache: 'no-store',
     });
 
@@ -20,7 +20,7 @@ async function getStats() {
 
     return response.json();
   } catch (error) {
-    console.error('Помилка отримання статистики:', error);
+    console.warn('Помилка отримання статистики:', error);
     return {
       totalCategories: 0,
       totalAlbums: 0,
@@ -31,8 +31,16 @@ async function getStats() {
 }
 
 export default async function AdminPage() {
-  const user = await currentUser();
-  const stats = await getStats();
+  const user = await currentUser().catch(() => null);
+  let stats = {
+    totalCategories: 0,
+    totalAlbums: 0,
+    totalPhotos: 0,
+    sliderPhotos: 0,
+  };
+  try {
+    stats = await getStats();
+  } catch {}
 
   const statCards = [
     {
@@ -67,7 +75,7 @@ export default async function AdminPage() {
 
       <div className="mb-8">
         <h2 className="text-lg font-semibold text-foreground mb-3">
-          Ласкаво просимо, {user?.firstName}!
+        Ласкаво просимо, {user?.firstName}!
         </h2>
         <p className="text-gray-600">
           Керуйте контентом вашого фотосайту через зручну адміністративну панель.

@@ -1,6 +1,20 @@
 import { Photo } from '@lounge/types';
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import type { Photo as PrismaPhoto } from '@prisma/client';
+import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+
+type PrismaPhotoModel = {
+  id: string;
+  albumId: string;
+  filename: string;
+  originalUrl: string;
+  thumbnailUrl: string;
+  displayOrder: number;
+  isSliderImage: boolean;
+  width: number;
+  height: number;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
 import { AlbumsService } from '../albums/albums.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { StorageService } from '../storage/storage.service';
@@ -8,6 +22,7 @@ import { UpdatePhotoDto, UpdatePhotosOrderDto } from './dto';
 
 @Injectable()
 export class PhotosService {
+  private readonly logger = new Logger(PhotosService.name);
   constructor(
     private readonly prisma: PrismaService,
     private readonly storageService: StorageService,
@@ -23,13 +38,13 @@ export class PhotosService {
     displayOrder?: number,
     isSliderImage = false,
   ): Promise<Photo> {
-    console.log('Starting photo upload for albumId:', albumId, 'file:', file.originalname);
+    this.logger.debug(`Starting photo upload for albumId: ${albumId}, file: ${file.originalname}`);
     // Check if album exists
     try {
       await this.albumsService.findOne(albumId);
-      console.log('Album check passed for ID:', albumId);
+      this.logger.debug(`Album check passed for ID: ${albumId}`);
     } catch (error) {
-      console.error('Album check failed:', error);
+      this.logger.warn(`Album check failed: ${error instanceof Error ? error.message : 'Unknown'}`);
       throw error;
     }
 
@@ -43,11 +58,13 @@ export class PhotosService {
       height: number;
     };
     try {
-      console.log('Uploading file to storage...');
+      this.logger.debug('Uploading file to storage...');
       uploadResult = await this.storageService.uploadFile(file);
-      console.log('File uploaded to storage successfully:', uploadResult.filename);
+      this.logger.debug(`File uploaded to storage successfully: ${uploadResult.filename}`);
     } catch (error) {
-      console.error('Storage upload failed:', error);
+      this.logger.error(
+        `Storage upload failed: ${error instanceof Error ? error.message : 'Unknown'}`,
+      );
       throw error;
     }
 
@@ -56,9 +73,9 @@ export class PhotosService {
       displayOrder !== undefined ? displayOrder : await this.getNextDisplayOrder(albumId);
 
     // Create photo record in database
-    let photo: PrismaPhoto;
+    let photo: PrismaPhotoModel;
     try {
-      console.log('Creating photo record in database...');
+      this.logger.debug('Creating photo record in database...');
       photo = await this.prisma.photo.create({
         data: {
           albumId,
@@ -71,14 +88,15 @@ export class PhotosService {
           height: uploadResult.height,
         },
       });
-      console.log('Photo record created successfully:', photo.id);
+      this.logger.debug(`Photo record created successfully: ${photo.id}`);
     } catch (error) {
-      console.error('Database create failed:', error);
+      this.logger.error(
+        `Database create failed: ${error instanceof Error ? error.message : 'Unknown'}`,
+      );
       // Optionally rollback storage upload if needed
       throw error;
     }
-
-    console.log('Photo upload completed successfully');
+    this.logger.debug('Photo upload completed successfully');
     return this.mapPrismaPhotoToPhoto(photo);
   }
 
@@ -239,7 +257,7 @@ export class PhotosService {
   /**
    * Convert Prisma model to domain model
    */
-  private mapPrismaPhotoToPhoto(prismaPhoto: PrismaPhoto): Photo {
+  private mapPrismaPhotoToPhoto(prismaPhoto: PrismaPhotoModel): Photo {
     return {
       id: prismaPhoto.id,
       albumId: prismaPhoto.albumId,

@@ -7,9 +7,9 @@ import CategoryForm from '../../../../../components/admin/category-form';
 async function getCategory(id: string): Promise<Category | null> {
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/categories/${id}`,
+      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/v1/categories/${id}`,
       {
-        cache: 'no-store',
+        next: { revalidate: 3600 },
       },
     );
 
@@ -35,9 +35,11 @@ interface EditCategoryPageProps {
   }>;
 }
 
-export default async function EditCategoryPage({ params }: EditCategoryPageProps) {
-  const { id } = await params;
-  const category = await getCategory(id);
+import { use } from 'react';
+export default function EditCategoryPage({ params }: EditCategoryPageProps) {
+  const resolvedParams = use(params);
+  const dataPromise = getCategory(resolvedParams.id);
+  const category = use(dataPromise);
 
   if (!category) {
     notFound();

@@ -1,7 +1,7 @@
 import type { Album, Category } from '@lounge/types';
 import Image from 'next/image';
 import Link from 'next/link';
-
+import { notFound } from 'next/navigation';
 import { Suspense, use } from 'react';
 
 interface CategoryPageParams {
@@ -16,26 +16,39 @@ async function getCategoryData(
 ): Promise<{ category: Category; albums: Album[] }> {
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
-  // Fetch category
-  const categoryResponse = await fetch(`${apiBaseUrl}/categories/slug/${categorySlug}`, {
-    cache: 'no-store',
-  });
-
-  if (!categoryResponse.ok) {
-    throw new Error('Category not found');
+  let category: Category | null = null;
+  try {
+    const categoryResponse = await fetch(`${apiBaseUrl}/v1/categories/slug/${categorySlug}`, {
+      next: {
+        revalidate: 3600,
+        tags: [`category-${categorySlug}`],
+      },
+    });
+    if (!categoryResponse.ok) {
+      notFound();
+    }
+    category = await categoryResponse.json();
+  } catch {
+    notFound();
   }
 
-  const category = await categoryResponse.json();
+  if (!category) {
+    notFound();
+  }
 
-  // Fetch albums
-  const albumsResponse = await fetch(`${apiBaseUrl}/albums/category/${category.id}`, {
-    cache: 'no-store',
-  });
-
+  // Fetch albums with shorter cache - albums can change more frequently
   let albums: Album[] = [];
-  if (albumsResponse.ok) {
-    albums = await albumsResponse.json();
-  }
+  try {
+    const albumsResponse = await fetch(`${apiBaseUrl}/v1/albums/category/${category?.id}`, {
+      next: {
+        revalidate: 1800,
+        tags: [`albums-category-${category?.id}`],
+      },
+    });
+    if (albumsResponse.ok) {
+      albums = await albumsResponse.json();
+    }
+  } catch {}
 
   return { category, albums };
 }
@@ -70,6 +83,7 @@ function CategoryContent({ params }: CategoryPageParams) {
                         src={album.coverImageUrl}
                         alt={album.name}
                         fill
+                        loading="lazy"
                         className="object-cover transition-transform group-hover:scale-105"
                       />
                     ) : (
@@ -122,6 +136,31 @@ function CategoryLoadingSkeleton() {
       </div>
     </div>
   );
+}
+
+// ISR configuration removed due to cacheComponents compatibility
+
+// Generate static params for all categories at build time
+export async function generateStaticParams() {
+  try {
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+    const response = await fetch(`${apiBaseUrl}/v1/categories`, {
+      next: { revalidate: 3600 },
+    });
+
+    if (!response.ok) {
+      console.error('Failed to fetch categories for static generation');
+      return [];
+    }
+
+    const categories: Category[] = await response.json();
+    return categories.map((category) => ({
+      categorySlug: category.slug,
+    }));
+  } catch (error) {
+    console.error('Error generating static params for categories:', error);
+    return [];
+  }
 }
 
 export default function CategoryPage({ params }: CategoryPageParams) {

@@ -40,5 +40,5 @@ export function proxy(request: NextRequest, event: NextFetchEvent) {
 
 // Configure Next.js proxy
 export const config = {
-  matcher: ['/((?!.+\\.[\\w]+$|_next).*)', '/', '/(api|trpc)(.*)'],
+  matcher: ['/admin/:path*', '/(api|trpc)(.*)'],
 };

@@ -1,0 +1,72 @@
+name: Playwright Tests
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+    steps:
+    - uses: actions/checkout@v4
+    
+    - uses: pnpm/action-setup@v2
+      with:
+        version: 8
+    
+    - uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'pnpm'
+    
+    - name: Install dependencies
+      run: pnpm install
+    
+    - name: Install Playwright Browsers
+      run: npx playwright install --with-deps
+    
+    - name: Setup environment
+      run: |
+        cp .env.example .env
+        echo "DATABASE_URL=postgresql://postgres:postgres@localhost:5432/lounge_test" >> .env
+        echo "NEXT_PUBLIC_API_URL=http://localhost:3001" >> .env
+        echo "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=test" >> .env
+        echo "CLERK_SECRET_KEY=test" >> .env
+        echo "BACKBLAZE_KEY_ID=test" >> .env
+        echo "BACKBLAZE_APPLICATION_KEY=test" >> .env
+        echo "BACKBLAZE_BUCKET_ID=test" >> .env
+    
+    - name: Setup PostgreSQL
+      uses: harmon758/postgresql-action@v1
+      with:
+        postgresql version: '15'
+        postgresql db: 'lounge_test'
+        postgresql user: 'postgres'
+        postgresql password: 'postgres'
+    
+    - name: Run database migrations
+      run: |
+        cd apps/api
+        pnpm prisma generate
+        pnpm prisma migrate deploy
+    
+    - name: Build applications
+      run: |
+        pnpm build
+    
+    - name: Run Playwright tests
+      run: |
+        cd apps/web
+        pnpm test:e2e
+    
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: playwright-report-${{ matrix.node-version }}
+        path: apps/web/playwright-report/
+        retention-days: 30

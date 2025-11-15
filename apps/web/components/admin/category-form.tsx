@@ -1,9 +1,15 @@
 'use client';
 
-import { useAuth } from '@clerk/nextjs';
 import type { Category } from '@lounge/types';
 import { useRouter } from 'next/navigation';
-import { useId, useState } from 'react';
+import { FormActions, FormCheckbox, FormError, FormField } from '@/lib/forms/form-components';
+import { useFormHandler } from '@/lib/forms/form-handler';
+
+interface CategoryFormData extends Record<string, unknown> {
+  name: string;
+  slug: string;
+  showInMenu: boolean;
+}
 
 interface CategoryFormProps {
   category?: Category;
@@ -11,178 +17,61 @@ interface CategoryFormProps {
 
 export default function CategoryForm({ category }: CategoryFormProps) {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
-  const { getToken } = useAuth();
-  const id = useId();
-  const [formData, setFormData] = useState({
-    name: category?.name || '',
-    slug: category?.slug || '',
-    showInMenu: category?.showInMenu || false,
-  });
-  const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const processErrorResponse = (errorData: { message?: string | string[] }) => {
-    if (errorData.message && Array.isArray(errorData.message)) {
-      const fieldErrors: Record<string, string> = {};
-      errorData.message.forEach((msg: string) => {
-        if (msg.includes('назва') || msg.includes('name')) {
-          fieldErrors.name = msg;
-        } else if (msg.includes('slug')) {
-          fieldErrors.slug = msg;
-        } else if (msg.includes('showInMenu')) {
-          fieldErrors.showInMenu = msg;
-        }
-      });
-      setErrors(fieldErrors);
-    } else {
-      setErrors({
-        general: errorData.message || 'Помилка збереження категорії',
-      });
-    }
-  };
-
-  const submitData = async () => {
-    const token = await getToken();
-
-    const url = category
-      ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/categories/${category.id}`
-      : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/categories`;
-
-    const method = category ? 'PATCH' : 'POST';
-
-    const response = await fetch(url, {
-      method,
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
+  const { formData, errors, isLoading, id, handleSubmit, handleInputChange } =
+    useFormHandler<CategoryFormData>({
+      initialData: {
+        name: category?.name || '',
+        slug: category?.slug || '',
+        showInMenu: category?.showInMenu || false,
       },
-      body: JSON.stringify(formData),
+      apiEndpoint: '/categories',
+      successRedirect: '/admin/categories',
+      itemId: category?.id,
     });
-
-    if (!response.ok) {
-      const errorData = await response
-        .json()
-        .catch(() => ({ message: 'Помилка збереження категорії' }));
-      processErrorResponse(errorData);
-      return;
-    }
-
-    router.push('/admin/categories');
-    router.refresh();
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setErrors({});
-
-    try {
-      await submitData();
-    } catch (error) {
-      console.error('Error saving category:', error);
-      setErrors({ general: 'Помилка збереження категорії' });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value,
-    }));
-
-    // Clear error when user starts typing
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: '' }));
-    }
-  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {errors.general && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-          {errors.general}
-        </div>
-      )}
+      {errors.general && <FormError error={errors.general} />}
 
-      <div>
-        <label htmlFor={`${id}-name`} className="block text-sm font-medium text-gray-700 mb-2">
-          Назва категорії *
-        </label>
-        <input
-          type="text"
-          id={`${id}-name`}
-          name="name"
-          value={formData.name}
-          onChange={handleInputChange}
-          className={`w-full px-3 py-2 border rounded-md shadow-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-            errors.name ? 'border-red-300' : 'border-gray-300'
-          }`}
-          placeholder="Введіть назву категорії"
-          required
-        />
-        {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name}</p>}
-      </div>
+      <FormField
+        id={`${id}-name`}
+        name="name"
+        label="Назва категорії"
+        value={formData.name}
+        onChange={handleInputChange}
+        error={errors.name}
+        placeholder="Введіть назву категорії"
+        required
+      />
 
-      <div>
-        <label htmlFor={`${id}-slug`} className="block text-sm font-medium text-gray-700 mb-2">
-          Slug (URL)
-        </label>
-        <input
-          type="text"
-          id={`${id}-slug`}
-          name="slug"
-          value={formData.slug}
-          onChange={handleInputChange}
-          className={`w-full px-3 py-2 border rounded-md shadow-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-            errors.slug ? 'border-red-300' : 'border-gray-300'
-          }`}
-          placeholder="Залиште порожнім для автоматичної генерації"
-        />
-        {errors.slug && <p className="mt-1 text-sm text-red-600">{errors.slug}</p>}
-        <p className="mt-1 text-sm text-gray-500">
-          Якщо залишити порожнім, буде згенеровано автоматично з назви
-        </p>
-      </div>
+      <FormField
+        id={`${id}-slug`}
+        name="slug"
+        label="Slug (URL)"
+        value={formData.slug}
+        onChange={handleInputChange}
+        error={errors.slug}
+        placeholder="Залиште порожнім для автоматичної генерації"
+        description="Якщо залишити порожнім, буде згенеровано автоматично з назви"
+      />
 
-      <div>
-        <div className="flex items-center">
-          <input
-            type="checkbox"
-            id={`${id}-showInMenu`}
-            name="showInMenu"
-            checked={formData.showInMenu}
-            onChange={handleInputChange}
-            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-          />
-          <label htmlFor={`${id}-showInMenu`} className="ml-2 block text-sm text-gray-700">
-            Показувати в меню
-          </label>
-        </div>
-        {errors.showInMenu && <p className="mt-1 text-sm text-red-600">{errors.showInMenu}</p>}
-        <p className="mt-1 text-sm text-gray-500">
-          Якщо увімкнено, категорія буде відображатися в навігаційному меню
-        </p>
-      </div>
+      <FormCheckbox
+        id={`${id}-showInMenu`}
+        name="showInMenu"
+        label="Показувати в меню"
+        checked={formData.showInMenu}
+        onChange={handleInputChange}
+        error={errors.showInMenu}
+        description="Якщо увімкнено, категорія буде відображатися в навігаційному меню"
+      />
 
-      <div className="flex items-center justify-between pt-4">
-        <button
-          type="button"
-          onClick={() => router.back()}
-          className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-        >
-          Скасувати
-        </button>
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {isLoading ? 'Збереження...' : category ? 'Оновити' : 'Створити'}
-        </button>
-      </div>
+      <FormActions
+        isLoading={isLoading}
+        onCancel={() => router.back()}
+        submitText={category ? 'Оновити' : 'Створити'}
+        loadingText="Збереження..."
+      />
     </form>
   );
 }

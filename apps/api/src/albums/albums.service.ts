@@ -1,6 +1,19 @@
 import { Album } from '@lounge/types';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import type { Album as PrismaAlbum } from '@prisma/client';
+
+type PrismaAlbumModel = {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  categoryId: string;
+  displayOrder: number;
+  coverImageUrl: string | null;
+  isHidden: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
 import slugify from 'slugify';
 import { CategoriesService } from '../categories/categories.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -234,7 +247,7 @@ export class AlbumsService {
   /**
    * Convert Prisma album object to API album object
    */
-  private mapPrismaAlbumToAlbum(prismaAlbum: PrismaAlbum): Album {
+  private mapPrismaAlbumToAlbum(prismaAlbum: PrismaAlbumModel): Album {
     return {
       id: prismaAlbum.id,
       name: prismaAlbum.name,

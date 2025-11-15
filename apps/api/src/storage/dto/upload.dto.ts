@@ -64,4 +64,9 @@ export class UploadFileResponseDto {
    * Album ID to which the photo belongs (if specified)
    */
   albumId?: string;
+
+  /**
+   * URLs to WebP versions of the image
+   */
+  webpUrls?: { [key: string]: string } | null;
 }

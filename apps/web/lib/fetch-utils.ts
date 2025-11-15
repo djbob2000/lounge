@@ -1,7 +1,7 @@
 import type { Album, Category, Photo } from '@lounge/types';
 
 // API configuration
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const API_BASE_URL = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/v1`;
 
 // Generic fetch wrapper with error handling
 export async function apiFetch<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
@@ -41,7 +41,7 @@ export async function fetchPhotos(): Promise<Photo[]> {
 }
 
 export async function fetchPhotosByAlbum(albumId: string): Promise<Photo[]> {
-  return apiFetch<Photo[]>(`/photos?albumId=${albumId}`);
+  return apiFetch<Photo[]>(`/photos/album/${albumId}`);
 }
 
 export async function fetchSliderPhotos(): Promise<Photo[]> {
@@ -51,11 +51,13 @@ export async function fetchSliderPhotos(): Promise<Photo[]> {
 // Combined data fetching functions
 export async function fetchAlbumData(resolvedParams: { categorySlug: string; albumSlug: string }) {
   // Fetch all data in parallel
-  const [category, album, photos] = await Promise.all([
+  const [category, album] = await Promise.all([
     fetchCategoryBySlug(resolvedParams.categorySlug),
     fetchAlbumBySlug(resolvedParams.albumSlug),
-    fetchPhotosByAlbum(resolvedParams.albumSlug),
   ]);
+
+  // Fetch photos using album ID, not slug
+  const photos = await fetchPhotosByAlbum(album.id);
 
   return {
     category,

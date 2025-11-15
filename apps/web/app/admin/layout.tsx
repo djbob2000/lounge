@@ -1,4 +1,4 @@
-import { UserButton } from '@clerk/nextjs';
+import { SignIn, UserButton } from '@clerk/nextjs';
 import { auth, currentUser } from '@clerk/nextjs/server';
 import { UserRole } from '@lounge/types';
 import Link from 'next/link';
@@ -8,9 +8,12 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const { userId } = await auth();
   const user = await currentUser();
 
-  // Authentication check (additional protection, main check in middleware)
   if (!userId || !user) {
-    return redirect('/sign-in');
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <SignIn forceRedirectUrl="/admin" fallbackRedirectUrl="/admin" />
+      </div>
+    );
   }
 
   // Role check (additional protection, main check in middleware)

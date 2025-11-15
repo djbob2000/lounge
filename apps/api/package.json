@@ -14,11 +14,7 @@
     "start:prod": "node dist/main",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:cov": "jest --coverage",
-    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "check-types": "tsc --noEmit",
     "dev-all": "pnpm run start:dev",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
@@ -30,14 +26,18 @@
     "@clerk/backend": "^2.19.0",
     "@clerk/express": "^1.7.42",
     "@lounge/types": "workspace:*",
-    "@nestjs/common": "^11.1.7",
+    "@nestjs/cache-manager": "^3.0.1",
+    "@nestjs/common": "^11.1.9",
     "@nestjs/config": "^4.0.2",
-    "@nestjs/core": "^11.1.7",
-    "@nestjs/platform-express": "^11.1.7",
-    "@prisma/client": "^6.18.0",
+    "@nestjs/core": "^11.1.9",
+    "@nestjs/platform-express": "^11.1.9",
+    "@nestjs/throttler": "^6.4.0",
+    "@prisma/client": "^6.19.0",
     "backblaze-b2": "^1.7.1",
+    "cache-manager": "^7.2.4",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.2",
+    "helmet": "^8.1.0",
     "multer": "^2.0.2",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
@@ -52,36 +52,16 @@
     "@swc/cli": "^0.7.8",
     "@swc/core": "^1.13.5",
     "@types/express": "^5.0.4",
-    "@types/jest": "^30.0.0",
     "@types/multer": "^2.0.0",
     "@types/node": "^24.9.1",
     "@types/supertest": "^6.0.3",
     "@types/uuid": "^11.0.0",
-    "jest": "^30.2.0",
-    "prisma": "^6.18.0",
+    "prisma": "^6.19.0",
     "source-map-support": "^0.5.21",
     "supertest": "^7.1.4",
-    "ts-jest": "^29.4.5",
     "ts-loader": "^9.5.4",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.9.3"
-  },
-  "jest": {
-    "moduleFileExtensions": [
-      "js",
-      "json",
-      "ts"
-    ],
-    "rootDir": "src",
-    "testRegex": ".*\\.spec\\.ts$",
-    "transform": {
-      "^.+\\.(t|j)s$": "ts-jest"
-    },
-    "collectCoverageFrom": [
-      "**/*.(t|j)s"
-    ],
-    "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
   }
 }

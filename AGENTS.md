@@ -60,6 +60,10 @@ This project is a monorepo managed with pnpm and TurboRepo. It consists of appli
 - `biome.jsonc`: Biome linting and formatting rules.
 - `.env`, `.env.local`, `.env.example`: Environment variables.
 
+### Next.js Compiler Setting
+
+- `reactCompiler: true` is intentional and should not be removed from `apps/web/next.config.mjs`. Agents are prohibited from changing or removing this flag when editing the configuration.
+
 ## Code Standards
 
 ### General Principles

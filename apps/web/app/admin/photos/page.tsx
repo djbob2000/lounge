@@ -6,9 +6,9 @@ import PhotoClientPage from './photo-client-page';
 async function getPhotos(): Promise<Photo[]> {
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/photos`,
+      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/v1/photos`,
       {
-        cache: 'no-store',
+        next: { revalidate: 900 },
       },
     );
 
@@ -27,9 +27,9 @@ async function getPhotos(): Promise<Photo[]> {
 async function getAlbums(): Promise<Album[]> {
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/albums`,
+      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/v1/albums`,
       {
-        cache: 'no-store',
+        next: { revalidate: 1800 },
       },
     );
 
@@ -48,9 +48,9 @@ async function getAlbums(): Promise<Album[]> {
 async function getPhotosByAlbum(albumId: string): Promise<Photo[]> {
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/photos/album/${albumId}`,
+      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/v1/photos/album/${albumId}`,
       {
-        cache: 'no-store',
+        next: { revalidate: 900 },
       },
     );
 
@@ -69,9 +69,9 @@ async function getPhotosByAlbum(albumId: string): Promise<Photo[]> {
 async function getSliderPhotos(): Promise<Photo[]> {
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/photos/slider`,
+      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/v1/photos/slider`,
       {
-        cache: 'no-store',
+        next: { revalidate: 900 },
       },
     );
 

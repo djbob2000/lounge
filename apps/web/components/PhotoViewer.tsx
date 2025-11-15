@@ -21,18 +21,19 @@ export const PhotoViewer = ({ photos, initialIndex = 0, onClose }: PhotoViewerPr
   const [currentIndex, _setCurrentIndex] = useState(initialIndex);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Використовуємо useCallback для нереактивної логіки (обробники подій)
+  // Optimized keyboard navigation with proper event handling
   const handleKeyDown = useEffectEvent((event: KeyboardEvent) => {
     if (event.key === 'Escape') {
+      event.preventDefault();
       onClose();
     }
   });
 
-  // Ефект для управління document events та styles
+  // Optimized document event management
   useEffect(() => {
     const handleKeyDownEvent = (event: KeyboardEvent) => handleKeyDown(event);
 
-    document.addEventListener('keydown', handleKeyDownEvent);
+    document.addEventListener('keydown', handleKeyDownEvent, { passive: false });
     document.body.style.overflow = 'hidden';
 
     return () => {
@@ -41,9 +42,8 @@ export const PhotoViewer = ({ photos, initialIndex = 0, onClose }: PhotoViewerPr
     };
   }, []);
 
-  // Ефект для управління loading станом
+  // Reset loading state when photo changes
   useEffect(() => {
-    // Скидаємо loading стан при зміні фото
     setIsLoading(true);
   }, []);
 

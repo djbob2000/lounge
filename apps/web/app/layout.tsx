@@ -17,11 +17,15 @@ export const metadata: Metadata = {
 };
 
 async function getCategories(): Promise<Category[]> {
-  const apiUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/categories`;
+  const apiUrl = `/api/v1/categories`;
 
   try {
     const response = await fetch(apiUrl, {
-      cache: 'no-store',
+      // Cache categories for 1 hour since they rarely change
+      next: {
+        revalidate: 3600, // 1 hour in seconds
+        tags: ['categories'],
+      },
       // Add timeout to prevent hanging
       signal: AbortSignal.timeout(5000),
     });
@@ -32,7 +36,7 @@ async function getCategories(): Promise<Category[]> {
 
     return response.json();
   } catch (error) {
-    console.error('Error fetching categories:', error);
+    console.warn('Error fetching categories:', error);
     // Return empty array instead of throwing to prevent layout crash
     return [];
   }

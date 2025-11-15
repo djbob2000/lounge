@@ -40,6 +40,7 @@ const HomeSlider = ({
   const stopAutoPlay = useEffectEvent(() => {
     if (autoPlayTimeoutRef.current) {
       clearTimeout(autoPlayTimeoutRef.current);
+      autoPlayTimeoutRef.current = null;
     }
   });
 
@@ -50,6 +51,24 @@ const HomeSlider = ({
     }
   });
 
+  // Optimized navigation handlers
+  const goToNext = () => {
+    setCurrentIndex((prevIndex) => (prevIndex === safePhotos.length - 1 ? 0 : prevIndex + 1));
+    resetAutoPlay();
+  };
+
+  const goToPrevious = () => {
+    setCurrentIndex((prevIndex) => (prevIndex === 0 ? safePhotos.length - 1 : prevIndex - 1));
+    resetAutoPlay();
+  };
+
+  const goToSlide = (index: number) => {
+    if (index >= 0 && index < safePhotos.length) {
+      setCurrentIndex(index);
+      resetAutoPlay();
+    }
+  };
+
   // Main effect for auto-play management
   useEffect(() => {
     resetAutoPlay();
@@ -57,7 +76,7 @@ const HomeSlider = ({
     return () => {
       stopAutoPlay();
     };
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // React to index changes for auto-play
   useEffect(() => {
@@ -65,20 +84,6 @@ const HomeSlider = ({
       startAutoPlay();
     }
   }, [autoPlay, safePhotos.length]);
-
-  const goToNext = useEffectEvent(() => {
-    setCurrentIndex((prevIndex) => (prevIndex === safePhotos.length - 1 ? 0 : prevIndex + 1));
-  });
-
-  const goToPrevious = useEffectEvent(() => {
-    setCurrentIndex((prevIndex) => (prevIndex === 0 ? safePhotos.length - 1 : prevIndex - 1));
-  });
-
-  const goToSlide = useEffectEvent((index: number) => {
-    if (index >= 0 && index < safePhotos.length) {
-      setCurrentIndex(index);
-    }
-  });
 
   if (safePhotos.length === 0) {
     return (

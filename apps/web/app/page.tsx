@@ -7,7 +7,11 @@ async function getSliderPhotos(): Promise<Photo[]> {
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/photos/slider`,
       {
-        cache: 'no-store',
+        // Cache slider photos for 15 minutes - they can change more frequently
+        next: {
+          revalidate: 900, // 15 minutes
+          tags: ['slider-photos'],
+        },
       },
     );
 

@@ -4,7 +4,7 @@ import { useAuth } from '@clerk/nextjs';
 import type { Album, Category } from '@lounge/types';
 import { AlertCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useActionState, useId, useOptimistic } from 'react';
+import { useActionState, useEffect, useId, useOptimistic, useRef } from 'react';
 import { useFormStatus } from 'react-dom';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -193,10 +193,8 @@ export default function AlbumForm({ album, categories, categoryId }: AlbumFormPr
     const method = album ? 'PATCH' : 'POST';
 
     try {
-      // Виконуємо API запит
       const response = await createApiRequest(url, method, token, data);
-
-      // Обробляємо відповідь
+      hasSubmitted.current = true;
       return await processApiResponse(response);
     } catch (error) {
       console.error('Error saving album:', error);
@@ -205,6 +203,8 @@ export default function AlbumForm({ album, categories, categoryId }: AlbumFormPr
   };
 
   const [errors, submitAction] = useActionState(submitAlbum, {});
+
+  const hasSubmitted = useRef(false);
 
   // Обробка зміни полів з оптимістичними оновленнями
   const handleInputChange = (
@@ -218,11 +218,12 @@ export default function AlbumForm({ album, categories, categoryId }: AlbumFormPr
     });
   };
 
-  // Перенаправлення при успішному збереженні (коли немає помилок)
-  if (Object.keys(errors).length === 0 && album) {
-    router.push('/admin/albums');
-    router.refresh();
-  }
+  useEffect(() => {
+    if (hasSubmitted.current && Object.keys(errors).length === 0) {
+      router.push('/admin/albums');
+      router.refresh();
+    }
+  }, [errors, router]);
 
   return (
     <form action={submitAction} className="space-y-6">

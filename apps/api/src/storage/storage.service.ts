@@ -27,6 +27,8 @@ export class StorageService {
     medium: { width: 640, height: 640 },
     large: { width: 1280, height: 1280 },
   };
+  private readonly enableWebP = true;
+  private readonly enableProgressive = true;
 
   constructor(private readonly configService: ConfigService) {
     this.initializeB2();
@@ -67,7 +69,7 @@ export class StorageService {
   }
 
   /**
-   * Upload file to B2
+   * Upload file to B2 with optimization
    */
   async uploadFile(file: Express.Multer.File): Promise<UploadFileResponseDto> {
     try {
@@ -88,14 +90,24 @@ export class StorageService {
       const fileName = `${fileId}${fileExtension}`;
       const metadata = await this.getImageMetadata(file.buffer);
 
-      // Upload original file
+      // Optimize original image
+      const optimizedBuffer = await this.optimizeImage(file.buffer, file.mimetype);
+
+      // Upload optimized original file
       const originalFileName = `photos/original/${fileName}`;
-      const originalFileUrl = await this.uploadToB2(file.buffer, originalFileName, file.mimetype);
+      const originalFileUrl = await this.uploadToB2(
+        optimizedBuffer,
+        originalFileName,
+        file.mimetype,
+      );
 
       // Generate and upload thumbnail
-      const thumbnailBuffer = await this.generateThumbnail(file.buffer);
+      const thumbnailBuffer = await this.generateThumbnail(optimizedBuffer);
       const thumbnailFileName = `photos/thumbnails/${fileId}_thumbnail${fileExtension}`;
       const thumbnailUrl = await this.uploadToB2(thumbnailBuffer, thumbnailFileName, file.mimetype);
+
+      // Generate WebP versions if enabled
+      const webpUrls = await this.generateWebPVersions(optimizedBuffer, fileId);
 
       return {
         id: fileId,
@@ -104,6 +116,7 @@ export class StorageService {
         thumbnailUrl,
         width: metadata.width,
         height: metadata.height,
+        webpUrls,
       };
     } catch (error) {
       this.logger.error(`Upload file error: ${error.message}`);
@@ -261,6 +274,82 @@ export class StorageService {
   }
 
   /**
+   * Optimize image with progressive JPEG and WebP
+   */
+  private async optimizeImage(buffer: Buffer, mimetype: string): Promise<Buffer> {
+    try {
+      if (mimetype === 'image/jpeg' && this.enableProgressive) {
+        return await sharp(buffer)
+          .jpeg({
+            quality: 85,
+            progressive: true,
+            mozjpeg: true,
+          })
+          .toBuffer();
+      }
+
+      if (mimetype === 'image/png') {
+        return await sharp(buffer)
+          .png({
+            quality: 85,
+            compressionLevel: 9,
+          })
+          .toBuffer();
+      }
+
+      return buffer;
+    } catch (error) {
+      this.logger.error(`Image optimization error: ${error.message}`);
+      return buffer; // Return original if optimization fails
+    }
+  }
+
+  /**
+   * Generate WebP versions
+   */
+  private async generateWebPVersions(
+    buffer: Buffer,
+    fileId: string,
+  ): Promise<{ [key: string]: string } | null> {
+    if (!this.enableWebP) {
+      return null;
+    }
+
+    try {
+      const webpUrls: { [key: string]: string } = {};
+
+      // Generate WebP for original size
+      const webpBuffer = await sharp(buffer).webp({ quality: 80 }).toBuffer();
+
+      const webpFileName = `photos/webp/${fileId}.webp`;
+      webpUrls.original = await this.uploadToB2(webpBuffer, webpFileName, 'image/webp');
+
+      // Generate WebP thumbnails
+      for (const [size, dimensions] of Object.entries(this.thumbnailSizes)) {
+        const webpThumbnailBuffer = await sharp(buffer)
+          .resize(dimensions.width, dimensions.height, {
+            fit: 'inside',
+            withoutEnlargement: true,
+          })
+          .webp({ quality: 75 })
+          .toBuffer();
+
+        const webpThumbnailFileName = `photos/webp/${fileId}_${size}.webp`;
+        webpUrls[`thumbnail_${size}`] = await this.uploadToB2(
+          webpThumbnailBuffer,
+          webpThumbnailFileName,
+          'image/webp',
+        );
+      }
+
+      return webpUrls;
+    } catch (error) {
+      this.logger.error(`WebP generation error: ${error.message}`);
+      return null;
+    }
+  }
+
+  /**
    * Generate thumbnail
    */
   private async generateThumbnail(buffer: Buffer): Promise<Buffer> {
@@ -270,6 +359,10 @@ export class StorageService {
         .resize(width, height, {
           fit: 'inside',
           withoutEnlargement: true,
+        })
+        .jpeg({
+          quality: 80,
+          progressive: this.enableProgressive,
         })
         .toBuffer();
     } catch (error) {

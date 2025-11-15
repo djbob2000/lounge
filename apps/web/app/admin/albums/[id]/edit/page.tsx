@@ -1,6 +1,7 @@
 import type { Album, Category } from '@lounge/types';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { Suspense, use } from 'react';
 
 import AlbumForm from '../../../../../components/admin/album-form';
 
@@ -8,9 +9,9 @@ import AlbumForm from '../../../../../components/admin/album-form';
 async function getAlbum(id: string): Promise<Album | null> {
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/albums/${id}`,
+      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/v1/albums/${id}`,
       {
-        cache: 'no-store',
+        next: { revalidate: 1800 },
       },
     );
 
@@ -29,9 +30,9 @@ async function getAlbum(id: string): Promise<Album | null> {
 async function getCategories(): Promise<Category[]> {
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/categories`,
+      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/v1/categories`,
       {
-        cache: 'no-store',
+        next: { revalidate: 3600 },
       },
     );
 
@@ -57,12 +58,14 @@ interface EditAlbumPageProps {
   }>;
 }
 
-export default async function EditAlbumPage({ params }: EditAlbumPageProps) {
-  const { id } = await params;
-  const [album, categories] = await Promise.all([getAlbum(id), getCategories()]);
-
+function EditAlbumContentWithFetch({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = use(params);
+  const dataPromise = Promise.all([getAlbum(resolvedParams.id), getCategories()]).then(
+    ([album, categories]) => ({ album, categories }),
+  );
+  const { album, categories } = use(dataPromise);
   if (!album) {
-    notFound();
+    return <div className="min-h-[200px]" />;
   }
 
   return (
@@ -76,5 +79,13 @@ export default async function EditAlbumPage({ params }: EditAlbumPageProps) {
         <AlbumForm album={album} categories={categories} categoryId={album.categoryId} />
       </div>
     </div>
+  );
+}
+
+export default function EditAlbumPage({ params }: EditAlbumPageProps) {
+  return (
+    <Suspense fallback={<div className="min-h-[200px]" />}>
+      <EditAlbumContentWithFetch params={params} />
+    </Suspense>
   );
 }
