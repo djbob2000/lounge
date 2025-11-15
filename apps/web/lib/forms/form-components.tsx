@@ -69,15 +69,15 @@ export function FormField({
   description,
   className = '',
 }: FormFieldProps) {
-  const inputClassName = `w-full px-3 py-2 border rounded-md shadow-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-    error ? 'border-red-300' : 'border-gray-300'
+  const inputClassName = `w-full px-3 py-2 border rounded-md shadow-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary bg-background ${
+    error ? 'border-destructive' : 'border-border'
   } ${className}`;
 
   return (
     <div>
-      <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-2">
+      <label htmlFor={id} className="block text-sm font-medium text-foreground mb-2">
         {label}
-        {required && <span className="text-red-500 ml-1">*</span>}
+        {required && <span className="text-destructive ml-1">*</span>}
       </label>
       <input
         type={type}
@@ -89,8 +89,8 @@ export function FormField({
         placeholder={placeholder}
         required={required}
       />
-      {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
-      {description && <p className="mt-1 text-sm text-gray-500">{description}</p>}
+      {error && <p className="mt-1 text-sm text-destructive">{error}</p>}
+      {description && <p className="mt-1 text-sm text-muted-foreground">{description}</p>}
     </div>
   );
 }
@@ -108,15 +108,15 @@ export function FormTextarea({
   rows = 3,
   className = '',
 }: Omit<FormFieldProps, 'type'> & { rows?: number }) {
-  const textareaClassName = `w-full px-3 py-2 border rounded-md shadow-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-    error ? 'border-red-300' : 'border-gray-300'
+  const textareaClassName = `w-full px-3 py-2 border rounded-md shadow-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary bg-background ${
+    error ? 'border-destructive' : 'border-border'
   } ${className}`;
 
   return (
     <div>
-      <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-2">
+      <label htmlFor={id} className="block text-sm font-medium text-foreground mb-2">
         {label}
-        {required && <span className="text-red-500 ml-1">*</span>}
+        {required && <span className="text-destructive ml-1">*</span>}
       </label>
       <textarea
         id={id}
@@ -128,8 +128,8 @@ export function FormTextarea({
         required={required}
         rows={rows}
       />
-      {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
-      {description && <p className="mt-1 text-sm text-gray-500">{description}</p>}
+      {error && <p className="mt-1 text-sm text-destructive">{error}</p>}
+      {description && <p className="mt-1 text-sm text-muted-foreground">{description}</p>}
     </div>
   );
 }
@@ -162,14 +162,14 @@ export function FormCheckbox({
           name={name}
           checked={checked}
           onChange={onChange}
-          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+          className="h-4 w-4 text-primary focus:ring-primary border-border rounded"
         />
-        <label htmlFor={id} className="ml-2 block text-sm text-gray-700">
+        <label htmlFor={id} className="ml-2 block text-sm text-foreground">
           {label}
         </label>
       </div>
-      {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
-      {description && <p className="mt-1 text-sm text-gray-500">{description}</p>}
+      {error && <p className="mt-1 text-sm text-destructive">{error}</p>}
+      {description && <p className="mt-1 text-sm text-muted-foreground">{description}</p>}
     </div>
   );
 }

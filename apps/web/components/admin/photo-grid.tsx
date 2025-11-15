@@ -32,21 +32,21 @@ export default function PhotoGrid({ photos, onSelectionChange }: PhotoGridProps)
   };
 
   if (!photos || photos.length === 0) {
-    return <p className="text-center text-gray-600 py-8">No photos in this album yet.</p>;
+    return <p className="text-center text-muted-foreground py-8">No photos in this album yet.</p>;
   }
 
   return (
     <div>
       <div className="mb-6 flex justify-between items-center">
-        <label className="flex items-center space-x-3 cursor-pointer p-2 hover:bg-gray-50 rounded-md text-foreground">
+        <label className="flex items-center space-x-3 cursor-pointer p-2 hover:bg-muted/30 rounded-md text-foreground">
           <input
             type="checkbox"
-            className="form-checkbox h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+            className="form-checkbox h-5 w-5 text-primary border-input rounded focus:ring-ring"
             checked={selectedPhotoIds.length === photos.length && photos.length > 0}
             onChange={handleSelectAll}
             disabled={photos.length === 0}
           />
-          <span className="text-sm font-medium text-gray-700">
+          <span className="text-sm font-medium text-foreground">
             {selectedPhotoIds.length === photos.length ? 'Deselect All' : 'Select All'}(
             {selectedPhotoIds.length} / {photos.length})
           </span>
@@ -59,15 +59,15 @@ export default function PhotoGrid({ photos, onSelectionChange }: PhotoGridProps)
             type="button"
             className={`relative border rounded-lg overflow-hidden group cursor-pointer shadow-sm hover:shadow-md transition-shadow duration-200 ease-in-out ${
               selectedPhotoIds.includes(photo.id)
-                ? 'ring-2 ring-blue-500 border-transparent'
-                : 'border-gray-200'
+                ? 'ring-2 ring-primary border-transparent'
+                : 'border-border'
             }`}
             onClick={() => handleSelectPhoto(photo.id)}
           >
             <div className="absolute top-2 left-2 z-10">
               <input
                 type="checkbox"
-                className="form-checkbox h-5 w-5 text-blue-600 bg-white border-gray-400 rounded focus:ring-blue-500"
+                className="form-checkbox h-5 w-5 text-primary bg-background border-border rounded focus:ring-ring"
                 checked={selectedPhotoIds.includes(photo.id)}
                 onChange={(e) => {
                   e.stopPropagation(); // Prevent click on div from re-triggering selection
@@ -86,7 +86,7 @@ export default function PhotoGrid({ photos, onSelectionChange }: PhotoGridProps)
                 e.currentTarget.src = '/placeholder-image.svg';
               }}
             />
-            <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-1.5 text-xs truncate">
+            <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white p-1.5 text-xs truncate">
               {photo.filename || photo.id}
             </div>
           </button>

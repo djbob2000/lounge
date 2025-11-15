@@ -49,14 +49,14 @@ export default function PhotoClientPage({
   return (
     <>
       {photos.length === 0 ? (
-        <div className="bg-white rounded-lg shadow p-6 text-center">
-          <p className="text-gray-500 mb-4">{getEmptyStateMessage()}</p>
-          <Link href={getAddLink()} className="text-blue-500 hover:text-blue-700 underline">
+        <div className="bg-card rounded-lg shadow p-6 text-center border border-border dark:bg-card">
+          <p className="text-foreground dark:text-foreground mb-4">{getEmptyStateMessage()}</p>
+          <Link href={getAddLink()} className="text-primary hover:text-primary/80 underline font-medium">
             {getAddButtonText()}
           </Link>
         </div>
       ) : (
-        <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div className="bg-card rounded-lg shadow overflow-hidden border border-border dark:bg-card">
           <DraggableList
             items={photos}
             itemType="photo"

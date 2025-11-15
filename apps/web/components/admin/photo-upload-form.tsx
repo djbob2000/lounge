@@ -39,7 +39,7 @@ function SubmitButton({ _fileCount }: { _fileCount: number }) {
     <button
       type="submit"
       disabled={pending || _fileCount === 0}
-      className="w-full sm:w-auto px-6 py-2.5 bg-blue-600 text-white font-medium text-sm rounded-lg hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-150 ease-in-out"
+      className="w-full sm:w-auto px-6 py-2.5 bg-primary text-primary-foreground font-medium text-sm rounded-lg hover:bg-primary/90 focus:ring-4 focus:outline-none focus:ring-ring disabled:bg-muted disabled:cursor-not-allowed transition-colors duration-150 ease-in-out"
     >
       {pending ? 'Uploading...' : `Upload ${_fileCount} photo(s)`}
     </button>
@@ -346,7 +346,7 @@ export default function PhotoUploadForm({
   };
 
   return (
-    <form action={action} className="mb-6 p-4 border border-gray-200 rounded-lg bg-white shadow-sm">
+    <form action={action} className="mb-6 p-4 border border-border rounded-lg bg-card shadow-sm">
       <h3 className="text-xl font-semibold mb-3 text-foreground">Upload New Photos</h3>
 
       {/* Photo File Input */}
@@ -360,14 +360,14 @@ export default function PhotoUploadForm({
             multiple
             accept="image/*"
             onChange={handleFileChange}
-            className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 disabled:opacity-50 cursor-pointer"
+            className="block w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 disabled:opacity-50 cursor-pointer"
           />
         </FormControl>
         <FormMessage />
       </FormItem>
 
       {/* Album Selection */}
-      {albumId && <p className="text-sm text-gray-700 mb-2">Album pre-selected: {albumId}</p>}
+      {albumId && <p className="text-sm text-muted-foreground mb-2">Album pre-selected: {albumId}</p>}
       <FormItem>
         <FormLabel htmlFor={`${baseId}-albumId`}>Album *</FormLabel>
         <FormControl>
@@ -434,12 +434,12 @@ export default function PhotoUploadForm({
       {/* File Status and Previews */}
       {optimisticFiles.length > 0 && (
         <div className="space-y-3">
-          <p className="text-sm text-gray-600 mt-2 mb-3">
+          <p className="text-sm text-muted-foreground mt-2 mb-3">
             {optimisticFiles.length} file(s) selected. Click 'Upload' to start.
           </p>
 
-          <div className="p-3 border border-gray-200 rounded-lg bg-gray-50">
-            <p className="text-sm font-medium text-gray-700 mb-2">Selected image previews:</p>
+          <div className="p-3 border border-border rounded-lg bg-secondary/50">
+            <p className="text-sm font-medium text-foreground mb-2">Selected image previews:</p>
             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3">
               {optimisticFiles.map((item) => (
                 <div key={item.id} className="relative group">
@@ -448,7 +448,7 @@ export default function PhotoUploadForm({
                     alt={`Preview of ${item.file.name}`}
                     width={200}
                     height={128}
-                    className="h-24 w-full object-cover rounded-md border border-gray-300 shadow-sm"
+                    className="h-24 w-full object-cover rounded-md border border-border shadow-sm"
                     onError={(e) => {
                       (e.target as HTMLImageElement).style.display = 'none';
                     }}
@@ -456,7 +456,7 @@ export default function PhotoUploadForm({
                   <button
                     type="button"
                     onClick={() => handleRemoveFile(item.id)}
-                    className="absolute top-1 right-1 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-80 hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1"
+                    className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-80 hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-destructive focus:ring-offset-1"
                     aria-label="Remove image"
                   >
                     <span className="block leading-none -mt-px">&#x2715;</span>
@@ -477,7 +477,7 @@ export default function PhotoUploadForm({
           {state.progress.map((msg) => (
             <p
               key={msg}
-              className={`text-xs ${msg.startsWith('❌') ? 'text-red-600' : 'text-green-600'}`}
+              className={`text-xs ${msg.startsWith('❌') ? 'text-destructive' : 'text-green-600'}`}
             >
               {msg}
             </p>
@@ -486,10 +486,10 @@ export default function PhotoUploadForm({
       )}
 
       {/* Overall Message */}
-      {state.message && <p className="mt-3 text-sm font-medium text-gray-800">{state.message}</p>}
+      {state.message && <p className="mt-3 text-sm font-medium text-foreground">{state.message}</p>}
 
       {/* Error Display */}
-      {state.error && <p className="mt-3 text-sm font-medium text-red-600">{state.error}</p>}
+      {state.error && <p className="mt-3 text-sm font-medium text-destructive">{state.error}</p>}
     </form>
   );
 }

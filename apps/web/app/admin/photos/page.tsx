@@ -164,11 +164,11 @@ export default async function PhotosPage({
     <div>
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">{title}</h1>
-          <p className="text-gray-600 mt-1">
+          <h1 className="text-2xl font-bold text-foreground dark:text-foreground">{title}</h1>
+          <p className="text-foreground/70 mt-1">
             {showGrouped
-              ? `${photos.length} photos across ${groupedPhotos?.length || 0} albums`
-              : `${photos.length} photos`}
+              ? `${photos.length} фотографій у ${groupedPhotos?.length || 0} альбомах`
+              : `${photos.length} фотографій`}
           </p>
         </div>
         <div className="flex space-x-3">
@@ -176,21 +176,21 @@ export default async function PhotosPage({
             href="/admin/photos?slider=true"
             className={`px-4 py-2 rounded-md transition-colors ${
               isSliderPage
-                ? 'bg-pink-100 text-pink-700 border border-pink-300'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                ? 'bg-accent text-accent-foreground border border-border'
+                : 'bg-secondary text-secondary-foreground hover:bg-secondary/80 hover:text-secondary-foreground'
             }`}
           >
-            Slider Photos
+            Фото слайдера
           </Link>
           <Link
             href="/admin/photos"
             className={`px-4 py-2 rounded-md transition-colors ${
               !albumId && !isSliderPage
-                ? 'bg-blue-100 text-blue-700 border border-blue-300'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                ? 'bg-primary/10 text-primary border border-primary/20'
+                : 'bg-secondary text-secondary-foreground hover:bg-secondary/80 hover:text-secondary-foreground'
             }`}
           >
-            All Photos
+            Всі фотографії
           </Link>
           <Link
             href={
@@ -200,9 +200,9 @@ export default async function PhotosPage({
                   ? '/admin/photos/new?slider=true'
                   : '/admin/photos/new'
             }
-            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-md transition-colors"
           >
-            Upload Photo
+            Завантажити фото
           </Link>
         </div>
       </div>
@@ -211,18 +211,18 @@ export default async function PhotosPage({
         // Grouped view by album
         <div className="space-y-8">
           {groupedPhotos.map(({ album, photos: albumPhotos }) => (
-            <div key={album.id} className="bg-white rounded-lg shadow overflow-hidden">
-              <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
+            <div key={album.id} className="bg-card rounded-lg shadow overflow-hidden border border-border">
+              <div className="bg-secondary/50 px-6 py-4 border-b border-border">
                 <div className="flex justify-between items-center">
                   <div>
                     <h3 className="text-lg font-medium text-foreground">{album.name}</h3>
-                    <p className="text-sm text-gray-500">{albumPhotos.length} photos</p>
+                    <p className="text-sm text-foreground/70">{albumPhotos.length} фотографій</p>
                   </div>
                   <Link
                     href={`/admin/photos?albumId=${album.id}`}
-                    className="text-blue-500 hover:text-blue-700 text-sm"
+                    className="text-primary hover:text-primary/80 text-sm font-medium"
                   >
-                    View album →
+                    Переглянути альбом →
                   </Link>
                 </div>
               </div>

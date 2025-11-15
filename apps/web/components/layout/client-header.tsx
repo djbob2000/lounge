@@ -4,6 +4,7 @@ import type { Category } from '@lounge/types';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useId, useState } from 'react';
+import { ThemeSwitcher } from './ThemeSwitcher';
 
 interface ClientHeaderProps {
   categories: Category[];
@@ -64,7 +65,7 @@ export default function ClientHeader({ categories }: ClientHeaderProps) {
       </button>
 
       {/* Desktop Navigation */}
-      <nav className="hidden md:flex space-x-6" aria-label="Main navigation">
+      <nav className="hidden md:flex items-center space-x-6" aria-label="Main navigation">
         {categories
           .filter((category) => category.showInMenu)
           .sort((a, b) => a.displayOrder - b.displayOrder)
@@ -75,7 +76,7 @@ export default function ClientHeader({ categories }: ClientHeaderProps) {
                 key={category.id}
                 href={`/${category.slug}`}
                 className={`text-base hover:text-primary transition-colors ${
-                  isActive ? 'font-semibold text-primary' : 'font-normal'
+                  isActive ? 'font-semibold text-primary' : 'font-normal text-foreground/90 hover:text-foreground'
                 }`}
                 aria-current={isActive ? 'page' : undefined}
               >
@@ -83,6 +84,7 @@ export default function ClientHeader({ categories }: ClientHeaderProps) {
               </Link>
             );
           })}
+        <ThemeSwitcher />
       </nav>
 
       {/* Mobile Navigation */}
@@ -103,7 +105,7 @@ export default function ClientHeader({ categories }: ClientHeaderProps) {
                     key={category.id}
                     href={`/${category.slug}`}
                     className={`text-base hover:text-primary transition-colors ${
-                      isActive ? 'font-semibold text-primary' : 'font-normal'
+                      isActive ? 'font-semibold text-primary' : 'font-normal text-foreground/90 hover:text-foreground'
                     }`}
                     onClick={() => setIsMenuOpen(false)}
                     aria-current={isActive ? 'page' : undefined}
@@ -112,6 +114,9 @@ export default function ClientHeader({ categories }: ClientHeaderProps) {
                   </Link>
                 );
               })}
+            <div className="pt-2 border-t">
+              <ThemeSwitcher />
+            </div>
           </div>
         </nav>
       )}

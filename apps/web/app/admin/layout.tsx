@@ -10,7 +10,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   if (!userId || !user) {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <SignIn forceRedirectUrl="/admin" fallbackRedirectUrl="/admin" />
       </div>
     );
@@ -24,34 +24,34 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <header className="bg-white shadow">
+    <div className="min-h-screen bg-background">
+      <header className="bg-card border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
           <div className="flex items-center">
-            <Link href="/admin" className="text-lg font-bold text-gray-900">
+            <Link href="/admin" className="text-lg font-bold text-foreground">
               Адмін-панель
             </Link>
 
             <nav className="ml-10 flex space-x-6">
               <Link
                 href="/admin/categories"
-                className="text-gray-600 hover:text-gray-900 transition-colors"
+                className="text-foreground/70 hover:text-foreground transition-colors font-medium"
               >
                 Категорії
               </Link>
               <Link
                 href="/admin/albums"
-                className="text-gray-600 hover:text-gray-900 transition-colors"
+                className="text-foreground/70 hover:text-foreground transition-colors font-medium"
               >
                 Альбоми
               </Link>
               <Link
                 href="/admin/photos"
-                className="text-gray-600 hover:text-gray-900 transition-colors"
+                className="text-foreground/70 hover:text-foreground transition-colors font-medium"
               >
                 Фотографії
               </Link>
-              <Link href="/" className="text-gray-600 hover:text-gray-900 transition-colors">
+              <Link href="/" className="text-foreground/70 hover:text-foreground transition-colors font-medium">
                 На сайт
               </Link>
             </nav>

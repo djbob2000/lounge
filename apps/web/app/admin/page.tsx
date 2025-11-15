@@ -47,25 +47,25 @@ export default async function AdminPage() {
       title: 'Категорії',
       value: stats.totalCategories,
       link: '/admin/categories',
-      color: 'bg-blue-500',
+      color: 'bg-blue-600 hover:bg-blue-700',
     },
     {
       title: 'Альбоми',
       value: stats.totalAlbums,
       link: '/admin/albums',
-      color: 'bg-green-500',
+      color: 'bg-green-600 hover:bg-green-700',
     },
     {
       title: 'Фотографії',
       value: stats.totalPhotos,
       link: '/admin/photos',
-      color: 'bg-purple-500',
+      color: 'bg-purple-600 hover:bg-purple-700',
     },
     {
       title: 'Слайдер',
       value: stats.sliderPhotos,
       link: '/admin/photos?slider=true',
-      color: 'bg-pink-500',
+      color: 'bg-pink-600 hover:bg-pink-700',
     },
   ];
 
@@ -77,7 +77,7 @@ export default async function AdminPage() {
         <h2 className="text-lg font-semibold text-foreground mb-3">
         Ласкаво просимо, {user?.firstName}!
         </h2>
-        <p className="text-gray-600">
+        <p className="text-foreground/70">
           Керуйте контентом вашого фотосайту через зручну адміністративну панель.
         </p>
       </div>
@@ -86,7 +86,7 @@ export default async function AdminPage() {
         {statCards.map((card) => (
           <Link href={card.link} key={card.title} className="block">
             <div
-              className={`${card.color} text-white rounded-lg shadow-md p-6 transition-transform hover:scale-105`}
+              className={`${card.color} text-white rounded-lg shadow-md p-6 transition-transform hover:scale-105 hover:shadow-lg`}
             >
               <div className="font-bold text-xl mb-2">{card.title}</div>
               <div className="text-4xl font-bold">{card.value}</div>
@@ -96,24 +96,24 @@ export default async function AdminPage() {
       </div>
 
       <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="bg-card rounded-lg shadow-md p-6 border border-border">
           <h3 className="text-lg font-semibold text-foreground mb-4">Швидкі дії</h3>
           <div className="flex flex-col space-y-3">
-            <Link href="/admin/categories/new" className="text-blue-600 hover:text-blue-800">
+            <Link href="/admin/categories/new" className="text-primary hover:text-primary/80 font-medium transition-colors">
               Створити нову категорію
             </Link>
-            <Link href="/admin/albums/new" className="text-blue-600 hover:text-blue-800">
+            <Link href="/admin/albums/new" className="text-primary hover:text-primary/80 font-medium transition-colors">
               Створити новий альбом
             </Link>
-            <Link href="/admin/photos/upload" className="text-blue-600 hover:text-blue-800">
+            <Link href="/admin/photos/upload" className="text-primary hover:text-primary/80 font-medium transition-colors">
               Завантажити фотографії
             </Link>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="bg-card rounded-lg shadow-md p-6 border border-border">
           <h3 className="text-lg font-semibold text-foreground mb-4">Підказки</h3>
-          <ul className="list-disc list-inside text-gray-600 space-y-2">
+          <ul className="list-disc list-inside text-foreground/70 space-y-2">
             <li>Використовуйте drag-n-drop для зміни порядку елементів</li>
             <li>Створіть категорії перед додаванням альбомів</li>
             <li>Оберіть обкладинку для кожного альбому</li>

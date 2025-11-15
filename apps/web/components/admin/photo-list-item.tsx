@@ -62,9 +62,9 @@ export default function PhotoListItem({ item }: PhotoListItemProps) {
   };
 
   return (
-    <div className="flex items-center justify-between p-3 md:p-4 border-b border-gray-20 last:border-b-0">
+    <div className="flex items-center justify-between p-3 md:p-4 border-b border-border last:border-b-0 bg-card hover:bg-muted/30 transition-colors">
       <div className="flex items-center space-x-3 md:space-x-4 flex-1 min-w-0">
-        <div className="w-16 h-16 md:w-20 md:h-20 rounded overflow-hidden flex-shrink-0 bg-gray-10">
+        <div className="w-16 h-16 md:w-20 md:h-20 rounded overflow-hidden flex-shrink-0 bg-secondary">
           <Image
             src={item.thumbnailUrl}
             alt={item.description || `Фото ${item.filename}`}
@@ -82,13 +82,13 @@ export default function PhotoListItem({ item }: PhotoListItemProps) {
           </h4>
           {item.description && (
             <p
-              className="text-xs md:text-sm text-gray-600 mt-1 max-w-xs md:max-w-md truncate"
+              className="text-xs md:text-sm text-muted-foreground mt-1 max-w-xs md:max-w-md truncate"
               title={item.description}
             >
               {item.description}
             </p>
           )}
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-muted-foreground">
             {item.width}×{item.height}
           </p>
         </div>
@@ -104,9 +104,9 @@ export default function PhotoListItem({ item }: PhotoListItemProps) {
           {' '}
           {/* Placeholder for toggle slider functionality */}
           {item.isSliderImage ? (
-            <StarIconSolid className="h-3 w-3 md:h-4 md:w-4 text-yellow-500" />
+            <StarIconSolid className="h-3 w-3 md:h-4 md:w-4 text-yellow-500 dark:text-yellow-400" />
           ) : (
-            <StarIconOutline className="h-3 w-3 md:h-4 md:w-4 text-gray-400" />
+            <StarIconOutline className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
           )}
           <span className="sr-only">
             {item.isSliderImage ? 'Прибрати зі слайдера' : 'Додати до слайдера'}

@@ -4,6 +4,8 @@ import { useAuth } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import { Trash2Icon } from 'lucide-react';
 
 interface CategoryDeleteButtonProps {
   categoryId: string;
@@ -29,7 +31,7 @@ export default function CategoryDeleteButton({
       const token = await getToken();
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/categories/${categoryId}`,
+        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/v1/categories/${categoryId}`,
         {
           method: 'DELETE',
           headers: {
@@ -54,13 +56,9 @@ export default function CategoryDeleteButton({
   };
 
   return (
-    <button
-      type="button"
-      onClick={handleDelete}
-      disabled={isDeleting}
-      className="text-red-500 hover:text-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
-    >
-      {isDeleting ? 'Видалення...' : 'Видалити'}
-    </button>
+    <Button variant="destructive" size="icon" onClick={handleDelete} disabled={isDeleting}>
+      <Trash2Icon className="h-4 w-4" />
+      <span className="sr-only">Видалити</span>
+    </Button>
   );
 }

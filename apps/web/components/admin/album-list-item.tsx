@@ -11,7 +11,7 @@ interface AlbumListItemProps {
 
 export default function AlbumListItem({ item }: AlbumListItemProps) {
   return (
-    <div className="flex items-center justify-between p-4 border-b border-gray-200 last:border-b-0">
+    <div className="flex items-center justify-between p-4 border-b border-border last:border-b-0 bg-card hover:bg-muted/30 transition-colors">
       <Link href={`/admin/albums/${item.id}`} className="flex items-center flex-grow min-w-0">
         {' '}
         {/* Added Link and classes */}
@@ -29,12 +29,12 @@ export default function AlbumListItem({ item }: AlbumListItemProps) {
         <div className="flex-grow min-w-0">
           {' '}
           {/* Added min-w-0 for proper truncation if needed */}
-          <h3 className="font-medium text-sm md:text-base text-foreground truncate">{item.name}</h3>{' '}
+          <h3 className="font-medium text-sm md:text-base text-foreground dark:text-foreground truncate">{item.name}</h3>{' '}
           {/* Added truncate */}
-          <p className="text-xs text-gray-500 md:text-sm truncate">/{item.slug}</p>{' '}
+          <p className="text-xs text-muted-foreground md:text-sm truncate">/{item.slug}</p>{' '}
           {/* Added truncate */}
           {item.description && (
-            <p className="text-xs text-gray-600 mt-1 hidden md:block truncate">
+            <p className="text-xs text-muted-foreground mt-1 hidden md:block truncate">
               {' '}
               {/* Added truncate */}
               {item.description}

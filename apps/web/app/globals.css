@@ -3,26 +3,26 @@
 @import "tailwindcss/utilities" layer(utilities);
 
 @theme {
-  /* Colors */
-  --color-background: hsl(0 0% 100%);
-  --color-foreground: hsl(240 10% 3.9%);
+  /* Professional Photography Theme - Light Mode */
+  --color-background: hsl(210 20% 98%);
+  --color-foreground: hsl(210 24% 16%);
   --color-card: hsl(0 0% 100%);
-  --color-card-foreground: hsl(240 10% 3.9%);
+  --color-card-foreground: hsl(210 24% 16%);
   --color-popover: hsl(0 0% 100%);
-  --color-popover-foreground: hsl(240 10% 3.9%);
-  --color-primary: hsl(240 5.9% 10%);
-  --color-primary-foreground: hsl(0 0% 98%);
-  --color-secondary: hsl(240 4.8% 95.9%);
-  --color-secondary-foreground: hsl(240 5.9% 10%);
-  --color-muted: hsl(240 4.8% 95.9%);
-  --color-muted-foreground: hsl(240 3.8% 46.1%);
-  --color-accent: hsl(240 4.8% 95.9%);
-  --color-accent-foreground: hsl(240 5.9% 10%);
+  --color-popover-foreground: hsl(210 24% 16%);
+  --color-primary: hsl(25 95% 53%);
+  --color-primary-foreground: hsl(0 0% 100%);
+  --color-secondary: hsl(210 16% 93%);
+  --color-secondary-foreground: hsl(210 24% 16%);
+  --color-muted: hsl(210 16% 93%);
+  --color-muted-foreground: hsl(210 12% 44%);
+  --color-accent: hsl(25 95% 95%);
+  --color-accent-foreground: hsl(25 95% 45%);
   --color-destructive: hsl(0 84.2% 60.2%);
   --color-destructive-foreground: hsl(0 0% 98%);
-  --color-border: hsl(240 5.9% 90%);
-  --color-input: hsl(240 5.9% 90%);
-  --color-ring: hsl(240 5.9% 10%);
+  --color-border: hsl(210 16% 87%);
+  --color-input: hsl(210 16% 87%);
+  --color-ring: hsl(25 95% 53%);
 
   /* Border radius */
   --radius-lg: 0.5rem;
@@ -31,28 +31,27 @@
   --radius: 0.5rem;
 }
 
-@media (prefers-color-scheme: dark) {
-  @theme {
-    --color-background: hsl(240 10% 3.9%);
-    --color-foreground: hsl(0 0% 98%);
-    --color-card: hsl(240 10% 3.9%);
-    --color-card-foreground: hsl(0 0% 98%);
-    --color-popover: hsl(240 10% 3.9%);
-    --color-popover-foreground: hsl(0 0% 98%);
-    --color-primary: hsl(0 0% 98%);
-    --color-primary-foreground: hsl(240 5.9% 10%);
-    --color-secondary: hsl(240 3.7% 15.9%);
-    --color-secondary-foreground: hsl(0 0% 98%);
-    --color-muted: hsl(240 3.7% 15.9%);
-    --color-muted-foreground: hsl(240 5% 64.9%);
-    --color-accent: hsl(240 3.7% 15.9%);
-    --color-accent-foreground: hsl(0 0% 98%);
-    --color-destructive: hsl(0 62.8% 30.6%);
-    --color-destructive-foreground: hsl(0 0% 98%);
-    --color-border: hsl(240 3.7% 15.9%);
-    --color-input: hsl(240 3.7% 15.9%);
-    --color-ring: hsl(240 4.9% 83.9%);
-  }
+/* Dark mode styles */
+.dark {
+  --color-background: hsl(210 24% 8%);
+  --color-foreground: hsl(210 20% 98%);
+  --color-card: hsl(210 24% 12%);
+  --color-card-foreground: hsl(210 20% 98%);
+  --color-popover: hsl(210 24% 16%);
+  --color-popover-foreground: hsl(210 20% 98%);
+  --color-primary: hsl(25 95% 60%);
+  --color-primary-foreground: hsl(210 24% 8%);
+  --color-secondary: hsl(210 24% 16%);
+  --color-secondary-foreground: hsl(210 20% 98%);
+  --color-muted: hsl(210 24% 16%);
+  --color-muted-foreground: hsl(210 12% 80%);
+  --color-accent: hsl(25 95% 25%);
+  --color-accent-foreground: hsl(25 95% 90%);
+  --color-destructive: hsl(0 62.8% 50%);
+  --color-destructive-foreground: hsl(210 20% 98%);
+  --color-border: hsl(210 24% 30%);
+  --color-input: hsl(210 24% 25%);
+  --color-ring: hsl(25 95% 60%);
 }
 
 @keyframes accordion-down {
@@ -110,11 +109,11 @@ label {
 
 /* Photographer-specific styles */
 .photo-grid {
-  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4;
+  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6;
 }
 
 .photo-item {
-  @apply aspect-square overflow-hidden relative cursor-pointer transition-transform hover:scale-[1.02];
+  @apply aspect-square overflow-hidden relative cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-xl rounded-lg;
 }
 
 .photo-item img {
@@ -122,7 +121,7 @@ label {
 }
 
 .album-cover {
-  @apply aspect-square overflow-hidden cursor-pointer transition-transform hover:scale-[1.02];
+  @apply aspect-square overflow-hidden cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-xl rounded-lg;
 }
 
 .album-cover img {
@@ -130,7 +129,7 @@ label {
 }
 
 .album-title {
-  @apply absolute bottom-0 left-0 right-0 bg-black/50 text-white p-2 text-center;
+  @apply absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent text-white p-4 text-center font-medium;
 }
 
 /* Additional styles for fullscreen slider */

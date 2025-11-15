@@ -77,37 +77,37 @@ export default async function AlbumsPage() {
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Albums</h1>
+        <h1 className="text-2xl font-bold text-foreground dark:text-foreground">Альбоми</h1>
         <Link
           href="/admin/albums/new"
-          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors"
+          className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-md transition-colors"
         >
-          Add Album
+          Додати альбом
         </Link>
       </div>
 
       {categories.length === 0 ? (
-        <div className="bg-white rounded-lg shadow p-6 text-center">
-          <p className="text-gray-500 mb-4">Create categories first</p>
+        <div className="bg-card rounded-lg shadow p-6 text-center border border-border">
+          <p className="text-foreground/70 mb-4">Спочатку створіть категорії</p>
           <Link
             href="/admin/categories/new"
-            className="text-blue-500 hover:text-blue-700 underline"
+            className="text-primary hover:text-primary/80 underline"
           >
-            Create Category
+            Створити категорію
           </Link>
         </div>
       ) : (
         <div className="space-y-6">
           {categoriesWithAlbums.map((category) => (
-            <div key={category.id} className="bg-white rounded-lg shadow overflow-hidden">
-              <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
+            <div key={category.id} className="bg-card rounded-lg shadow overflow-hidden border border-border">
+              <div className="bg-secondary/50 px-6 py-4 border-b border-border">
                 <div className="flex items-center justify-between">
                   <h2 className="text-lg font-medium text-foreground">{category.name}</h2>
                   <Link
                     href={`/admin/albums/new?categoryId=${category.id}`}
-                    className="text-sm bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded transition-colors"
+                    className="text-sm bg-primary hover:bg-primary/90 text-primary-foreground px-3 py-1 rounded transition-colors"
                   >
-                    Add Album
+                    Додати альбом
                   </Link>
                 </div>
               </div>

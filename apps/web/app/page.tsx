@@ -35,17 +35,17 @@ export default async function Home() {
       {/* Використовуємо Suspense для streaming */}
       <Suspense
         fallback={
-          <div className="w-full h-[60vh] flex items-center justify-center bg-muted">
-            <p className="text-muted-foreground">Завантаження слайдера...</p>
+          <div className="w-full h-[60vh] flex items-center justify-center bg-secondary/50">
+            <p className="text-foreground/60">Завантаження слайдера...</p>
           </div>
         }
       >
         <HomeSlider photosPromise={photosPromise} />
       </Suspense>
 
-      <div className="py-12 px-6 text-center">
-        <h1 className="text-4xl md:text-5xl font-semibold text-foreground mb-4">Squares</h1>
-        <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto">
+      <div className="py-16 px-6 text-center">
+        <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6">Lounge Photo</h1>
+        <p className="text-xl md:text-2xl text-foreground/80 max-w-3xl mx-auto leading-relaxed">
           Вітаємо у світі професійної фотографії. Перегляньте наші альбоми та насолоджуйтесь
           якісними знімками.
         </p>

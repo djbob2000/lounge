@@ -129,7 +129,7 @@ export default function PhotoForm({ photo, albums, onSubmit, onCancel }: PhotoFo
   };
 
   return (
-    <div className="bg-white rounded-lg shadow p-6">
+    <div className="bg-card rounded-lg shadow p-6">
       <h2 className="text-xl font-semibold text-foreground mb-6">
         {photo ? 'Edit Photo' : 'Upload New Photo'}
       </h2>
@@ -138,7 +138,7 @@ export default function PhotoForm({ photo, albums, onSubmit, onCancel }: PhotoFo
         {/* File Upload */}
         {!photo && (
           <div>
-            <label htmlFor={`${id}-file`} className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor={`${id}-file`} className="block text-sm font-medium text-foreground mb-2">
               Photo File *
             </label>
             <input
@@ -148,7 +148,7 @@ export default function PhotoForm({ photo, albums, onSubmit, onCancel }: PhotoFo
               accept="image/*"
               required={!photo}
               onChange={handleFileChange}
-              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+              className="block w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
             />
           </div>
         )}
@@ -156,8 +156,8 @@ export default function PhotoForm({ photo, albums, onSubmit, onCancel }: PhotoFo
         {/* Preview */}
         {previewUrl && (
           <div>
-            <span className="block text-sm font-medium text-gray-700 mb-2">Preview</span>
-            <div className="w-48 h-48 border border-gray-300 rounded-lg overflow-hidden">
+            <span className="block text-sm font-medium text-foreground mb-2">Preview</span>
+            <div className="w-48 h-48 border border-border rounded-lg overflow-hidden">
               <Image
                 src={previewUrl}
                 alt="Preview"
@@ -171,7 +171,7 @@ export default function PhotoForm({ photo, albums, onSubmit, onCancel }: PhotoFo
 
         {/* Album Selection */}
         <div>
-          <label htmlFor={`${id}-albumId`} className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor={`${id}-albumId`} className="block text-sm font-medium text-foreground mb-2">
             Album *
           </label>
           <AlbumSelect
@@ -188,7 +188,7 @@ export default function PhotoForm({ photo, albums, onSubmit, onCancel }: PhotoFo
         <div>
           <label
             htmlFor={`${id}-description`}
-            className="block text-sm font-medium text-gray-700 mb-2"
+            className="block text-sm font-medium text-foreground mb-2"
           >
             Description
           </label>
@@ -198,7 +198,7 @@ export default function PhotoForm({ photo, albums, onSubmit, onCancel }: PhotoFo
             rows={3}
             defaultValue={photo?.description || ''}
             placeholder="Optional description for this photo"
-            className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            className="block w-full px-3 py-2 border border-input rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-input bg-background text-foreground"
           />
         </div>
 
@@ -206,7 +206,7 @@ export default function PhotoForm({ photo, albums, onSubmit, onCancel }: PhotoFo
         <div>
           <label
             htmlFor={`${id}-displayOrder`}
-            className="block text-sm font-medium text-gray-700 mb-2"
+            className="block text-sm font-medium text-foreground mb-2"
           >
             Display Order
           </label>
@@ -216,7 +216,7 @@ export default function PhotoForm({ photo, albums, onSubmit, onCancel }: PhotoFo
             name="displayOrder"
             min="0"
             defaultValue={photo?.displayOrder || 0}
-            className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            className="block w-full px-3 py-2 border border-input rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-input bg-background text-foreground"
           />
         </div>
 
@@ -227,26 +227,26 @@ export default function PhotoForm({ photo, albums, onSubmit, onCancel }: PhotoFo
             id={`${id}-isSliderImage`}
             name="isSliderImage"
             defaultChecked={photo?.isSliderImage || false}
-            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            className="h-4 w-4 text-primary focus:ring-primary border-input rounded"
           />
-          <label htmlFor={`${id}-isSliderImage`} className="ml-2 block text-sm text-gray-700">
+          <label htmlFor={`${id}-isSliderImage`} className="ml-2 block text-sm text-foreground">
             Use as slider image
           </label>
         </div>
 
         {/* Action Buttons */}
-        <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+        <div className="flex justify-end space-x-3 pt-6 border-t border-border">
           <button
             type="button"
             onClick={handleCancel}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            className="px-4 py-2 text-sm font-medium text-foreground bg-background border border-input rounded-md hover:bg-accent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ring"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={isSubmitting}
-            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-2 text-sm font-medium text-primary-foreground bg-primary border border-transparent rounded-md hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ring disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSubmitting ? 'Saving...' : photo ? 'Update Photo' : 'Upload Photo'}
           </button>

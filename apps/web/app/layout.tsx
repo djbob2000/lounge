@@ -5,6 +5,7 @@ import type { Category } from '@lounge/types';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { Toaster } from 'sonner';
+import { ThemeProvider } from '../components/layout/ThemeProvider';
 import ClientLayout from '../components/layout/ClientLayout';
 import Footer from '../components/layout/Footer';
 import Header from '../components/layout/Header';
@@ -47,14 +48,16 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <ClerkProvider localization={ukUA as typeof ukUA}>
-      <html lang="uk">
+      <html lang="uk" suppressHydrationWarning>
         <body suppressHydrationWarning={true}>
-          <ClientLayout className={`${inter.className} min-h-screen flex flex-col`}>
-            <Header initialCategories={categories} />
-            <main className="flex-1">{children}</main>
-            <Footer />
-          </ClientLayout>
-          <Toaster />
+          <ThemeProvider>
+            <ClientLayout className={`${inter.className} min-h-screen flex flex-col`}>
+              <Header initialCategories={categories} />
+              <main className="flex-1">{children}</main>
+              <Footer />
+            </ClientLayout>
+            <Toaster />
+          </ThemeProvider>
         </body>
       </html>
     </ClerkProvider>
