@@ -11,7 +11,7 @@ test.describe('AlbumsService Unit Tests', () => {
   let authToken: string | null = null;
 
   test.beforeAll(async ({ request }) => {
-    // Получаем тестовый токен для админа
+    // Get test token for admin
     const response = await request.post(`${API_BASE_URL}/auth/test-token`, {
       data: { role: 'admin' },
     });
@@ -21,7 +21,7 @@ test.describe('AlbumsService Unit Tests', () => {
       authToken = data.token;
     }
 
-    // Создаем тестовую категорию
+    // Create a test category
     if (authToken) {
       const categoryResponse = await request.post(`${API_BASE_URL}/v1/categories`, {
         headers: {
@@ -42,7 +42,7 @@ test.describe('AlbumsService Unit Tests', () => {
   });
 
   test.afterAll(async ({ request }) => {
-    // Очистка: удаляем тестовые данные
+    // Cleanup: remove test data
     if (testAlbum?.id && authToken) {
       await request.delete(`${API_BASE_URL}/v1/albums/${testAlbum.id}`, {
         headers: {
@@ -103,7 +103,7 @@ test.describe('AlbumsService Unit Tests', () => {
     expect(Array.isArray(albums)).toBeTruthy();
     expect(albums.length).toBeGreaterThan(0);
 
-    // Проверяем структуру альбомов
+    // Validate album structure
     albums.forEach((album) => {
       expect(album).toHaveProperty('id');
       expect(album).toHaveProperty('name');
@@ -127,7 +127,7 @@ test.describe('AlbumsService Unit Tests', () => {
     const albums = (await response.json()) as Album[];
     expect(Array.isArray(albums)).toBeTruthy();
 
-    // Все альбомы должны принадлежать категории
+    // All albums must belong to the category
     albums.forEach((album) => {
       expect(album.categoryId).toBe(testCategory?.id);
     });
@@ -189,7 +189,7 @@ test.describe('AlbumsService Unit Tests', () => {
     expect(updatedAlbum.description).toBe('Updated description');
     expect(updatedAlbum.id).toBe(testAlbum.id);
 
-    // Обновляем тестовый альбом
+    // Update the test album reference
     testAlbum = updatedAlbum;
   });
 
@@ -247,7 +247,7 @@ test.describe('AlbumsService Unit Tests', () => {
       return;
     }
 
-    // Сначала получаем список альбомов
+    // First, fetch the albums list
     const listResponse = await request.get(`${API_BASE_URL}/v1/albums`);
 
     if (!listResponse.ok()) {
@@ -263,7 +263,7 @@ test.describe('AlbumsService Unit Tests', () => {
 
     const albumsToReorder = albums.slice(0, 2).map((album, index) => ({
       id: album.id,
-      displayOrder: index + 100, // Новый порядок
+      displayOrder: index + 100, // New order
     }));
 
     const response = await request.patch(`${API_BASE_URL}/v1/albums/order/update`, {
@@ -328,7 +328,7 @@ test.describe('AlbumsService Unit Tests', () => {
       return;
     }
 
-    // Сначда создаем альбом для удаления
+    // First create an album for deletion
     const createResponse = await request.post(`${API_BASE_URL}/v1/albums`, {
       headers: {
         Authorization: `Bearer ${authToken}`,
@@ -345,7 +345,7 @@ test.describe('AlbumsService Unit Tests', () => {
     expect(createResponse.ok()).toBeTruthy();
     const albumToDelete = (await createResponse.json()) as Album;
 
-    // Удаляем альбом
+    // Delete the album
     const deleteResponse = await request.delete(`${API_BASE_URL}/v1/albums/${albumToDelete.id}`, {
       headers: {
         Authorization: `Bearer ${authToken}`,
@@ -354,7 +354,7 @@ test.describe('AlbumsService Unit Tests', () => {
 
     expect(deleteResponse.status()).toBe(204);
 
-    // Проверяем, что альбом действительно удален
+    // Verify the album is deleted
     const getResponse = await request.get(`${API_BASE_URL}/v1/albums/${albumToDelete.id}`);
     expect(getResponse.status()).toBe(404);
   });

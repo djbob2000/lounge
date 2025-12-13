@@ -1,11 +1,11 @@
 'use client';
 
 import { useAuth } from '@clerk/nextjs';
+import { Trash2Icon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import { Trash2Icon } from 'lucide-react';
 
 interface CategoryDeleteButtonProps {
   categoryId: string;

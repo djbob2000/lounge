@@ -1,7 +1,7 @@
 import { Category } from '@lounge/types';
 import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import slugify from 'slugify';
+import type { Prisma } from '../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateCategoryDto, UpdateCategoriesOrderDto, UpdateCategoryDto } from './dto';
 
@@ -184,10 +184,7 @@ export class CategoriesService {
         throw error;
       }
 
-      if (
-        error instanceof PrismaClientKnownRequestError &&
-        error.code === 'P2025' // Record to update not found
-      ) {
+      if ((error as Prisma.PrismaClientKnownRequestError).code === 'P2025') {
         throw new NotFoundException('One or more categories to update were not found.');
       }
 

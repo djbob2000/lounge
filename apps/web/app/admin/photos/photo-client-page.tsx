@@ -51,7 +51,10 @@ export default function PhotoClientPage({
       {photos.length === 0 ? (
         <div className="bg-card rounded-lg shadow p-6 text-center border border-border dark:bg-card">
           <p className="text-foreground dark:text-foreground mb-4">{getEmptyStateMessage()}</p>
-          <Link href={getAddLink()} className="text-primary hover:text-primary/80 underline font-medium">
+          <Link
+            href={getAddLink()}
+            className="text-primary hover:text-primary/80 underline font-medium"
+          >
             {getAddButtonText()}
           </Link>
         </div>

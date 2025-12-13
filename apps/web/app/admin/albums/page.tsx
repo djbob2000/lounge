@@ -99,7 +99,10 @@ export default async function AlbumsPage() {
       ) : (
         <div className="space-y-6">
           {categoriesWithAlbums.map((category) => (
-            <div key={category.id} className="bg-card rounded-lg shadow overflow-hidden border border-border">
+            <div
+              key={category.id}
+              className="bg-card rounded-lg shadow overflow-hidden border border-border"
+            >
               <div className="bg-secondary/50 px-6 py-4 border-b border-border">
                 <div className="flex items-center justify-between">
                   <h2 className="text-lg font-medium text-foreground">{category.name}</h2>

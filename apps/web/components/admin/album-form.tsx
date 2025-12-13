@@ -34,7 +34,7 @@ interface AlbumFormProps {
   categoryId?: string;
 }
 
-// Компонент кнопки з автоматичним керуванням станом
+// Submit button with automatic pending state
 function SubmitButton() {
   const { pending } = useFormStatus();
   return (
@@ -44,7 +44,7 @@ function SubmitButton() {
   );
 }
 
-// Компонент кнопки редагування з автоматичним керуванням станом
+// Edit submit button with automatic pending state
 function EditSubmitButton() {
   const { pending } = useFormStatus();
   return (
@@ -124,8 +124,6 @@ const createApiRequest = async (
   token: string,
   data: AlbumFormData,
 ) => {
-  console.log('[AlbumForm] api:request', { url, method, payload: data });
-
   const response = await fetch(url, {
     method,
     headers: {
@@ -135,8 +133,6 @@ const createApiRequest = async (
     body: JSON.stringify(data),
   });
 
-  console.log('[AlbumForm] api:response', { ok: response.ok, status: response.status });
-
   return response;
 };
 
@@ -144,7 +140,7 @@ export default function AlbumForm({ album, categories, categoryId }: AlbumFormPr
   const router = useRouter();
   const { getToken } = useAuth();
 
-  // Генеруємо унікальні ID для компонентів
+  // Generate unique IDs for inputs
   const nameId = useId();
   const categorySelectId = useId();
   const slugId = useId();
@@ -159,33 +155,33 @@ export default function AlbumForm({ album, categories, categoryId }: AlbumFormPr
     isHidden: album?.isHidden || false,
   };
 
-  // Оптимістичні оновлення форми
+  // Optimistic form updates
   const [optimisticFormData, setOptimisticFormData] = useOptimistic(
     initialFormData,
     (state, newData: Partial<AlbumFormData>) => ({ ...state, ...newData }),
   );
 
-  // Action функція для обробки форми
+  // Action function to handle form submission
   const submitAlbum = async (
     _previousState: Record<string, string> | null,
     formData: FormData,
   ): Promise<Record<string, string>> => {
-    // Витягуємо дані з formData
+    // Extract data from formData
     const data = extractFormData(formData);
 
-    // Валідація
+    // Validation
     const errors = validateForm(data);
     if (Object.keys(errors).length > 0) {
       return errors;
     }
 
-    // Отримуємо токен автентифікації
+    // Get authentication token
     const token = await getAuthToken(getToken);
     if (!token) {
       return { general: 'Authentication token not found. Please try logging in again.' };
     }
 
-    // Визначаємо URL та метод
+    // Determine URL and method
     const url = album
       ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/albums/${album.id}`
       : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/albums`;
@@ -206,7 +202,7 @@ export default function AlbumForm({ album, categories, categoryId }: AlbumFormPr
 
   const hasSubmitted = useRef(false);
 
-  // Обробка зміни полів з оптимістичними оновленнями
+  // Handle field changes with optimistic updates
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
   ) => {

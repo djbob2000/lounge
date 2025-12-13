@@ -1,6 +1,5 @@
 import type { Album, Category } from '@lounge/types';
 import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
 import { Suspense, use } from 'react';
 
 import AlbumForm from '../../../../../components/admin/album-form';

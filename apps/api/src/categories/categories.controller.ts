@@ -74,7 +74,6 @@ export class CategoriesController {
   @CacheTTL(3600) // 1 hour
   @Header('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=3600')
   findBySlug(@Param('slug') slug: string): Promise<Category> {
-    console.log('Controller received slug:', slug);
     return this.categoriesService.findBySlug(slug);
   }
 

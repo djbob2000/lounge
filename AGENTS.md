@@ -7,10 +7,11 @@ This project is a monorepo managed with pnpm and TurboRepo. It consists of appli
 ### Tech Stack
 
 - **Monorepo Management:** pnpm workspaces + TurboRepo
-- **Backend:** NestJS, Prisma ORM, PostgreSQL
+- **Backend:** NestJS 11, Prisma ORM 7, PostgreSQL
 - **Frontend:** Next.js 16 (App Router), React 19, TypeScript
 - **Authentication:** Clerk (with Ukrainian localization)
 - **UI Framework:** Shadcn UI, Radix UI, Tailwind CSS v4
+- **Testing:** Playwright (E2E)
 - **Storage:** Backblaze B2
 - **Image Processing:** Sharp
 - **Form Management:** React Hook Form + Zod validation
@@ -26,7 +27,8 @@ This project is a monorepo managed with pnpm and TurboRepo. It consists of appli
 - **Authentication:** Clerk Express middleware
 - **File Upload:** Multer + Sharp for image processing
 - **Storage:** Backblaze B2 integration
-- **Key Modules:** `albums`, `auth`, `categories`, `photos`, `prisma`, `stats`, `storage`
+- **Key Modules:** `albums`, `api-version`, `auth`, `cache`, `categories`, `photos`, `prisma`, `stats`, `storage`
+- **Global:** `LoggingInterceptor`, `AllExceptionsFilter`, `AuthGuard`
 - **Schema:** [`prisma/schema.prisma`](apps/api/prisma/schema.prisma:1)
 
 #### `apps/web/` - Next.js Frontend
@@ -35,9 +37,11 @@ This project is a monorepo managed with pnpm and TurboRepo. It consists of appli
 - **Authentication:** Clerk Next.js SDK
 - **UI Components:** Shadcn UI + Radix UI primitives
 - **Styling:** Tailwind CSS v4
+- **Key Libraries:** `@dnd-kit` (drag & drop), `embla-carousel-react` (slider), `sonner` (toasts)
 - **Structure:**
   - `app/` - Next.js App Router pages (`[categorySlug]`, `admin`, `api`, `sign-in`, `sign-up`)
   - `components/` - React components (`admin`, `layout`, `ui`)
+  - `e2e/` - Playwright E2E tests
   - `lib/` - Utility functions
   - `proxy.ts` - Clerk authentication middleware
 

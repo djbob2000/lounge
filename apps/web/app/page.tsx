@@ -27,12 +27,11 @@ async function getSliderPhotos(): Promise<Photo[]> {
 }
 
 export default async function Home() {
-  // НЕ await! Просто створюємо Promise
   const photosPromise = getSliderPhotos();
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Використовуємо Suspense для streaming */}
+      {/* Using Suspense for streaming */}
       <Suspense
         fallback={
           <div className="w-full h-[60vh] flex items-center justify-center bg-secondary/50">

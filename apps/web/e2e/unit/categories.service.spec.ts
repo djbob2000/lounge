@@ -10,7 +10,7 @@ test.describe('CategoriesService Unit Tests', () => {
   let authToken: string | null = null;
 
   test.beforeAll(async ({ request }) => {
-    // Получаем тестовый токен для админа
+    // Get test token for admin
     const response = await request.post(`${API_BASE_URL}/auth/test-token`, {
       data: { role: 'admin' },
     });
@@ -22,7 +22,7 @@ test.describe('CategoriesService Unit Tests', () => {
   });
 
   test.afterAll(async ({ request }) => {
-    // Очистка: удаляем тестовую категорию если она существует
+    // Cleanup: delete test category if it exists
     if (testCategory?.id && authToken) {
       await request.delete(`${API_BASE_URL}/v1/categories/${testCategory.id}`, {
         headers: {
@@ -71,7 +71,7 @@ test.describe('CategoriesService Unit Tests', () => {
     expect(Array.isArray(categories)).toBeTruthy();
     expect(categories.length).toBeGreaterThan(0);
 
-    // Проверяем структуру категорий
+    // Validate category structure
     categories.forEach((category) => {
       expect(category).toHaveProperty('id');
       expect(category).toHaveProperty('name');
@@ -135,7 +135,7 @@ test.describe('CategoriesService Unit Tests', () => {
     expect(updatedCategory.name).toBe(updatedName);
     expect(updatedCategory.id).toBe(testCategory.id);
 
-    // Обновляем тестовую категорию
+    // Update the test category reference
     testCategory = updatedCategory;
   });
 
@@ -145,7 +145,7 @@ test.describe('CategoriesService Unit Tests', () => {
       return;
     }
 
-    // Пытаемся создать категорию с тем же slug
+    // Try to create a category with the same slug
     const response = await request.post(`${API_BASE_URL}/v1/categories`, {
       headers: {
         Authorization: `Bearer ${authToken}`,
@@ -153,7 +153,7 @@ test.describe('CategoriesService Unit Tests', () => {
       },
       data: {
         name: 'Duplicate Category',
-        slug: testCategory.slug, // Используем существующий slug
+        slug: testCategory.slug, // Use existing slug
       },
     });
 
@@ -203,7 +203,7 @@ test.describe('CategoriesService Unit Tests', () => {
       return;
     }
 
-    // Сначала создаем категорию без альбомов для удаления
+    // First create a category without albums for deletion
     const createResponse = await request.post(`${API_BASE_URL}/v1/categories`, {
       headers: {
         Authorization: `Bearer ${authToken}`,
@@ -218,7 +218,7 @@ test.describe('CategoriesService Unit Tests', () => {
     expect(createResponse.ok()).toBeTruthy();
     const categoryToDelete = (await createResponse.json()) as Category;
 
-    // Удаляем категорию
+    // Delete the category
     const deleteResponse = await request.delete(
       `${API_BASE_URL}/v1/categories/${categoryToDelete.id}`,
       {
@@ -230,7 +230,7 @@ test.describe('CategoriesService Unit Tests', () => {
 
     expect(deleteResponse.status()).toBe(204);
 
-    // Проверяем, что категория действительно удалена
+    // Verify the category is deleted
     const getResponse = await request.get(`${API_BASE_URL}/v1/categories/${categoryToDelete.id}`);
     expect(getResponse.status()).toBe(404);
   });

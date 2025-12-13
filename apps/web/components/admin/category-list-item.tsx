@@ -1,15 +1,15 @@
 'use client';
 
-import type { Category } from '@lounge/types';
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { PencilIcon, Trash2Icon } from 'lucide-react';
-import CategoryDeleteButton from './CategoryDeleteButton';
-import { Switch } from '@/components/ui/switch';
 import { useAuth } from '@clerk/nextjs';
+import type { Category } from '@lounge/types';
+import { PencilIcon } from 'lucide-react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
+import CategoryDeleteButton from './CategoryDeleteButton';
 
 interface CategoryListItemProps {
   item: Category;
@@ -40,12 +40,12 @@ export default function CategoryListItem({ item: category }: CategoryListItemPro
       );
       if (!res.ok) {
         setShowInMenu(prev);
-        const err = await res.json().catch(() => ({} as any));
+        const err: { message?: string } = await res.json().catch(() => ({}));
         toast.error(err?.message || 'Помилка оновлення категорії');
         return;
       }
       router.refresh();
-    } catch (e) {
+    } catch (_e) {
       setShowInMenu(prev);
       toast.error('Помилка оновлення категорії');
     } finally {
@@ -55,15 +55,25 @@ export default function CategoryListItem({ item: category }: CategoryListItemPro
 
   return (
     <div className="flex items-center justify-between p-4 border-b border-border last:border-b-0 bg-card hover:bg-muted/30 transition-colors">
-      <Link href={`/admin/categories/${category.id}/edit`} className="flex items-center flex-grow min-w-0">
+      <Link
+        href={`/admin/categories/${category.id}/edit`}
+        className="flex items-center flex-grow min-w-0"
+      >
         <div className="flex-grow min-w-0">
-          <h3 className="font-medium text-sm md:text-base text-foreground dark:text-foreground truncate">{category.name}</h3>
+          <h3 className="font-medium text-sm md:text-base text-foreground dark:text-foreground truncate">
+            {category.name}
+          </h3>
           <p className="text-xs text-muted-foreground md:text-sm truncate">/{category.slug}</p>
         </div>
       </Link>
       <div className="flex items-center space-x-2 flex-shrink-0 mr-2">
         <span className="text-sm text-muted-foreground">В меню</span>
-        <Switch checked={showInMenu} onCheckedChange={(v) => toggleShowInMenu(!!v)} disabled={updating} aria-label="Показувати в меню" />
+        <Switch
+          checked={showInMenu}
+          onCheckedChange={(v) => toggleShowInMenu(!!v)}
+          disabled={updating}
+          aria-label="Показувати в меню"
+        />
       </div>
       <div className="flex items-center space-x-2 flex-shrink-0 ml-2">
         <Button variant="outline" size="icon" asChild>

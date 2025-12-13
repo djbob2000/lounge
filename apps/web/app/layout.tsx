@@ -5,10 +5,10 @@ import type { Category } from '@lounge/types';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { Toaster } from 'sonner';
-import { ThemeProvider } from '../components/layout/ThemeProvider';
 import ClientLayout from '../components/layout/ClientLayout';
 import Footer from '../components/layout/Footer';
 import Header from '../components/layout/Header';
+import { ThemeProvider } from '../components/layout/ThemeProvider';
 
 const inter = Inter({ subsets: ['latin', 'cyrillic'] });
 

@@ -1,6 +1,6 @@
 'use client';
 
-import * as React from 'react';
+import type * as React from 'react';
 import { cn } from '@/lib/utils';
 
 interface SwitchProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -9,7 +9,13 @@ interface SwitchProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   disabled?: boolean;
 }
 
-const Switch = ({ checked = false, onCheckedChange, disabled, className, ...props }: SwitchProps) => {
+const Switch = ({
+  checked = false,
+  onCheckedChange,
+  disabled,
+  className,
+  ...props
+}: SwitchProps) => {
   const handleToggle = () => {
     if (disabled) return;
     onCheckedChange?.(!checked);

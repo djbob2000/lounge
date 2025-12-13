@@ -1,6 +1,5 @@
 import { currentUser } from '@clerk/nextjs/server';
 import Link from 'next/link';
-import { redirect } from 'next/navigation';
 
 // Function to fetch stats from the API
 async function getStats() {
@@ -20,7 +19,7 @@ async function getStats() {
 
     return response.json();
   } catch (error) {
-    console.warn('Помилка отримання статистики:', error);
+    console.warn('Failed to fetch stats:', error);
     return {
       totalCategories: 0,
       totalAlbums: 0,
@@ -75,7 +74,7 @@ export default async function AdminPage() {
 
       <div className="mb-8">
         <h2 className="text-lg font-semibold text-foreground mb-3">
-        Ласкаво просимо, {user?.firstName}!
+          Ласкаво просимо, {user?.firstName}!
         </h2>
         <p className="text-foreground/70">
           Керуйте контентом вашого фотосайту через зручну адміністративну панель.
@@ -99,13 +98,22 @@ export default async function AdminPage() {
         <div className="bg-card rounded-lg shadow-md p-6 border border-border">
           <h3 className="text-lg font-semibold text-foreground mb-4">Швидкі дії</h3>
           <div className="flex flex-col space-y-3">
-            <Link href="/admin/categories/new" className="text-primary hover:text-primary/80 font-medium transition-colors">
+            <Link
+              href="/admin/categories/new"
+              className="text-primary hover:text-primary/80 font-medium transition-colors"
+            >
               Створити нову категорію
             </Link>
-            <Link href="/admin/albums/new" className="text-primary hover:text-primary/80 font-medium transition-colors">
+            <Link
+              href="/admin/albums/new"
+              className="text-primary hover:text-primary/80 font-medium transition-colors"
+            >
               Створити новий альбом
             </Link>
-            <Link href="/admin/photos/upload" className="text-primary hover:text-primary/80 font-medium transition-colors">
+            <Link
+              href="/admin/photos/upload"
+              className="text-primary hover:text-primary/80 font-medium transition-colors"
+            >
               Завантажити фотографії
             </Link>
           </div>

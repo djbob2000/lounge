@@ -9,7 +9,6 @@ async function getAlbumDetails(albumId: string): Promise<Album | null> {
     });
     if (!res.ok) {
       if (res.status === 404) {
-        console.log(`Album with ID ${albumId} not found (404).`);
         return null;
       }
       console.error(`Error fetching album ${albumId}: ${res.status} ${res.statusText}`);

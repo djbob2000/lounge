@@ -51,7 +51,10 @@ export default async function AdminLayout({ children }: { children: React.ReactN
               >
                 Фотографії
               </Link>
-              <Link href="/" className="text-foreground/70 hover:text-foreground transition-colors font-medium">
+              <Link
+                href="/"
+                className="text-foreground/70 hover:text-foreground transition-colors font-medium"
+              >
                 На сайт
               </Link>
             </nav>

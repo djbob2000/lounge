@@ -76,7 +76,9 @@ export default function ClientHeader({ categories }: ClientHeaderProps) {
                 key={category.id}
                 href={`/${category.slug}`}
                 className={`text-base hover:text-primary transition-colors ${
-                  isActive ? 'font-semibold text-primary' : 'font-normal text-foreground/90 hover:text-foreground'
+                  isActive
+                    ? 'font-semibold text-primary'
+                    : 'font-normal text-foreground/90 hover:text-foreground'
                 }`}
                 aria-current={isActive ? 'page' : undefined}
               >
@@ -105,7 +107,9 @@ export default function ClientHeader({ categories }: ClientHeaderProps) {
                     key={category.id}
                     href={`/${category.slug}`}
                     className={`text-base hover:text-primary transition-colors ${
-                      isActive ? 'font-semibold text-primary' : 'font-normal text-foreground/90 hover:text-foreground'
+                      isActive
+                        ? 'font-semibold text-primary'
+                        : 'font-normal text-foreground/90 hover:text-foreground'
                     }`}
                     onClick={() => setIsMenuOpen(false)}
                     aria-current={isActive ? 'page' : undefined}

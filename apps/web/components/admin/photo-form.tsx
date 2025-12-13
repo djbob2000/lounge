@@ -48,7 +48,6 @@ export default function PhotoForm({ photo, albums, onSubmit, onCancel }: PhotoFo
     const method = photo ? 'PATCH' : 'POST';
 
     const token = await getToken();
-    console.log('[PhotoForm] api:token', token ? `len:${token.length}` : 'null');
 
     if (!token) {
       console.error('[PhotoForm] api:no-token');
@@ -63,17 +62,9 @@ export default function PhotoForm({ photo, albums, onSubmit, onCancel }: PhotoFo
       const patch = buildPatchPayload(formData);
       body = patch.body;
       Object.assign(headers, patch.headers);
-      console.log('[PhotoForm] api:patch:payload', patch);
     }
 
-    console.log('[PhotoForm] api:request', {
-      endpoint,
-      method,
-      headers: { hasAuth: !!headers.Authorization, contentType: headers['Content-Type'] },
-    });
-
     const response = await fetch(endpoint, { method, headers, body });
-    console.log('[PhotoForm] api:response', { ok: response.ok, status: response.status });
 
     if (!response.ok) {
       const text = await response.text().catch(() => '');
@@ -87,7 +78,6 @@ export default function PhotoForm({ photo, albums, onSubmit, onCancel }: PhotoFo
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log('[PhotoForm] submit:start');
     setIsSubmitting(true);
 
     try {
@@ -97,17 +87,8 @@ export default function PhotoForm({ photo, albums, onSubmit, onCancel }: PhotoFo
         formData.set('file', selectedFile);
       }
 
-      console.log('[PhotoForm] submit:data', {
-        hasFile: !!selectedFile,
-        albumId: formData.get('albumId'),
-        description: formData.get('description'),
-        displayOrder: formData.get('displayOrder'),
-        isSliderImage: formData.get('isSliderImage'),
-      });
-
       if (onSubmit) {
         await onSubmit(formData);
-        console.log('[PhotoForm] submit:onSubmit:done');
       } else {
         await defaultSubmit(formData);
       }
@@ -116,7 +97,6 @@ export default function PhotoForm({ photo, albums, onSubmit, onCancel }: PhotoFo
       toast.error('Error saving photo. Please try again.');
     } finally {
       setIsSubmitting(false);
-      console.log('[PhotoForm] submit:end');
     }
   };
 
@@ -138,7 +118,10 @@ export default function PhotoForm({ photo, albums, onSubmit, onCancel }: PhotoFo
         {/* File Upload */}
         {!photo && (
           <div>
-            <label htmlFor={`${id}-file`} className="block text-sm font-medium text-foreground mb-2">
+            <label
+              htmlFor={`${id}-file`}
+              className="block text-sm font-medium text-foreground mb-2"
+            >
               Photo File *
             </label>
             <input
@@ -171,7 +154,10 @@ export default function PhotoForm({ photo, albums, onSubmit, onCancel }: PhotoFo
 
         {/* Album Selection */}
         <div>
-          <label htmlFor={`${id}-albumId`} className="block text-sm font-medium text-foreground mb-2">
+          <label
+            htmlFor={`${id}-albumId`}
+            className="block text-sm font-medium text-foreground mb-2"
+          >
             Album *
           </label>
           <AlbumSelect

@@ -211,7 +211,10 @@ export default async function PhotosPage({
         // Grouped view by album
         <div className="space-y-8">
           {groupedPhotos.map(({ album, photos: albumPhotos }) => (
-            <div key={album.id} className="bg-card rounded-lg shadow overflow-hidden border border-border">
+            <div
+              key={album.id}
+              className="bg-card rounded-lg shadow overflow-hidden border border-border"
+            >
               <div className="bg-secondary/50 px-6 py-4 border-b border-border">
                 <div className="flex justify-between items-center">
                   <div>

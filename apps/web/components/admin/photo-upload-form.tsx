@@ -367,7 +367,9 @@ export default function PhotoUploadForm({
       </FormItem>
 
       {/* Album Selection */}
-      {albumId && <p className="text-sm text-muted-foreground mb-2">Album pre-selected: {albumId}</p>}
+      {albumId && (
+        <p className="text-sm text-muted-foreground mb-2">Album pre-selected: {albumId}</p>
+      )}
       <FormItem>
         <FormLabel htmlFor={`${baseId}-albumId`}>Album *</FormLabel>
         <FormControl>

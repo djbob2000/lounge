@@ -15,12 +15,6 @@ export async function POST(request: NextRequest) {
     // Get the form data from the request
     const formData = await request.formData();
 
-    // Log formData entries for debugging
-    console.log('FormData entries:');
-    for (const [key, value] of formData.entries()) {
-      console.log(`${key}: ${value instanceof File ? `File: ${value.name}` : value}`);
-    }
-
     // Ensure the file field is named correctly
     const file = formData.get('file');
     if (!file || !(file instanceof File)) {

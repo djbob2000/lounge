@@ -9,7 +9,7 @@ test.describe('PhotosService Unit Tests', () => {
   let authToken: string | null = null;
 
   test.beforeAll(async ({ request }) => {
-    // Получаем тестовый токен для админа
+    // Get test token for admin
     const response = await request.post(`${API_BASE_URL}/auth/test-token`, {
       data: { role: 'admin' },
     });
@@ -19,7 +19,7 @@ test.describe('PhotosService Unit Tests', () => {
       authToken = data.token;
     }
 
-    // Создаем тестовый альбом
+    // Create a test album
     if (authToken) {
       const albumResponse = await request.post(`${API_BASE_URL}/v1/albums`, {
         headers: {
@@ -42,7 +42,7 @@ test.describe('PhotosService Unit Tests', () => {
   });
 
   test.afterAll(async ({ request }) => {
-    // Очистка: удаляем тестовые данные
+    // Cleanup: remove test data
     if (testAlbum?.id && authToken) {
       await request.delete(`${API_BASE_URL}/v1/albums/${testAlbum.id}`, {
         headers: {
@@ -60,7 +60,7 @@ test.describe('PhotosService Unit Tests', () => {
     const photos = (await response.json()) as Photo[];
     expect(Array.isArray(photos)).toBeTruthy();
 
-    // Проверяем структуру фотографий
+    // Validate photo structure
     photos.forEach((photo) => {
       expect(photo).toHaveProperty('id');
       expect(photo).toHaveProperty('originalUrl');
@@ -78,7 +78,7 @@ test.describe('PhotosService Unit Tests', () => {
     const photos = (await response.json()) as Photo[];
     expect(Array.isArray(photos)).toBeTruthy();
 
-    // Все фото должны быть слайдерными
+    // All photos must be slider images
     photos.forEach((photo) => {
       expect(photo.isSliderImage).toBe(true);
     });
@@ -97,14 +97,14 @@ test.describe('PhotosService Unit Tests', () => {
     const photos = (await response.json()) as Photo[];
     expect(Array.isArray(photos)).toBeTruthy();
 
-    // Все фото должны принадлежать альбому
+    // All photos must belong to the album
     photos.forEach((photo) => {
       expect(photo.albumId).toBe(testAlbum?.id);
     });
   });
 
   test('should get photo by id', async ({ request }) => {
-    // Сначала получаем список фото
+    // First, fetch the photos list
     const listResponse = await request.get(`${API_BASE_URL}/v1/photos`);
 
     if (!listResponse.ok()) {
@@ -133,7 +133,7 @@ test.describe('PhotosService Unit Tests', () => {
   });
 
   test('should update photo display order', async ({ request }) => {
-    // Сначала получаем список фото
+    // First, fetch the photos list
     const listResponse = await request.get(`${API_BASE_URL}/v1/photos`);
 
     if (!listResponse.ok() || !authToken) {
@@ -192,7 +192,7 @@ test.describe('PhotosService Unit Tests', () => {
 
     const photosToReorder = photos.slice(0, 2).map((photo, index) => ({
       id: photo.id,
-      displayOrder: index + 100, // Новый порядок
+      displayOrder: index + 100, // New order
     }));
 
     const response = await request.patch(`${API_BASE_URL}/v1/photos/order/update`, {
@@ -212,7 +212,7 @@ test.describe('PhotosService Unit Tests', () => {
   });
 
   test('should toggle slider status', async ({ request }) => {
-    // Сначала получаем список фото
+    // First, fetch the photos list
     const listResponse = await request.get(`${API_BASE_URL}/v1/photos`);
 
     if (!listResponse.ok() || !authToken) {
@@ -250,7 +250,7 @@ test.describe('PhotosService Unit Tests', () => {
   });
 
   test('should require authentication for updates', async ({ request }) => {
-    // Сначала получаем список фото
+    // First, fetch the photos list
     const listResponse = await request.get(`${API_BASE_URL}/v1/photos`);
 
     if (!listResponse.ok()) {
